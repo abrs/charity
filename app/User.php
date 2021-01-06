@@ -5,10 +5,13 @@ namespace App;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
+use Laravel\Passport\HasApiTokens;
 
+//TODO: this class's migration file have to be moved to the tenant folder routes..
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, HasRoles, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +19,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'user_name', 'confirm_password',
+        'deleted_at', 'is_enabled', 'created_by', 'modified_by',
     ];
 
     /**

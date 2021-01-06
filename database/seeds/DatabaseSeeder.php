@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-
+use Laravel\Passport\ClientRepository;
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -11,6 +11,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UsersTableSeeder::class);
+        $client = new ClientRepository();
+
+        $client->createPasswordGrantClient(null, 'Default password grant client', 'http://localhost');
+        $client->createPersonalAccessClient(null, 'Default personal access client', 'http://localhost');
     }
 }
