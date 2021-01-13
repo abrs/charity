@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Auth\Access\AuthorizationException;
+
 
 class Authenticate extends Middleware
 {
@@ -15,7 +17,8 @@ class Authenticate extends Middleware
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
-            return route('login');
+            // return route('login', ['tenant' => tenant('id')]);
+            throw new AuthorizationException();
         }
     }
 }

@@ -32,11 +32,11 @@ class FormController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:forms'],
+            'name' => ['required', 'unique:forms'],
         ]);
 
-        if($validator->fails()){
-            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        if ($validator->fails()) {
+            return Message::response(false, 'Invalid Input', $validator->errors());
         }
 
         $form = Form::firstOrcreate([
@@ -67,11 +67,11 @@ class FormController extends Controller
     public function update(Request $request, Form $form)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:forms'],
+            'name' => ['required', 'unique:forms'],
         ]);
 
-        if($validator->fails()){
-            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        if ($validator->fails()) {
+            return Message::response(false, 'Invalid Input', $validator->errors());
         }
 
         $form->update([

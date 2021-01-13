@@ -6,11 +6,29 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Message;
+use App\Helpers\{Tenant, Message};
 use App\User;
 
 class UserController extends Controller
 {
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        return Tenant::wrapTenant(function() {
+
+            return Message::response(
+                true,
+                'done',
+                User::paginate(25)
+            );
+        });
+    }
+
     public function signup(Request $request) 
     {
         $validator = \Validator::make($request->all(), [
@@ -18,14 +36,14 @@ class UserController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required',
             'confirm_password' => 'required|same:password', 
-            
+
             'name' => 'required', 
             'user_name' => 'required|unique:users',
 
             'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             'created_by' => 'required|alpha_num',
-            'modified_by' => 'required|alpha_num',
+            'modified_by' => 'nullable|alpha_num',
         ]);
 
         if ($validator->fails()) {
@@ -38,6 +56,7 @@ class UserController extends Controller
 
             try {
                 $created_user = User::firstOrCreate(
+                    #a user with the same name is an old user.
                     ['user_name' => $request->user_name],
 
                     [
@@ -46,7 +65,7 @@ class UserController extends Controller
                         'password' => $password,
                         'is_enabled' => $request->is_enabled,
                         'created_by' => $request->created_by,
-                        'modified_by' => $request->modified_by,
+                        // 'modified_by' => $request->modified_by,
                     ],
                 );
 
@@ -90,7 +109,7 @@ class UserController extends Controller
                 $token = $tokenResult->token;
         
                 if ($request->remember_me) {
-        
+                    #when a remember_me with true sent, extend the user token's life a week
                     $token->expires_at = Carbon::now()->addWeeks(1);
                 }
         
@@ -124,7 +143,12 @@ class UserController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->token()->revoke();
-        return Message::response(true, 'user logged out successfully');
+        $result = tenant()->run(function () use ($request){
+
+            $request->user()->token()->revoke();
+            return Message::response(true, 'user logged out successfully');
+        });
+
+        return $result;
     }
 }

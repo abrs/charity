@@ -2,8 +2,9 @@
 
 namespace App\Exceptions;
 
-use App\Message;
+use App\Helpers\Message;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
@@ -52,9 +53,12 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-
         if ($exception instanceof ModelNotFoundException) {
-            return Message::response(false,'wrong id!!');
+            return Message::response(false,'Wrong model id!!');
+        }
+
+        if ($exception instanceof AuthorizationException) {
+            return Message::response(false,'Unauthorized.');
         }
         
         return parent::render($request, $exception);

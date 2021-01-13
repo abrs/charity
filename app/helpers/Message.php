@@ -1,8 +1,9 @@
 <?php
 
-namespace App;
+namespace App\Helpers;
 
 use Illuminate\Database\Eloquent\Collection;
+
 class Message
 {
     public static function response($result , $msg ='', $data=null) {
