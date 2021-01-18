@@ -38,7 +38,7 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 Route::group([
     'prefix' => '/api/{tenant}',
-    'middleware' => [InitializeTenancyByPath::class, 'api'],
+    'middleware' => [InitializeTenancyByPath::class, 'api', PreventAccessFromCentralDomains::class],
 ], function () {
     
     #user controller actions    ----------
@@ -61,16 +61,18 @@ Route::group([
         Route::get('logout', 'Api\UserController@logout');
 
         //types controller routes
-        Route::post('types/{type}', 'Api\TypeController@update');
         Route::apiResource('types', 'Api\TypeController')->except('update');
+        Route::post('types/{type}', 'Api\TypeController@update');
 
         //type infos controller routes
-        Route::post('type_infos/{type_info}', 'Api\TypeInfoController@update');
         Route::apiResource('type_infos', 'Api\TypeInfoController')->except('update');
+        Route::post('type_infos/{type_info}', 'Api\TypeInfoController@update');
 
         //party infos controller routes
-        Route::post('party_infos/{party_info}', 'Api\PartyInfoController@update');
+        #create new party
+        Route::post('party_infos/createNewParty', 'Api\PartyInfoController@createNewParty');
         Route::apiResource('party_infos', 'Api\PartyInfoController')->except('update');
+        Route::post('party_infos/{party_info}', 'Api\PartyInfoController@update');
     });
 
 

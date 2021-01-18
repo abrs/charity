@@ -22,7 +22,7 @@ class TypeInfoController extends Controller
             return Message::response(
                 true,
                 'done',
-                Type_Info::paginate(25)
+                Type_Info::with('party_info')->paginate(25)
             );
         });
     }

@@ -24,7 +24,7 @@ class UserController extends Controller
             return Message::response(
                 true,
                 'done',
-                User::paginate(25)
+                User::with('types')->paginate(25)
             );
         });
     }

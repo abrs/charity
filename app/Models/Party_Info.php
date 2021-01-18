@@ -16,4 +16,9 @@ class Party_Info extends Model
         'modified_by', 
         'code'
     ];
+
+    /** Relations ----------- */
+    public function type_info() {
+        return $this->belongsTo(Type_Info::class, 'type_infos_id');
+    }
 }

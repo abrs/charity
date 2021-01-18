@@ -6,7 +6,10 @@ use App\Models\Party_Info;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\{Message, Tenant};
+use App\Models\Type;
+use App\Models\Type_Info;
 use App\Rules\ValidModel;
+use App\User;
 
 class PartyInfoController extends Controller
 {
@@ -22,7 +25,7 @@ class PartyInfoController extends Controller
             return Message::response(
                 true,
                 'done',
-                Party_Info::paginate(25)
+                Party_Info::with('type_info')->paginate(25)
             );
         });
     }
@@ -141,5 +144,45 @@ class PartyInfoController extends Controller
         } 
       
         return $prefix . $randomString; 
+    }
+
+
+    /**
+     * add new party memeber
+     */
+    public function createNewParty(Request $request) {
+        #1 get the party_info or build it
+        $validator = \Validator::make($request->all(), [
+            // 'type_infos_id'=>['required', 'unique:party_infos,type_infos_id', new ValidModel('App\Models\Type_Info')],
+
+            'is_enabled' => 'nullable|boolean',
+            'user_id' => ['required', new ValidModel('App\User')],
+            'type_id' => ['required', new ValidModel('App\Models\Type')],
+        ]);
+
+        if($validator->fails()){
+            
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+        
+        #2 assign it a type_infos
+        $typeInfo = Type_Info::where('user_id', $request->user_id)
+            ->where('type_id', $request->type_id)
+            ->first();
+
+        return Tenant::wrapTenant(function() use ($request, $typeInfo){
+
+            $partyInfo = Party_Info::create(
+
+                [
+                    'type_infos_id' => $typeInfo->id,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'created_by' => auth()->user()->user_name,
+                    'code' => $this->getCode(5, now()),
+                ]
+            );
+
+            return Message::response(true, 'created', $partyInfo);
+        });
     }
 }

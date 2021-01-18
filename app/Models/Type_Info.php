@@ -16,4 +16,9 @@ class Type_Info extends Model
         'user_id',
         'type_id',
     ];
+
+    /** Relations ----------- */
+    public function party_info() {
+        return $this->hasOne(Party_Info::class, 'type_infos_id');
+    }
 }

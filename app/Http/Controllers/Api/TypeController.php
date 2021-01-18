@@ -21,7 +21,7 @@ class TypeController extends Controller
             return Message::response(
                 true,
                 'done',
-                Type::paginate(25)
+                Type::with('users')->paginate(25)
             );
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\User;
 
 class Type extends Model
 {
@@ -18,4 +19,9 @@ class Type extends Model
         'modified_by', 
         'name'
     ];
+
+    /** Relations ----------- */
+    public function users() {
+        return $this->belongsToMany(User::class, 'type_infos', 'type_id', 'user_id');
+    }
 }

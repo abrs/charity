@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Type;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -40,4 +41,11 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+
+
+    /** Relations ----------- */
+    public function types() {
+        return $this->belongsToMany(Type::class, 'type_infos', 'user_id', 'type_id');
+    }
 }
