@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
 use Illuminate\Http\Request;
-use App\Models\Location;
-use App\Rules\ValidModel;
+use App\Models\Activity;
 
-class LocationController extends Controller
+class ActivityController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,7 +21,7 @@ class LocationController extends Controller
             return Message::response(
                 true,
                 'done',
-                Location::with('point', 'beneficiaries')->paginate(25)
+                Activity::paginate(25)
             );
         });
     }
@@ -36,8 +35,7 @@ class LocationController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'point_id'=>['required', new ValidModel('App\Models\Point')],
-            'name'=>['required', 'unique:locations,name'],
+            'name'=>['required', 'unique:activities,name'],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -49,32 +47,31 @@ class LocationController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $location = Location::firstOrCreate(
+            $activity = Activity::firstOrCreate(
 
                 ['name' => $request->name],
 
                 [
-                    'point_id' => $request->point_id,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
                     'created_by' => auth()->user()->user_name,
                 ]
             );
 
-           return Message::response(true, 'created', $location);
+           return Message::response(true, 'created', $activity);
         });
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Location  $location
+     * @param  \App\Models\Activity  $activity
      * @return \Illuminate\Http\Response
      */
-    public function show(Location $location)
+    public function show(Activity $activity)
     {
-        return Tenant::wrapTenant(function() use ($location){
+        return Tenant::wrapTenant(function() use ($activity){
 
-            return Message::response('true', 'done', $location->load('point', 'beneficiaries'));
+            return Message::response('true', 'done', $activity);
         });
     }
 
@@ -82,14 +79,13 @@ class LocationController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Location  $location
+     * @param  \App\Models\Activity  $activity
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Location $location)
+    public function update(Request $request, Activity $activity)
     {
         $validator = \Validator::make($request->all(), [
-            'point_id'=>['required', new ValidModel('App\Models\Point')],
-            'name'=>['required', 'unique:locations,name'],
+            'name'=>['required', 'unique:activities,name'],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -99,33 +95,32 @@ class LocationController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $location){
+        return Tenant::wrapTenant(function() use ($request, $activity){
 
-            $location->update(
+            $activity->update(
 
                 [
                     'name' => $request->name,
-                    'point_id' => $request->point_id,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
                     'modified_by' => auth()->user()->user_name,
                 ]
             );
 
-           return Message::response(true, 'updated', Location::findOrFail($location->id));
+           return Message::response(true, 'updated', Activity::findOrFail($activity->id));
         });
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Location  $location
+     * @param  \App\Models\Activity  $activity
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Location $location)
+    public function destroy(Activity $activity)
     {
-        return Tenant::wrapTenant(function() use ($location){
+        return Tenant::wrapTenant(function() use ($activity){
 
-            $location->delete();
+            $activity->delete();
             return Message::response(true, 'deleted');
         });
     }

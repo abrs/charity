@@ -87,6 +87,10 @@ Route::group([
         //points routes
         Route::apiResource('locations', 'Api\LocationController')->except('update');
         Route::post('locations/{location}', 'Api\LocationController@update');
+
+        //activities routes
+        Route::apiResource('activities', 'Api\ActivityController')->except('update');
+        Route::post('activities/{activity}', 'Api\ActivityController@update');
     });
 
 
