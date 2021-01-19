@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
 use Illuminate\Http\Request;
-use App\Models\Type;
+use App\Models\Point;
 
-class TypeController extends Controller
+class PointController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,7 +21,7 @@ class TypeController extends Controller
             return Message::response(
                 true,
                 'done',
-                Type::with('users')->paginate(25)
+                Point::with('locations')->paginate(25)
             );
         });
     }
@@ -35,7 +35,7 @@ class TypeController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:types'],
+            'name'=>['required', 'unique:points'],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -48,8 +48,9 @@ class TypeController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $type = Type::firstOrcreate(
+            $type = Point::firstOrcreate(
                 ['name' => $request->name],
+
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
@@ -64,14 +65,14 @@ class TypeController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Type  $type
+     * @param  \App\Models\Point  $point
      * @return \Illuminate\Http\Response
      */
-    public function show(Type $type)
+    public function show(Point $point)
     {
-        return Tenant::wrapTenant(function() use ($type){
+        return Tenant::wrapTenant(function() use ($point){
 
-            return Message::response('true', 'done', $type);
+            return Message::response('true', 'done', $point->load('locations'));
         });
     }
 
@@ -79,13 +80,13 @@ class TypeController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Type  $type
+     * @param  \App\Models\Point  $point
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Type $type)
+    public function update(Request $request, Point $point)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:types'],
+            'name'=>['required', 'unique:points'],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -96,9 +97,9 @@ class TypeController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
         
-        return Tenant::wrapTenant(function() use ($type, $request){
+        return Tenant::wrapTenant(function() use ($point, $request){
 
-            $type->update(
+            $point->update(
                 [
                     'name' => $request->name,
                     #if is_enabled is null then it's false
@@ -108,22 +109,21 @@ class TypeController extends Controller
                 ]
             );
 
-            return Message::response(true, 'updated', Type::findOrFail($type->id));
+            return Message::response(true, 'updated', Point::findOrFail($point->id));
         });
-
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Type  $type
+     * @param  \App\Models\Point  $point
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Type $type)
+    public function destroy(Point $point)
     {
-        return Tenant::wrapTenant(function() use ($type){
+        return Tenant::wrapTenant(function() use ($point){
 
-            $type->delete();
+            $point->delete();
             return Message::response(true, 'deleted');
         });
     }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration
+class CreateBeneficiaryInfosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,19 +13,18 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('beneficiary_infos', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('user_name')->unique();
+            $table->unsignedBigInteger('type_infos_id')->nullable();
+            $table->unsignedBigInteger('location_id')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->boolean('is_enabled')->default(false);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
-            $table->rememberToken();
             $table->timestamps();
+
+            $table->foreign('type_infos_id')->references('id')->on('type_infos')->onDelete('cascade');
+            $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
     }
 
@@ -36,6 +35,6 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('beneficiary_infos');
     }
 }

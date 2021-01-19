@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Type_Info extends Model
 {
     protected $table = 'type_infos';
+    protected $with = ['user'];
 
     protected $fillable = [
         'deleted_at', 
@@ -20,5 +22,13 @@ class Type_Info extends Model
     /** Relations ----------- */
     public function party_info() {
         return $this->hasOne(Party_Info::class, 'type_infos_id');
+    }
+
+    public function beneficiary_info() {
+        return $this->hasOne(Beneficiary_Info::class, 'type_infos_id');
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class);
     }
 }

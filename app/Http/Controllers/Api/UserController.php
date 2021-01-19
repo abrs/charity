@@ -39,11 +39,6 @@ class UserController extends Controller
 
             'name' => 'required', 
             'user_name' => 'required|unique:users',
-
-            'deleted_at' => 'nullable|date',
-            'is_enabled' => 'nullable|boolean',
-            'created_by' => 'required|alpha_num',
-            'modified_by' => 'nullable|alpha_num',
         ]);
 
         if ($validator->fails()) {
@@ -52,31 +47,23 @@ class UserController extends Controller
 
         $password = bcrypt($request->password);
 
-        $result = tenant()->run(function () use ($request, $password){
+        return Tenant::wrapTenant(function() use ($request, $password){
 
-            try {
-                $created_user = User::firstOrCreate(
-                    #a user with the same name is an old user.
-                    ['user_name' => $request->user_name],
+            $created_user = User::firstOrCreate(
+                #a user with the same name is an old user.
+                ['user_name' => $request->user_name],
 
-                    [
-                        'name' => $request->name,
-                        'email' => $request->email,
-                        'password' => $password,
-                        'is_enabled' => $request->is_enabled,
-                        'created_by' => $request->created_by,
-                        // 'modified_by' => $request->modified_by,
-                    ],
-                );
+                [
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'password' => $password,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    // 'created_by' => auth()->user()->user_name,
+                ],
+            );
 
-                return Message::response(true, 'user created successfully', $created_user);
-
-            } catch (\Exception $e) {
-                return Message::response(false,'Invalid Input' ,$e->getMessage());
-            }
+            return Message::response(true, 'user created successfully', $created_user);
         });
-
-        return $result;
     }
 
     #--------- ---------- -------------- ------------ ---------------

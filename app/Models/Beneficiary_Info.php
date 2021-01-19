@@ -4,22 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Party_Info extends Model
+class Beneficiary_Info extends Model
 {
-    protected $table = 'party_infos';
-    protected $with = ['type_info.user'];
-    
+    protected $table = 'beneficiary_infos';
+    protected $with = ['location', 'type_info.user'];
+
     protected $fillable = [
         'type_infos_id', 
-        'deleted_at', 
+        'location_id',
         'is_enabled', 
+        'deleted_at', 
         'created_by',
         'modified_by', 
-        'code'
     ];
 
     /** Relations ----------- */
     public function type_info() {
         return $this->belongsTo(Type_Info::class, 'type_infos_id');
+    }
+
+    public function location() {
+        return $this->belongsTo(Location::class);
     }
 }
