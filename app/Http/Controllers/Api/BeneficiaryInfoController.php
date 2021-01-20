@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
+use App\Models\Activity;
+use App\Models\ActivityBeneficiary;
 use App\Models\Beneficiary_Info;
 use App\Models\Type_Info;
 use App\Rules\ValidModel;
@@ -19,8 +21,9 @@ class BeneficiaryInfoController extends Controller
      */
     public function index()
     {
+        
         return Tenant::wrapTenant(function() {
-
+                        
             return Message::response(
                 true,
                 'done',
@@ -76,7 +79,7 @@ class BeneficiaryInfoController extends Controller
     {
         return Tenant::wrapTenant(function() use ($beneficiary_info){
 
-            return Message::response('true', 'done', $beneficiary_info->load('location'));
+            return Message::response('true', 'done', $beneficiary_info);
         });
     }
 
@@ -207,6 +210,62 @@ class BeneficiaryInfoController extends Controller
                 return Message::response(true, 'created', $beneficiaryInfo);
 
             });
+        });
+    }
+
+
+    #attach a beneficiary an activity
+    public function attachBeneficiaryAnActivity(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+            'is_enabled' => ['nullable', 'boolean'],
+            'beneficiary_info_id'=>['required', new ValidModel('App\Models\Beneficiary_Info')],
+            'activity_id'=>['required', new ValidModel('App\Models\Activity')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+
+            $activityBeneficiary = ActivityBeneficiary::firstOrCreate(
+                [
+                    'beneficiary_id'    => $request->beneficiary_info_id,
+                    'activity_id'       => $request->activity_id,
+                ],
+
+                [                
+                    'created_by' => auth()->user()->user_name,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                ]
+            );
+
+           return Message::response(true, 'attached successfully', $activityBeneficiary);
+        });
+    }
+
+    #detach a beneficiary an activity
+    public function detachBeneficiaryAnActivity(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+            'beneficiary_info_id'=>['required', new ValidModel('App\Models\Beneficiary_Info')],
+            'activity_id'=>['required', new ValidModel('App\Models\Activity')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+
+            $beneficiary_info = Beneficiary_Info::findOrFail($request->beneficiary_info_id);
+
+            $beneficiary_info->activities()->detach($request->activity_id);
+
+           return Message::response(true, 'detached successfully');
         });
     }
 }

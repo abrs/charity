@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Beneficiary_Info extends Model
 {
     protected $table = 'beneficiary_infos';
-    protected $with = ['location', 'type_info.user'];
+    protected $with = ['location', 'type_info.user', 'activities'];
 
     protected $fillable = [
         'type_infos_id', 
@@ -25,5 +25,11 @@ class Beneficiary_Info extends Model
 
     public function location() {
         return $this->belongsTo(Location::class);
+    }
+
+    public function activities()
+    {
+        return $this->belongsToMany(Activity::class, 'activity_beneficiary', 'beneficiary_id', 'activity_id')->withTimestamps();
+            //  ->using(ActivityBeneficiary::class);
     }
 }

@@ -77,6 +77,15 @@ Route::group([
         //beneficiary infos controller routes
         #create new beneficiary
         Route::post('beneficiary_infos/createNewBeneficiary', 'Api\BeneficiaryInfoController@createNewBeneficiary');
+
+        #attach a beneficiary an activity
+        Route::post('beneficiary_infos/attachBeneficiaryAnActivity', 
+            'Api\BeneficiaryInfoController@attachBeneficiaryAnActivity');
+
+        #detach a beneficiary an activity
+        Route::post('beneficiary_infos/detachBeneficiaryAnActivity', 
+            'Api\BeneficiaryInfoController@detachBeneficiaryAnActivity');
+            
         Route::apiResource('beneficiary_infos', 'Api\BeneficiaryInfoController')->except('update');
         Route::post('beneficiary_infos/{beneficiary_info}', 'Api\BeneficiaryInfoController@update');
 
