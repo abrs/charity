@@ -16,10 +16,11 @@ class CreateActivitiesTable extends Migration
         Schema::create('activities', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name')->unique();
-            $table->timestamp('deleted_at')->nullable();
+            // $table->timestamp('deleted_at')->nullable();
             $table->boolean('is_enabled')->default(false);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

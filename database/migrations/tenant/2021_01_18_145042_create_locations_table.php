@@ -18,10 +18,11 @@ class CreateLocationsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('point_id')->nullable();
             $table->string('name')->unique();
-            $table->timestamp('deleted_at')->nullable();
+            // $table->timestamp('deleted_at')->nullable();
             $table->boolean('is_enabled')->default(false);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('point_id')->references('id')->on('points')->onDelete('cascade');

@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 
 class ActivityBeneficiary extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'activity_beneficiary';
     
     protected $fillable = [
@@ -16,4 +20,18 @@ class ActivityBeneficiary extends Model
         'created_by',
         'modified_by',
     ];
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope('is_enabled', function (Builder $builder) {
+            $builder->where('is_enabled', 1);
+        });
+    }
 }

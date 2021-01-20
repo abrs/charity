@@ -4,6 +4,7 @@ namespace App;
 
 use App\Models\Type;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -42,10 +43,28 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected $with = [
+        'types',
+    ];
+
 
 
     /** Relations ----------- */
     public function types() {
-        return $this->belongsToMany(Type::class, 'type_infos', 'user_id', 'type_id');
+        return $this->belongsToMany(Type::class, 'type_infos', 'user_id', 'type_id')->withTimestamps();
+    }
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope('is_enabled', function (Builder $builder) {
+            $builder->where('users.is_enabled', 1);
+        });
     }
 }

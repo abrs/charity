@@ -17,10 +17,11 @@ class CreateActivityBeneficiaryTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('activity_id')->nullable();
             $table->unsignedBigInteger('beneficiary_id')->nullable();
-            $table->timestamp('deleted_at')->nullable();
+            // $table->timestamp('deleted_at')->nullable();
             $table->boolean('is_enabled')->default(false);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('activity_id')->references('id')->on('activities')->onDelete('cascade');

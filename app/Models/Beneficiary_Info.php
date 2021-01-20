@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Beneficiary_Info extends Model
 {
+    use SoftDeletes;
+    
     protected $table = 'beneficiary_infos';
     protected $with = ['location', 'type_info.user', 'activities'];
 
@@ -31,5 +35,19 @@ class Beneficiary_Info extends Model
     {
         return $this->belongsToMany(Activity::class, 'activity_beneficiary', 'beneficiary_id', 'activity_id')->withTimestamps();
             //  ->using(ActivityBeneficiary::class);
+    }
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope('is_enabled', function (Builder $builder) {
+            $builder->where('is_enabled', 1);
+        });
     }
 }

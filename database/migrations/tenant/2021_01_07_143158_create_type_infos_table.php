@@ -17,10 +17,11 @@ class CreateTypeInfosTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('type_id')->nullable();
-            $table->timestamp('deleted_at')->nullable();
+            // $table->timestamp('deleted_at')->nullable();
             $table->boolean('is_enabled')->default(false);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
             $table->unique(['type_id', 'user_id']);
