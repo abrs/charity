@@ -2,31 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Location extends Model
+class Relation extends Model
 {
     use SoftDeletes;
-    
+
     protected $fillable = [
-        'point_id', 
         'name',
-        'is_enabled', 
+        'description',
+        'code',
+        // 's_beneficiary_id',
         'deleted_at', 
+        'is_enabled', 
         'created_by',
-        'modified_by', 
+        'modified_by',
     ];
-
-    /** Relations ----------- */
-    public function point() {
-        return $this->belongsTo(Point::class);
-    }
-
-    public function beneficiaries() {
-        return $this->hasMany(Beneficiary_Info::class);
-    }
 
     /**
      * The "booting" method of the model.
@@ -38,7 +31,7 @@ class Location extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('locations.is_enabled', 1);
+            $builder->where('relations.is_enabled', 1);
         });
     }
 }

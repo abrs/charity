@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateActivitiesTable extends Migration
+class CreateRelationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,22 @@ class CreateActivitiesTable extends Migration
      */
     public function up()
     {
-        Schema::create('activities', function (Blueprint $table) {
+        Schema::create('relations', function (Blueprint $table) {
             $table->bigIncrements('id');
+
             $table->string('name')->unique();
-            // $table->timestamp('deleted_at')->nullable();
+            $table->text('description')->nullable();
+            $table->string('code')->unique();
+            // $table->unsignedBigInteger('s_beneficiary_id')->nullable();
+
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
             $table->softDeletes();
+
             $table->timestamps();
+
+            // $table->foreign('s_beneficiary_id')->references('id')->on('beneficiary_infos')->onDelete('cascade');
         });
     }
 
@@ -32,6 +39,6 @@ class CreateActivitiesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('activities');
+        Schema::dropIfExists('relations');
     }
 }

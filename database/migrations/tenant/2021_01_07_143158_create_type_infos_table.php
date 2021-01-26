@@ -18,7 +18,7 @@ class CreateTypeInfosTable extends Migration
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('type_id')->nullable();
             // $table->timestamp('deleted_at')->nullable();
-            $table->boolean('is_enabled')->default(false);
+            $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
             $table->softDeletes();

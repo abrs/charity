@@ -20,7 +20,7 @@ class Field extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('is_enabled', 1);
+            $builder->where('fields.is_enabled', 1);
         });
     }
 }

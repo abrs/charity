@@ -11,7 +11,7 @@ class Beneficiary_Info extends Model
     use SoftDeletes;
     
     protected $table = 'beneficiary_infos';
-    protected $with = ['location', 'type_info.user', 'activities'];
+    protected $with = ['location', 'type_info.user', 'activities', 'relations'];
 
     protected $fillable = [
         'type_infos_id', 
@@ -34,7 +34,14 @@ class Beneficiary_Info extends Model
     public function activities()
     {
         return $this->belongsToMany(Activity::class, 'activity_beneficiary', 'beneficiary_id', 'activity_id')->withTimestamps();
-            //  ->using(ActivityBeneficiary::class);
+    }
+
+    public function relations()
+    {
+        return $this->belongsToMany(Relation::class, 'beneficiary_relations', 'beneficiary_id', 'relation_id')
+            // ->as('relations')
+            ->withPivot('s_beneficiary_id', 'is_enabled', 'created_by')
+            ->withTimestamps();
     }
 
     /**
@@ -47,7 +54,7 @@ class Beneficiary_Info extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('is_enabled', 1);
+            $builder->where('beneficiary_infos.is_enabled', 1);
         });
     }
 }

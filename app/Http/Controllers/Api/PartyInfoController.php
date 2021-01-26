@@ -24,7 +24,7 @@ class PartyInfoController extends Controller
             return Message::response(
                 true,
                 'done',
-                Party_Info::with('type_info')->paginate(25)
+                Party_Info::paginate(25)
             );
         });
     }

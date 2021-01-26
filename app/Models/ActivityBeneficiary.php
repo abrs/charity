@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ActivityBeneficiary extends Model
 {
@@ -31,7 +31,7 @@ class ActivityBeneficiary extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('is_enabled', 1);
+            $builder->where('activity_beneficiary.is_enabled', 1);
         });
     }
 }

@@ -86,6 +86,8 @@ Route::group([
         Route::post('beneficiary_infos/detachBeneficiaryAnActivity', 
             'Api\BeneficiaryInfoController@detachBeneficiaryAnActivity');
             
+        Route::post('beneficiary_infos/assignBeneficiaryRelation', 'Api\BeneficiaryInfoController@assignBeneficiaryRelation');
+        Route::post('beneficiary_infos/unAssignBeneficiaryRelation', 'Api\BeneficiaryInfoController@unAssignBeneficiaryRelation');
         Route::apiResource('beneficiary_infos', 'Api\BeneficiaryInfoController')->except('update');
         Route::post('beneficiary_infos/{beneficiary_info}', 'Api\BeneficiaryInfoController@update');
 
@@ -100,6 +102,10 @@ Route::group([
         //activities routes
         Route::apiResource('activities', 'Api\ActivityController')->except('update');
         Route::post('activities/{activity}', 'Api\ActivityController@update');
+        
+        //relations routes
+        Route::apiResource('relations', 'Api\RelationController')->except('update');
+        Route::post('relations/{relation}', 'Api\RelationController@update');
     });
 
 

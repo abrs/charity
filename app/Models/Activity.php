@@ -38,7 +38,7 @@ class Activity extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('is_enabled', 1);
+            $builder->where('activities.is_enabled', 1);
         });
     }
 }

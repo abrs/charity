@@ -46,7 +46,7 @@ class Type_Info extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('is_enabled', 1);
+            $builder->where('type_infos.is_enabled', 1);
         });
     }
 }

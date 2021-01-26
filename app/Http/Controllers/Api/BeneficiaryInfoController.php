@@ -7,10 +7,13 @@ use App\Helpers\{Tenant, Message};
 use App\Models\Activity;
 use App\Models\ActivityBeneficiary;
 use App\Models\Beneficiary_Info;
+use App\Models\BeneficiaryRelation;
+use App\Models\Relation;
 use App\Models\Type_Info;
 use App\Rules\ValidModel;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BeneficiaryInfoController extends Controller
 {
@@ -59,7 +62,7 @@ class BeneficiaryInfoController extends Controller
                 ['type_infos_id' => $request->type_infos_id],
 
                 [
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'location_id' => $request->location_id,
                     'created_by' => auth()->user()->user_name,
                 ]
@@ -111,7 +114,7 @@ class BeneficiaryInfoController extends Controller
                 [
                     'type_infos_id' => $request->type_infos_id,
                     'location_id' => $request->location_id,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,
                 ]
             );
@@ -181,7 +184,7 @@ class BeneficiaryInfoController extends Controller
                         'name' => $request->name,
                         'email' => $request->email,
                         'password' => $password,
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                         'created_by' => auth()->user()->user_name,
                     ],
                 );
@@ -191,7 +194,7 @@ class BeneficiaryInfoController extends Controller
                     ['user_id' => $created_user->id, 'type_id' => $request->type_id],
                     [
                         #if is_enabled is null then it's false
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                         'created_by' => auth()->user()->user_name,
                     ]
                 );
@@ -202,7 +205,7 @@ class BeneficiaryInfoController extends Controller
                     ['type_infos_id' => $typeInfo->id],
                     [
                         'location_id' => $request->location_id,
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                         'created_by' => auth()->user()->user_name,
                     ]
                 );
@@ -213,6 +216,71 @@ class BeneficiaryInfoController extends Controller
         });
     }
 
+    /**
+     * assign beneficiary a relation
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Helpers\Message
+     */
+    public function assignBeneficiaryRelation(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+            'is_enabled'        => ['nullable', 'boolean'],
+
+            'beneficiary_id'    => ['required', new ValidModel('App\Models\Beneficiary_Info')],
+            's_beneficiary_id'  => ['nullable', new ValidModel('App\Models\Beneficiary_Info'), Rule::notIn($request->beneficiary_id)],
+            'relation_id'       => ['required', new ValidModel('App\Models\Relation')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+
+            BeneficiaryRelation::firstOrCreate(
+                [
+                    'beneficiary_id' => $request->beneficiary_id,
+                    'relation_id' => $request->relation_id,
+                    's_beneficiary_id' => $request->s_beneficiary_id,
+                ],
+                [
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    'created_by' => auth()->user()->user_name,
+                ]
+            );
+
+           return Message::response(true, 'attached successfully');
+        });
+    }
+
+    /**
+     * unassign beneficiary a relation
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Helpers\Message
+     */
+    public function unAssignBeneficiaryRelation(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+
+            'beneficiary_id' => ['required', new ValidModel('App\Models\Beneficiary_Info')],
+            'relation_id'    => ['required', new ValidModel('App\Models\Relation')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+            
+            $beneficiary = Beneficiary_Info::find($request->beneficiary_id);
+
+            $beneficiary->relations()->detach($request->relation_id);
+
+           return Message::response(true, 'unattached successfully');
+        });
+    }
 
     #attach a beneficiary an activity
     public function attachBeneficiaryAnActivity(Request $request) {
@@ -238,7 +306,7 @@ class BeneficiaryInfoController extends Controller
 
                 [                
                     'created_by' => auth()->user()->user_name,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                 ]
             );
 

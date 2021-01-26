@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateActivityBeneficiaryTable extends Migration
+class CreateBeneficiaryRelationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,19 +13,22 @@ class CreateActivityBeneficiaryTable extends Migration
      */
     public function up()
     {
-        Schema::create('activity_beneficiary', function (Blueprint $table) {
+        Schema::create('beneficiary_relations', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('activity_id')->nullable();
+            $table->unsignedBigInteger('relation_id')->nullable();
             $table->unsignedBigInteger('beneficiary_id')->nullable();
-            // $table->timestamp('deleted_at')->nullable();
+            $table->unsignedBigInteger('s_beneficiary_id')->nullable();
+
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('activity_id')->references('id')->on('activities')->onDelete('cascade');
+            $table->unique(['relation_id', 'beneficiary_id', 's_beneficiary_id'], 'unique_r_b_s');
+            $table->foreign('relation_id')->references('id')->on('relations')->onDelete('cascade');
             $table->foreign('beneficiary_id')->references('id')->on('beneficiary_infos')->onDelete('cascade');
+            $table->foreign('s_beneficiary_id')->references('id')->on('beneficiary_infos')->onDelete('cascade');
         });
     }
 
@@ -36,6 +39,6 @@ class CreateActivityBeneficiaryTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('activity_beneficiaries');
+        Schema::dropIfExists('beneficiary_relations');
     }
 }
