@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
 use Illuminate\Http\Request;
 use App\Models\Relation;
-use App\Rules\ValidModel;
-use Illuminate\Validation\Rule;
 
 class RelationController extends Controller
 {

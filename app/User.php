@@ -44,7 +44,7 @@ class User extends Authenticatable
     ];
 
     protected $with = [
-        'types',
+        'types', 'roles'
     ];
 
 

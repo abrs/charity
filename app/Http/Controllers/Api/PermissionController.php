@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
 use Illuminate\Http\Request;
-use App\Models\Location;
-use App\Rules\ValidModel;
+use App\Models\Permission;
 
-class LocationController extends Controller
+class PermissionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,7 +21,7 @@ class LocationController extends Controller
             return Message::response(
                 true,
                 'done',
-                Location::with('point', 'beneficiaries')->paginate(25)
+                Permission::paginate(25)
             );
         });
     }
@@ -36,45 +35,40 @@ class LocationController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'point_id'=>['required', new ValidModel('App\Models\Point')],
-            'name'=>['required', 'unique:locations,name'],
-
+            'name'=>['required', 'unique:permissions,name'],
             'is_enabled' => 'nullable|boolean',
         ]);
 
         if($validator->fails()){
-
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $location = Location::firstOrCreate(
-
-                ['name' => $request->name],
-
+            $role = Permission::create(
                 [
-                    'point_id' => $request->point_id,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'name' => $request->name,
+                    #if is_enabled is null then it's false
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'created_by' => auth()->user()->user_name,
                 ]
             );
 
-           return Message::response(true, 'created', $location);
+            return Message::response(true, 'created', $role);          
         });
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Location  $location
+     * @param  \App\Models\Permission  $permission
      * @return \Illuminate\Http\Response
      */
-    public function show(Location $location)
+    public function show(Permission $permission)
     {
-        return Tenant::wrapTenant(function() use ($location){
+        return Tenant::wrapTenant(function() use ($permission){
 
-            return Message::response('true', 'done', $location->load('point', 'beneficiaries'));
+            return Message::response('true', 'done', $permission);
         });
     }
 
@@ -82,50 +76,46 @@ class LocationController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Location  $location
+     * @param  \App\Models\Permission  $permission
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Location $location)
+    public function update(Request $request, Permission $permission)
     {
         $validator = \Validator::make($request->all(), [
-            'point_id'=>['required', new ValidModel('App\Models\Point')],
-            'name'=>['required', 'unique:locations,name,' . $location->id],
-
+            'name'=>['required', 'unique:permissions,name, ' . $permission->id],
             'is_enabled' => 'nullable|boolean',
         ]);
 
         if($validator->fails()){
-
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $location){
+        return Tenant::wrapTenant(function() use ($permission, $request){
 
-            $location->update(
-
+            $permission->update(
                 [
                     'name' => $request->name,
-                    'point_id' => $request->point_id,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    #if is_enabled is null then it's false
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,
                 ]
             );
 
-           return Message::response(true, 'updated', Location::findOrFail($location->id));
+            return Message::response(true, 'updated', Permission::findOrFail($permission->id));
         });
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Location  $location
+     * @param  \App\Models\Permission  $permission
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Location $location)
+    public function destroy(Permission $permission)
     {
-        return Tenant::wrapTenant(function() use ($location){
+        return Tenant::wrapTenant(function() use ($permission){
 
-            $location->delete();
+            $permission->delete();
             return Message::response(true, 'deleted');
         });
     }

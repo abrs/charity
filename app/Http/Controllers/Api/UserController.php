@@ -57,10 +57,13 @@ class UserController extends Controller
                     'name' => $request->name,
                     'email' => $request->email,
                     'password' => $password,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'created_by' => auth()->user()->user_name,
                 ],
             );
+
+            #after creating a user by default he is a normal user
+            $created_user->assignRole('normal');
 
             return Message::response(true, 'user created successfully', $created_user);
         });
@@ -138,4 +141,13 @@ class UserController extends Controller
 
         return $result;
     }
+
+    #========================================
+    #   User's roles and permissions    =====
+    #==========================================
+
+    /** 
+     * assign user a role
+    */
+    
 }

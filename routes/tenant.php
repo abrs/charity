@@ -106,6 +106,16 @@ Route::group([
         //relations routes
         Route::apiResource('relations', 'Api\RelationController')->except('update');
         Route::post('relations/{relation}', 'Api\RelationController@update');
+
+        //roles routes
+        Route::post('roles/addPermission', 'Api\RoleController@addPermissionToRole');
+        Route::post('roles/removePermission', 'Api\RoleController@removePermissionFromRole');
+        Route::apiResource('roles', 'Api\RoleController')->except('update');
+        Route::post('roles/{role}', 'Api\RoleController@update');
+
+        //permissions routes
+        Route::apiResource('permissions', 'Api\PermissionController')->except('update');
+        Route::post('permissions/{permission}', 'Api\PermissionController@update');
     });
 
 

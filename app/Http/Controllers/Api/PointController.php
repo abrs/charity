@@ -53,7 +53,7 @@ class PointController extends Controller
 
                 [
                     #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'created_by' => auth()->user()->user_name,
                 ]
             );
@@ -86,7 +86,7 @@ class PointController extends Controller
     public function update(Request $request, Point $point)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:points'],
+            'name'=>['required', 'unique:points,name,' . $point->id],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -103,7 +103,7 @@ class PointController extends Controller
                 [
                     'name' => $request->name,
                     #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'created_by' => $request->created_by,
                     'modified_by' => auth()->user()->user_name,
                 ]
