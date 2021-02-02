@@ -19,6 +19,8 @@ class Location extends Model
         'modified_by', 
     ];
 
+    protected $with = ['point'];
+
     /** Relations ----------- */
     public function point() {
         return $this->belongsTo(Point::class);

@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Helpers\{Tenant, Message};
+use App\Rules\ValidModel;
 use App\User;
+use App\Models\Role;
 
 class UserController extends Controller
 {
@@ -133,13 +135,13 @@ class UserController extends Controller
      */
     public function logout(Request $request)
     {
-        $result = tenant()->run(function () use ($request){
+        // $result = tenant()->run(function () use ($request){
 
-            $request->user()->token()->revoke();
-            return Message::response(true, 'user logged out successfully');
-        });
+        $request->user()->token()->revoke();
+        return Message::response(true, 'user logged out successfully');
+        // });
 
-        return $result;
+        // return $result;
     }
 
     #========================================
@@ -149,5 +151,28 @@ class UserController extends Controller
     /** 
      * assign user a role
     */
+    public function assignRoleToUser(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+
+            'user_id' => ['required', new ValidModel('App\User')],
+            'role_id' => ['required', new ValidModel('App\Models\Role')],
+        ]);
+
+        if ($validator->fails()) {
+            return Message::response(false,'Invalid Input' ,$validator->errors());
+        }
+
+        return Tenant::wrapTenant(function() use ($request) {
+
+            \DB::table('model_has_roles')->insert([
+                'role_id' => $request->role_id,
+                'model_type' => User::class,
+                'model_id' => $request->user_id,
+            ]);
+                
+            return Message::response(true,'assigned successfully');
+        });
+    }
     
 }

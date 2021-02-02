@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Type;
+use App\Models\Type_Info;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -44,14 +45,22 @@ class User extends Authenticatable
     ];
 
     protected $with = [
-        'types', 'roles'
+        'types', 'roles.permissions', 'type_infos'
     ];
 
 
 
-    /** Relations ----------- */
+    /**
+     * =================== 
+     * ======== Relations 
+     * ==================================
+     *  */
     public function types() {
         return $this->belongsToMany(Type::class, 'type_infos', 'user_id', 'type_id')->withTimestamps();
+    }
+
+    public function type_infos() {
+        return $this->hasMany(Type_Info::class);
     }
 
     /**

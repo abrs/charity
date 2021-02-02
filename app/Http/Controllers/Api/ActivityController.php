@@ -52,7 +52,7 @@ class ActivityController extends Controller
                 ['name' => $request->name],
 
                 [
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'created_by' => auth()->user()->user_name,
                 ]
             );
@@ -101,7 +101,7 @@ class ActivityController extends Controller
 
                 [
                     'name' => $request->name,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,
                 ]
             );

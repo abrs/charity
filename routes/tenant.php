@@ -57,6 +57,9 @@ Route::group([
         #get all the users
         Route::get('users', 'Api\UserController@index');
 
+        #assign role to user
+        Route::post('users/assignRole', 'Api\UserController@assignRoleToUser');
+
         #logout a logged in user
         Route::get('logout', 'Api\UserController@logout');
 

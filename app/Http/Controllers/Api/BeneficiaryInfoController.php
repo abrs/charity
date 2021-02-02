@@ -161,6 +161,9 @@ class BeneficiaryInfoController extends Controller
             'is_enabled' => 'nullable|boolean',
             // 'user_id' => ['required', 'numeric', new ValidModel('App\User')],
             'type_id' => ['required', 'numeric', new ValidModel('App\Models\Type')],
+
+            //activity id should be attached automatically
+            // 'activity_id'=>['required', new ValidModel('App\Models\Activity')],
         ]);
 
         if($validator->fails()){
@@ -209,6 +212,10 @@ class BeneficiaryInfoController extends Controller
                         'created_by' => auth()->user()->user_name,
                     ]
                 );
+
+                #after creating the beneficiary it has to be tagged with the activity needs_server_approval
+                
+                    
 
                 return Message::response(true, 'created', $beneficiaryInfo);
 

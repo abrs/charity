@@ -12,7 +12,7 @@ class Type_Info extends Model
     use SoftDeletes;
     
     protected $table = 'type_infos';
-    protected $with = ['user'];
+    protected $with = ['beneficiary_info'];
 
     protected $fillable = [
         'deleted_at', 

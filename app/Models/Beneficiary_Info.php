@@ -11,7 +11,7 @@ class Beneficiary_Info extends Model
     use SoftDeletes;
     
     protected $table = 'beneficiary_infos';
-    protected $with = ['location', 'type_info.user', 'activities', 'relations'];
+    protected $with = ['location', 'activities', 'relations'];
 
     protected $fillable = [
         'type_infos_id', 
@@ -33,7 +33,9 @@ class Beneficiary_Info extends Model
 
     public function activities()
     {
-        return $this->belongsToMany(Activity::class, 'activity_beneficiary', 'beneficiary_id', 'activity_id')->withTimestamps();
+        return $this->belongsToMany(Activity::class, 'activity_beneficiary', 'beneficiary_id', 'activity_id')
+            // ->withPivot('name')
+            ->withTimestamps();
     }
 
     public function relations()

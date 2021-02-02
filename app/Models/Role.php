@@ -26,7 +26,7 @@ class Role extends BaseRole
         'name',
     ];
 
-    protected $with = ['permissions'];
+    // protected $with = ['permissions'];
 
     /**
      * The "booting" method of the model.

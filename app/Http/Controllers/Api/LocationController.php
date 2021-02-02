@@ -22,7 +22,7 @@ class LocationController extends Controller
             return Message::response(
                 true,
                 'done',
-                Location::with('point', 'beneficiaries')->paginate(25)
+                Location::paginate(25)
             );
         });
     }
@@ -55,7 +55,7 @@ class LocationController extends Controller
 
                 [
                     'point_id' => $request->point_id,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'created_by' => auth()->user()->user_name,
                 ]
             );
@@ -106,7 +106,7 @@ class LocationController extends Controller
                 [
                     'name' => $request->name,
                     'point_id' => $request->point_id,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,
                 ]
             );
