@@ -98,7 +98,7 @@ Route::group([
         Route::apiResource('points', 'Api\PointController')->except('update');
         Route::post('points/{point}', 'Api\PointController@update');
 
-        //points routes
+        //locations routes
         Route::apiResource('locations', 'Api\LocationController')->except('update');
         Route::post('locations/{location}', 'Api\LocationController@update');
 
@@ -119,6 +119,18 @@ Route::group([
         //permissions routes
         Route::apiResource('permissions', 'Api\PermissionController')->except('update');
         Route::post('permissions/{permission}', 'Api\PermissionController@update');
+
+        //statuses routes
+        Route::apiResource('statuses', 'Api\StatusController')->except('update');
+        Route::post('statuses/{status}', 'Api\StatusController@update');
+
+        //kinds routes
+        Route::apiResource('kinds', 'Api\KindController')->except('update');
+        Route::post('kinds/{kind}', 'Api\KindController@update');
+
+        //request_types routes
+        Route::apiResource('request_types', 'Api\RequestTypeController')->except('update');
+        Route::post('request_types/{request_type}', 'Api\RequestTypeController@update');
     });
 
 

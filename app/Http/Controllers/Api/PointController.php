@@ -48,7 +48,7 @@ class PointController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $type = Point::firstOrcreate(
+            $point = Point::firstOrcreate(
                 ['name' => $request->name],
 
                 [
@@ -58,7 +58,7 @@ class PointController extends Controller
                 ]
             );
 
-            return Message::response(true, 'created', $type);          
+            return Message::response(true, 'created', $point);          
         });
     }
 

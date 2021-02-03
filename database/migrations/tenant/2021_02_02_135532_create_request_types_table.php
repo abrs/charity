@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePointsTable extends Migration
+class CreateRequestTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,22 @@ class CreatePointsTable extends Migration
      */
     public function up()
     {
-        Schema::create('points', function (Blueprint $table) {
+        Schema::create('request_types', function (Blueprint $table) {
             $table->bigIncrements('id');
-            // $table->timestamp('deleted_at')->nullable();
+            $table->unsignedBigInteger('kind_id')->nullable();
             $table->string('name')->unique();
+
+            $table->unsignedInteger('max_days')->nullable();
+            $table->unsignedInteger('max_hours')->nullable();
+            $table->text('note')->nullable();
+
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
             $table->softDeletes();
             $table->timestamps();
+
+            $table->foreign('kind_id')->references('id')->on('kinds')->onDelete('cascade');
         });
     }
 
@@ -32,6 +39,6 @@ class CreatePointsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('points');
+        Schema::dropIfExists('request_types');
     }
 }

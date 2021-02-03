@@ -11,7 +11,6 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Passport\HasApiTokens;
 
-//TODO: this class's migration file have to be moved to the tenant folder routes..
 class User extends Authenticatable
 {
     use Notifiable, HasRoles, HasApiTokens;

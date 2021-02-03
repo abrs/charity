@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
-use App\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Type extends Model
+class Kind extends Model
 {
     use SoftDeletes;
-
+    
+    public $timestamps= false;
+    
     /**
      * The attributes that are mass assignable.
      *
@@ -24,11 +25,6 @@ class Type extends Model
         'name'
     ];
 
-    /** Relations ----------- */
-    public function users() {
-        return $this->belongsToMany(User::class, 'type_infos', 'type_id', 'user_id');
-    }
-
     /**
      * The "booting" method of the model.
      *
@@ -39,13 +35,7 @@ class Type extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('types.is_enabled', 1);
+            $builder->where('kinds.is_enabled', 1);
         });
-    }
-
-    public function request_types() {
-        return $this->belongsToMany(RequestType::class, 'req_to_approved', 'type_id', 'request_type_id')
-            // ->withPivot('s_beneficiary_id', 'is_enabled', 'created_by')
-            ->withTimestamps();
     }
 }

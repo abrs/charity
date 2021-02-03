@@ -9,9 +9,12 @@ use App\Models\ActivityBeneficiary;
 use App\Models\Beneficiary_Info;
 use App\Models\BeneficiaryRelation;
 use App\Models\Relation;
+use App\Models\RequestType;
+use App\Models\Type;
 use App\Models\Type_Info;
 use App\Rules\ValidModel;
 use App\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -160,7 +163,6 @@ class BeneficiaryInfoController extends Controller
 
             'is_enabled' => 'nullable|boolean',
             // 'user_id' => ['required', 'numeric', new ValidModel('App\User')],
-            'type_id' => ['required', 'numeric', new ValidModel('App\Models\Type')],
 
             //activity id should be attached automatically
             // 'activity_id'=>['required', new ValidModel('App\Models\Activity')],
@@ -192,9 +194,13 @@ class BeneficiaryInfoController extends Controller
                     ],
                 );
 
+                #get the type of a beneficiary
+                #type beneficiary needs to be exist
+                $type = Type::findOrFail(Type::where('name', 'beneficiary')->first('id')->id);
+                
                 #2- create a type info between a user and a created type.
                 $typeInfo = Type_Info::firstOrcreate(
-                    ['user_id' => $created_user->id, 'type_id' => $request->type_id],
+                    ['user_id' => $created_user->id, 'type_id' => $type->id],
                     [
                         #if is_enabled is null then it's false
                         'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
@@ -214,10 +220,16 @@ class BeneficiaryInfoController extends Controller
                 );
 
                 #after creating the beneficiary it has to be tagged with the activity needs_server_approval
-                
-                    
+                #add new beneficiary needs to exist
+                $requestType = RequestType::findOrFail(RequestType::where('name', 'add_new_beneficiary')->first('id')->id);
 
-                return Message::response(true, 'created', $beneficiaryInfo);
+                $type->request_types()->save(
+                    $requestType, [
+                        'created_by' => auth()->user()->user_name,
+                    ]
+                );
+
+                return Message::response(true, 'created', $created_user);
 
             });
         });

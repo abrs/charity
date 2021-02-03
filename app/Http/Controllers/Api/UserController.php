@@ -79,7 +79,7 @@ class UserController extends Controller
 
             'user_name' => 'required',
             'password' => 'required|string',
-            'remember_me' => 'boolean'
+            'remember_me' => 'boolean' //TODO: make extra studies on expiration date.
         ]);
 
         if ($validator->fails()) {

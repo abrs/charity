@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
 use Illuminate\Http\Request;
-use App\Models\Type;
+use App\Models\Status;
 
-class TypeController extends Controller
+class StatusController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,7 +21,7 @@ class TypeController extends Controller
             return Message::response(
                 true,
                 'done',
-                Type::with('users')->paginate(25)
+                Status::paginate(25)
             );
         });
     }
@@ -35,11 +35,8 @@ class TypeController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:types'],
-            // 'deleted_at' => 'nullable|date',
+            'name'=>['required', 'unique:statuses'],
             'is_enabled' => 'nullable|boolean',
-            // 'created_by' => 'nullable|alpha_num',
-            // 'modified_by' => 'nullable|alpha_num',
         ]);
 
         if($validator->fails()){
@@ -48,8 +45,9 @@ class TypeController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $type = Type::firstOrcreate(
+            $status = Status::firstOrcreate(
                 ['name' => $request->name],
+
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
@@ -57,21 +55,21 @@ class TypeController extends Controller
                 ]
             );
 
-            return Message::response(true, 'created', $type);          
+            return Message::response(true, 'created', $status);          
         });
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Type  $type
+     * @param  \App\Models\Status  $status
      * @return \Illuminate\Http\Response
      */
-    public function show(Type $type)
+    public function show(Status $status)
     {
-        return Tenant::wrapTenant(function() use ($type){
+        return Tenant::wrapTenant(function() use ($status){
 
-            return Message::response('true', 'done', $type);
+            return Message::response('true', 'done', $status);
         });
     }
 
@@ -79,26 +77,23 @@ class TypeController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Type  $type
+     * @param  \App\Models\Status  $status
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Type $type)
+    public function update(Request $request, Status $status)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:types'],
-            // 'deleted_at' => 'nullable|date',
+            'name'=>['required', 'unique:statuses,name,' . $status->id],
             'is_enabled' => 'nullable|boolean',
-            // 'created_by' => 'nullable|alpha_num',
-            // 'modified_by' => 'required|alpha_num',
         ]);
 
         if($validator->fails()){
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
         
-        return Tenant::wrapTenant(function() use ($type, $request){
+        return Tenant::wrapTenant(function() use ($status, $request){
 
-            $type->update(
+            $status->update(
                 [
                     'name' => $request->name,
                     #if is_enabled is null then it's false
@@ -108,22 +103,21 @@ class TypeController extends Controller
                 ]
             );
 
-            return Message::response(true, 'updated', Type::findOrFail($type->id));
+            return Message::response(true, 'updated', Status::findOrFail($status->id));
         });
-
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Type  $type
+     * @param  Status $status
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Type $type)
+    public function destroy(Status $status)
     {
-        return Tenant::wrapTenant(function() use ($type){
+        return Tenant::wrapTenant(function() use ($status){
 
-            $type->delete();
+            $status->delete();
             return Message::response(true, 'deleted');
         });
     }
