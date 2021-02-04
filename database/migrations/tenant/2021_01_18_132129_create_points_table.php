@@ -15,7 +15,6 @@ class CreatePointsTable extends Migration
     {
         Schema::create('points', function (Blueprint $table) {
             $table->bigIncrements('id');
-            // $table->timestamp('deleted_at')->nullable();
             $table->string('name')->unique();
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();

@@ -6,27 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Point extends Model
+class ActivityWorkflowSteps extends Model
 {
     use SoftDeletes;
-    
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'deleted_at', 
-        'is_enabled', 
-        'created_by', 
-        'modified_by', 
-        'name'
-    ];
 
-    /** Relations ----------- */
-    public function locations() {
-        return $this->hasMany(Location::class);
-    }
+    protected $table = 'activity_workflow_steps';
+
+    protected $fillable = [
+        'activity_id',    
+        'step_id',    
+        'order_num',
+        'finishing_percentage',
+        'required',
+        'is_enabled', 
+        'deleted_at', 
+        'created_by',
+        'modified_by',
+    ];
 
     /**
      * The "booting" method of the model.
@@ -38,7 +34,8 @@ class Point extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('points.is_enabled', 1);
+            $builder->where('activity_workflow_steps.is_enabled', 1);
         });
     }
+
 }

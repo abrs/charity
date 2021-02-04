@@ -11,7 +11,7 @@ class Beneficiary_Info extends Model
     use SoftDeletes;
     
     protected $table = 'beneficiary_infos';
-    protected $with = ['location', 'activities', 'relations'];
+    protected $with = ['location', 'relations'];
 
     protected $fillable = [
         'type_infos_id', 

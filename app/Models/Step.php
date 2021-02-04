@@ -6,11 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Kind extends Model
+class Step extends Model
 {
     use SoftDeletes;
-    
-    public $timestamps= false;
     
     /**
      * The attributes that are mass assignable.
@@ -22,6 +20,7 @@ class Kind extends Model
         'is_enabled', 
         'created_by', 
         'modified_by', 
+        'description',
         'name'
     ];
 
@@ -35,7 +34,19 @@ class Kind extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('kinds.is_enabled', 1);
+            $builder->where('steps.is_enabled', 1);
         });
+    }
+
+    /**
+     * ================
+     * relations
+     * =====
+     */
+    public function activities()
+    {
+        return $this->belongsToMany(Activity::class, 'activity_workflow_steps', 'step_id', 'activity_id')
+            ->withPivot('order_num', 'finishing_percentage', 'required', 'created_by')
+            ->withTimestamps();
     }
 }

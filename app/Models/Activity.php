@@ -2,31 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Activity extends Model
 {
     use SoftDeletes;
-
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'name',
-        'is_enabled', 
         'deleted_at', 
-        'created_by',
+        'is_enabled', 
+        'created_by', 
         'modified_by', 
+        'name'
     ];
-
-    //makes loop if activities from Beneficiary_Info is active.
-    // protected $with = ['beneficiaries'];
-
-    /** Relations ----------- */
-    public function beneficiaries()
-    {
-        return $this->belongsToMany(Beneficiary_Info::class, 'activity_beneficiary', 'activity_id', 'beneficiary_id')->withTimestamps();
-            // ->using(ActivityBeneficiary::class);
-    }
 
     /**
      * The "booting" method of the model.
@@ -40,5 +35,17 @@ class Activity extends Model
         static::addGlobalScope('is_enabled', function (Builder $builder) {
             $builder->where('activities.is_enabled', 1);
         });
+    }
+
+    /**
+     * ================
+     * relations
+     * =====
+     */
+    public function steps()
+    {
+        return $this->belongsToMany(Step::class, 'activity_workflow_steps', 'activity_id', 'step_id')
+            ->withPivot('order_num', 'finishing_percentage', 'required', 'created_by')
+            ->withTimestamps();
     }
 }

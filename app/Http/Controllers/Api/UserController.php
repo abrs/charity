@@ -102,7 +102,9 @@ class UserController extends Controller
         
                 if ($request->remember_me) {
                     #when a remember_me with true sent, extend the user token's life a week
-                    $token->expires_at = Carbon::now()->addWeeks(1);
+                    $token->expires_at = Carbon::now()->addMonth();
+                }else {
+                    $token->expires_at = Carbon::now()->addWeek();
                 }
         
                 $token->save();

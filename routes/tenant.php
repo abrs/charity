@@ -20,22 +20,6 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 |
 */
 
-// Route::middleware([
-//     'api',
-//     InitializeTenancyByPath::class,
-    
-//     PreventAccessFromCentralDomains::class,
-// ])->group(function () {
-    
-//     #user controller actions    ----------
-
-//     #register new user
-//     Route::post('register', 'Api\UserController@signup');
-//     #ligin a registered user and view its details.
-//     Route::post('login', 'Api\UserController@login');
-
-// });
-
 Route::group([
     'prefix' => '/api/{tenant}',
     'middleware' => [InitializeTenancyByPath::class, 'api'],
@@ -52,7 +36,7 @@ Route::group([
 
     
     //auth:api routes.
-    Route::group(['middleware' => 'auth:api'], function () {
+    Route::group(['middleware' => ['auth:api', 'check_expiration']], function () {
 
         #get all the users
         Route::get('users', 'Api\UserController@index');
@@ -80,14 +64,6 @@ Route::group([
         //beneficiary infos controller routes
         #create new beneficiary
         Route::post('beneficiary_infos/createNewBeneficiary', 'Api\BeneficiaryInfoController@createNewBeneficiary');
-
-        #attach a beneficiary an activity
-        Route::post('beneficiary_infos/attachBeneficiaryAnActivity', 
-            'Api\BeneficiaryInfoController@attachBeneficiaryAnActivity');
-
-        #detach a beneficiary an activity
-        Route::post('beneficiary_infos/detachBeneficiaryAnActivity', 
-            'Api\BeneficiaryInfoController@detachBeneficiaryAnActivity');
             
         Route::post('beneficiary_infos/assignBeneficiaryRelation', 'Api\BeneficiaryInfoController@assignBeneficiaryRelation');
         Route::post('beneficiary_infos/unAssignBeneficiaryRelation', 'Api\BeneficiaryInfoController@unAssignBeneficiaryRelation');
@@ -97,14 +73,23 @@ Route::group([
         //points routes
         Route::apiResource('points', 'Api\PointController')->except('update');
         Route::post('points/{point}', 'Api\PointController@update');
+        
+        //activities routes
+        Route::post('activities/assignStep', 'Api\ActivityController@assignStep');
+        Route::apiResource('activities', 'Api\ActivityController')->except('update');
+        Route::post('activities/{activity}', 'Api\ActivityController@update');
+
+        //steps routes
+        Route::apiResource('steps', 'Api\StepController')->except('update');
+        Route::post('steps/{step}', 'Api\StepController@update');
+
+        //step approval routes
+        Route::apiResource('step_approvals', 'Api\StepApprovalController')->except('update');
+        Route::post('step_approvals/{step_approval}', 'Api\StepApprovalController@update');
 
         //locations routes
         Route::apiResource('locations', 'Api\LocationController')->except('update');
         Route::post('locations/{location}', 'Api\LocationController@update');
-
-        //activities routes
-        Route::apiResource('activities', 'Api\ActivityController')->except('update');
-        Route::post('activities/{activity}', 'Api\ActivityController@update');
         
         //relations routes
         Route::apiResource('relations', 'Api\RelationController')->except('update');
@@ -123,14 +108,6 @@ Route::group([
         //statuses routes
         Route::apiResource('statuses', 'Api\StatusController')->except('update');
         Route::post('statuses/{status}', 'Api\StatusController@update');
-
-        //kinds routes
-        Route::apiResource('kinds', 'Api\KindController')->except('update');
-        Route::post('kinds/{kind}', 'Api\KindController@update');
-
-        //request_types routes
-        Route::apiResource('request_types', 'Api\RequestTypeController')->except('update');
-        Route::post('request_types/{request_type}', 'Api\RequestTypeController@update');
     });
 
 

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateActivityBeneficiaryTable extends Migration
+class CreateActivitiesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,19 +13,14 @@ class CreateActivityBeneficiaryTable extends Migration
      */
     public function up()
     {
-        Schema::create('activity_beneficiary', function (Blueprint $table) {
+        Schema::create('activities', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('activity_id')->nullable();
-            $table->unsignedBigInteger('beneficiary_id')->nullable();
-            // $table->timestamp('deleted_at')->nullable();
+            $table->string('name')->unique();
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
             $table->softDeletes();
             $table->timestamps();
-
-            $table->foreign('activity_id')->references('id')->on('activities')->onDelete('cascade');
-            $table->foreign('beneficiary_id')->references('id')->on('beneficiary_infos')->onDelete('cascade');
         });
     }
 
@@ -36,6 +31,6 @@ class CreateActivityBeneficiaryTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('activity_beneficiaries');
+        Schema::dropIfExists('activities');
     }
 }

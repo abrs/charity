@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
 use Illuminate\Http\Request;
-use App\Models\Kind;
+use App\Models\Step;
 
-class KindController extends Controller
+class StepController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,7 +21,7 @@ class KindController extends Controller
             return Message::response(
                 true,
                 'done',
-                Kind::paginate(25)
+                Step::paginate(25)
             );
         });
     }
@@ -35,7 +35,8 @@ class KindController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:kinds'],
+            'name'=>['required', 'unique:steps'],
+            'description'=>['nullable'],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -45,31 +46,32 @@ class KindController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $kind = Kind::firstOrcreate(
+            $step = Step::firstOrcreate(
                 ['name' => $request->name],
 
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    'description' => $request->has('description') ? $request->description : Null,
                     'created_by' => auth()->user()->user_name,
                 ]
             );
 
-            return Message::response(true, 'created', $kind);          
+            return Message::response(true, 'created', $step);          
         });
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Kind  $kind
+     * @param  \App\Models\Step  $step
      * @return \Illuminate\Http\Response
      */
-    public function show(Kind $kind)
+    public function show(Step $step)
     {
-        return Tenant::wrapTenant(function() use ($kind){
+        return Tenant::wrapTenant(function() use ($step){
 
-            return Message::response('true', 'done', $kind);
+            return Message::response('true', 'done', $step);
         });
     }
 
@@ -77,13 +79,14 @@ class KindController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Kind  $kind
+     * @param  \App\Models\Step  $step
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Kind $kind)
+    public function update(Request $request, Step $step)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:kinds,name,' . $kind->id],
+            'name'=>['required', 'unique:steps,name,' . $step->id],
+            'description'=>['nullable'],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -91,11 +94,12 @@ class KindController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
         
-        return Tenant::wrapTenant(function() use ($kind, $request){
+        return Tenant::wrapTenant(function() use ($step, $request){
 
-            $kind->update(
+            $step->update(
                 [
                     'name' => $request->name,
+                    'description' => $request->description,
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'created_by' => $request->created_by,
@@ -103,22 +107,28 @@ class KindController extends Controller
                 ]
             );
 
-            return Message::response(true, 'updated', Kind::findOrFail($kind->id));
+            return Message::response(true, 'updated', Step::findOrFail($step->id));
         });
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Kind  $kind
+     * @param  \App\Models\Step  $step
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Kind $kind)
+    public function destroy(Step $step)
     {
-        return Tenant::wrapTenant(function() use ($kind){
+        return Tenant::wrapTenant(function() use ($step){
 
-            $kind->delete();
+            $step->delete();
             return Message::response(true, 'deleted');
         });
     }
+
+    /**
+     * =========================
+     * extra functionality
+     * =======
+     */    
 }

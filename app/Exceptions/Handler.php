@@ -60,6 +60,10 @@ class Handler extends ExceptionHandler
         if ($exception instanceof AuthorizationException) {
             return Message::response(false,'Unauthorized.');
         }
+
+        if ($exception instanceof TokenExpiredException) {
+            return Message::response(false,'Token is out of date!!');
+        }
         
         return parent::render($request, $exception);
     }
