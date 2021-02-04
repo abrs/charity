@@ -62,6 +62,20 @@ class User extends Authenticatable
         return $this->hasMany(Type_Info::class);
     }
 
+    public function assignType(Type $type) {
+
+        if(! $this->types->contains($type)) {
+
+            $this->types()->save($type, [            
+                'created_by' => auth()->user()->user_name,                    
+            ]);
+        }
+
+        return Type_Info::where('user_id', $this->id)
+            ->where('type_id', $type->id)->first();
+        
+    }
+
     /**
      * The "booting" method of the model.
      *

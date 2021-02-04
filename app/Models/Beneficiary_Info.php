@@ -31,13 +31,6 @@ class Beneficiary_Info extends Model
         return $this->belongsTo(Location::class);
     }
 
-    public function activities()
-    {
-        return $this->belongsToMany(Activity::class, 'activity_beneficiary', 'beneficiary_id', 'activity_id')
-            // ->withPivot('name')
-            ->withTimestamps();
-    }
-
     public function relations()
     {
         return $this->belongsToMany(Relation::class, 'beneficiary_relations', 'beneficiary_id', 'relation_id')

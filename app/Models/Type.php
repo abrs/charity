@@ -42,10 +42,4 @@ class Type extends Model
             $builder->where('types.is_enabled', 1);
         });
     }
-
-    public function request_types() {
-        return $this->belongsToMany(RequestType::class, 'req_to_approved', 'type_id', 'request_type_id')
-            // ->withPivot('s_beneficiary_id', 'is_enabled', 'created_by')
-            ->withTimestamps();
-    }
 }

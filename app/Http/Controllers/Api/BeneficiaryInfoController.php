@@ -10,6 +10,7 @@ use App\Models\Beneficiary_Info;
 use App\Models\BeneficiaryRelation;
 use App\Models\Relation;
 use App\Models\RequestType;
+use App\Models\StepApproval;
 use App\Models\Type;
 use App\Models\Type_Info;
 use App\Rules\ValidModel;
@@ -142,30 +143,27 @@ class BeneficiaryInfoController extends Controller
     }
 
     /**
+     * ===============================================================
+     * ===================== extra functionality =====================
+     * ==================================================
+     */
+
+    /**
      * add new beneficiary memeber
      * @param \Illuminate\Http\Request $request
      * @return \App\Helpers\Message
      */
-    public function createNewBeneficiary(Request $request) {
+    public function createNewBeneficiaryDetails(Request $request) {
         
         $validator = \Validator::make($request->all(), [
 
-            #create new user
-            'email' => 'required|email|unique:users',
-            'password' => 'required',
-            'confirm_password' => 'required|same:password', 
-
-            'name' => 'required', 
-            'user_name' => 'required|unique:users',
+            #get the owner
+            'owner_id' => ['required', 'numeric', new ValidModel('App\User')],
 
             #create beneficiary
             'location_id'=>['required', new ValidModel('App\Models\Location')],
 
             'is_enabled' => 'nullable|boolean',
-            // 'user_id' => ['required', 'numeric', new ValidModel('App\User')],
-
-            //activity id should be attached automatically
-            // 'activity_id'=>['required', new ValidModel('App\Models\Activity')],
         ]);
 
         if($validator->fails()){
@@ -174,42 +172,20 @@ class BeneficiaryInfoController extends Controller
         }
 
         #create a password for the user
-        $password = bcrypt($request->password);
+        return Tenant::wrapTenant(function() use ($request){
 
-        return Tenant::wrapTenant(function() use ($request, $password){
-
-            return \DB::transaction(function () use ($request, $password){
+            return \DB::transaction(function () use ($request){
 
                 #1- create user
-                $created_user = User::firstOrCreate(
-                    #a user with the same name is an old user.
-                    ['user_name' => $request->user_name],
-
-                    [
-                        'name' => $request->name,
-                        'email' => $request->email,
-                        'password' => $password,
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                        'created_by' => auth()->user()->user_name,
-                    ],
-                );
+                $created_user = User::find($request->owner_id);
 
                 #get the type of a beneficiary
                 #type beneficiary needs to be exist
                 $type = Type::findOrFail(Type::where('name', 'beneficiary')->first('id')->id);
-                
-                #2- create a type info between a user and a created type.
-                $typeInfo = Type_Info::firstOrcreate(
-                    ['user_id' => $created_user->id, 'type_id' => $type->id],
-                    [
-                        #if is_enabled is null then it's false
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                        'created_by' => auth()->user()->user_name,
-                    ]
-                );
+                $typeInfo = $created_user->assignType($type);
 
                 #create a beneficiary details
-                $beneficiaryInfo = Beneficiary_Info::firstOrCreate(
+                Beneficiary_Info::firstOrCreate(
 
                     ['type_infos_id' => $typeInfo->id],
                     [
@@ -219,17 +195,7 @@ class BeneficiaryInfoController extends Controller
                     ]
                 );
 
-                #after creating the beneficiary it has to be tagged with the activity needs_server_approval
-                #add new beneficiary needs to exist
-                $requestType = RequestType::findOrFail(RequestType::where('name', 'add_new_beneficiary')->first('id')->id);
-
-                $type->request_types()->save(
-                    $requestType, [
-                        'created_by' => auth()->user()->user_name,
-                    ]
-                );
-
-                return Message::response(true, 'created', $created_user);
+                return Message::response(true, 'created', User::find($request->owner_id));
 
             });
         });
@@ -298,61 +264,6 @@ class BeneficiaryInfoController extends Controller
             $beneficiary->relations()->detach($request->relation_id);
 
            return Message::response(true, 'unattached successfully');
-        });
-    }
-
-    #attach a beneficiary an activity
-    public function attachBeneficiaryAnActivity(Request $request) {
-
-        $validator = \Validator::make($request->all(), [
-            'is_enabled' => ['nullable', 'boolean'],
-            'beneficiary_info_id'=>['required', new ValidModel('App\Models\Beneficiary_Info')],
-            'activity_id'=>['required', new ValidModel('App\Models\Activity')],
-        ]);
-
-        if($validator->fails()){
-
-            return Message::response(false,'Invalid Input' ,$validator->errors());  
-        }
-
-        return Tenant::wrapTenant(function() use ($request){
-
-            $activityBeneficiary = ActivityBeneficiary::firstOrCreate(
-                [
-                    'beneficiary_id'    => $request->beneficiary_info_id,
-                    'activity_id'       => $request->activity_id,
-                ],
-
-                [                
-                    'created_by' => auth()->user()->user_name,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                ]
-            );
-
-           return Message::response(true, 'attached successfully', $activityBeneficiary);
-        });
-    }
-
-    #detach a beneficiary an activity
-    public function detachBeneficiaryAnActivity(Request $request) {
-
-        $validator = \Validator::make($request->all(), [
-            'beneficiary_info_id'=>['required', new ValidModel('App\Models\Beneficiary_Info')],
-            'activity_id'=>['required', new ValidModel('App\Models\Activity')],
-        ]);
-
-        if($validator->fails()){
-
-            return Message::response(false,'Invalid Input' ,$validator->errors());  
-        }
-
-        return Tenant::wrapTenant(function() use ($request){
-
-            $beneficiary_info = Beneficiary_Info::findOrFail($request->beneficiary_info_id);
-
-            $beneficiary_info->activities()->detach($request->activity_id);
-
-           return Message::response(true, 'detached successfully');
         });
     }
 }

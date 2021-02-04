@@ -44,6 +44,9 @@ Route::group([
         #assign role to user
         Route::post('users/assignRole', 'Api\UserController@assignRoleToUser');
 
+        #assign type to user
+        Route::post('users/assignType', 'Api\UserController@assignType');
+
         #logout a logged in user
         Route::get('logout', 'Api\UserController@logout');
 
@@ -63,7 +66,7 @@ Route::group([
 
         //beneficiary infos controller routes
         #create new beneficiary
-        Route::post('beneficiary_infos/createNewBeneficiary', 'Api\BeneficiaryInfoController@createNewBeneficiary');
+        Route::post('beneficiary_infos/createNewBeneficiaryDetails', 'Api\BeneficiaryInfoController@createNewBeneficiaryDetails');
             
         Route::post('beneficiary_infos/assignBeneficiaryRelation', 'Api\BeneficiaryInfoController@assignBeneficiaryRelation');
         Route::post('beneficiary_infos/unAssignBeneficiaryRelation', 'Api\BeneficiaryInfoController@unAssignBeneficiaryRelation');

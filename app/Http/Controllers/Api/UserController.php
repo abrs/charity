@@ -10,6 +10,7 @@ use App\Helpers\{Tenant, Message};
 use App\Rules\ValidModel;
 use App\User;
 use App\Models\Role;
+use App\Models\Type;
 
 class UserController extends Controller
 {
@@ -174,6 +175,35 @@ class UserController extends Controller
             ]);
                 
             return Message::response(true,'assigned successfully');
+        });
+    }
+
+    #assign user a type
+    public function assignType(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+
+            'type_id' => ['required', new ValidModel('App\Models\Type')],
+            'user_id' => ['required', new ValidModel('App\User')],
+        ]);
+
+        if ($validator->fails()) {
+            return Message::response(false,'Invalid Input' ,$validator->errors());
+        }
+
+        return Tenant::wrapTenant(function() use ($request) {
+
+            $type = Type::find($request->type_id);
+            $user = User::find($request->user_id);
+            
+            if(! $user->types->contains($type)) {
+
+                $user->types()->save($type, [            
+                    'created_by' => auth()->user()->user_name,                    
+                ]);
+            }
+
+            return Message::response(true, 'assigned', $type);
         });
     }
     
