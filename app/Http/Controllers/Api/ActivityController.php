@@ -140,7 +140,7 @@ class ActivityController extends Controller
             'description'=>['nullable'],
             'is_enabled' => 'nullable|boolean',
             #workflow_steps
-            'order_num' => ['required'],
+            'order_num' => ['required', 'unique:activity_workflow_steps'],
             'finishing_percentage' => ['required'],
             'required' => ['required'],
         ]);
@@ -151,27 +151,30 @@ class ActivityController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $step = Step::firstOrcreate(
-                ['name' => $request->name],
+            return \DB::transaction(function () use ($request){
 
-                [
-                    #if is_enabled is null then it's false
+                $step = Step::firstOrcreate(
+                    ['name' => $request->name],
+    
+                    [
+                        #if is_enabled is null then it's false
+                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                        'description' => $request->has('description') ? $request->description : Null,
+                        'created_by' => auth()->user()->user_name,
+                    ]
+                );
+    
+                $activity = Activity::find($request->activity_id);
+                $activity->steps()->save($step, [
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'description' => $request->has('description') ? $request->description : Null,
                     'created_by' => auth()->user()->user_name,
-                ]
-            );
-
-            $activity = Activity::find($request->activity_id);
-            $activity->steps()->save($step, [
-                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                'created_by' => auth()->user()->user_name,
-                'order_num' => $request->order_num,            
-                'finishing_percentage' => $request->finishing_percentage,            
-                'required' => $request->required,            
-            ]);
-
-            return Message::response(true, 'assigned', $activity->load('steps'));
+                    'order_num' => $request->order_num,            
+                    'finishing_percentage' => $request->finishing_percentage,            
+                    'required' => $request->required,            
+                ]);
+    
+                return Message::response(true, 'assigned', $activity->load('steps'));
+            });
         });
     }
 }
