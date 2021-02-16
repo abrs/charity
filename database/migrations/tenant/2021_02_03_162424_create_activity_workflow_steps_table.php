@@ -22,7 +22,7 @@ class CreateActivityWorkflowStepsTable extends Migration
             
             $table->unsignedBigInteger('activity_id')->nullable();
             $table->unsignedBigInteger('step_id')->nullable();
-            $table->unsignedInteger('order_num')->unique();
+            $table->unsignedInteger('order_num');
             $table->string('finishing_percentage')->nullable();
             $table->boolean('required')->default(true);
             $table->timestamps();

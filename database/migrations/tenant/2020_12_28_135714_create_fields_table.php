@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStepsTable extends Migration
+class CreateFieldsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,13 @@ class CreateStepsTable extends Migration
      */
     public function up()
     {
-        Schema::create('steps', function (Blueprint $table) {
+        Schema::create('fields', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name')->unique();
-            $table->text('description')->nullable();
-            $table->boolean('optional')->default(0);
+            $table->strin('name_in_db');
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
-            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -33,6 +31,6 @@ class CreateStepsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('steps');
+        Schema::dropIfExists('fields');
     }
 }

@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 use Stancl\Tenancy\Events\TenancyBootstrapped;
+use Illuminate\Database\Eloquent\Relations\Relation;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,6 +15,9 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
+
+   
+
     public function register()
     {
         Passport::ignoreMigrations();
@@ -35,5 +40,12 @@ class AppServiceProvider extends ServiceProvider
         \Event::listen(TenancyBootstrapped::class, function (TenancyBootstrapped $event) {
             \Spatie\Permission\PermissionRegistrar::$cacheKey = 'spatie.permission.cache.tenant.' . $event->tenancy->tenant->id;
         });
+
+        Relation::morphMap([
+            'Form' => 'App\Models\Form',
+            'Field' => 'App\Models\Field',
+        ]);
     }
+  
 }
+
