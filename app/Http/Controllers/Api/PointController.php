@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
 use Illuminate\Http\Request;
 use App\Models\Point;
+use Exception;
 
 class PointController extends Controller
 {
@@ -21,7 +22,7 @@ class PointController extends Controller
             return Message::response(
                 true,
                 'done',
-                Point::with('locations')->paginate(25)
+                Point::paginate(25)
             );
         });
     }
@@ -35,7 +36,8 @@ class PointController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:points'],
+            'name_en'=>['required', 'unique:points,name->en'],
+            'name_ar'=>['required', 'unique:points,name->ar'],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -49,12 +51,14 @@ class PointController extends Controller
         return Tenant::wrapTenant(function() use ($request){
 
             $point = Point::firstOrcreate(
-                ['name' => $request->name],
-
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'created_by' => auth()->user()->user_name,
+                    'name' => [
+                        'ar' => $request->name_ar,
+                        'en' => $request->name_en,
+                    ],
+                    'created_by' => auth()->user()->user_name,                     
                 ]
             );
 
@@ -70,9 +74,10 @@ class PointController extends Controller
      */
     public function show(Point $point)
     {
+        // return Point::where('created_by->ar', 'مجرب1')->get();
         return Tenant::wrapTenant(function() use ($point){
 
-            return Message::response('true', 'done', $point->load('locations'));
+            return Message::response('true', 'done', $point);
         });
     }
 
@@ -86,7 +91,8 @@ class PointController extends Controller
     public function update(Request $request, Point $point)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:points,name,' . $point->id],
+            'name_en'=>['required', 'unique:points,name->en,' . $point->id],
+            'name_ar'=>['required', 'unique:points,name->ar,' . $point->id],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -101,7 +107,10 @@ class PointController extends Controller
 
             $point->update(
                 [
-                    'name' => $request->name,
+                    'name' => [
+                        'en' => $request->name_en,
+                        'ar' => $request->name_ar,
+                    ],
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'created_by' => $request->created_by,

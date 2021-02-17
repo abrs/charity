@@ -5,11 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Translatable\HasTranslations;
 
 class Step extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasTranslations;
     
+    public $translatable  = [
+        'description',
+        'name'
+    ];
+
     /**
      * The attributes that are mass assignable.
      *

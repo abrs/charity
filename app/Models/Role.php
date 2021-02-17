@@ -37,6 +37,11 @@ class Role extends BaseRole
     {
         parent::boot();
 
+        static::created(function($model) {
+            $model->guard_name = "web";
+            $model->save();
+        });
+
         static::addGlobalScope('is_enabled', function (Builder $builder) {
             $builder->where('roles.is_enabled', 1);
         });

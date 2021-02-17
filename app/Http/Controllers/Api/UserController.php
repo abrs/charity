@@ -40,7 +40,11 @@ class UserController extends Controller
             'password' => 'required',
             'confirm_password' => 'required|same:password', 
 
-            'name' => 'required', 
+            'first_name_en'=>['required', 'unique:users,first_name->en'],
+            'first_name_ar'=>['required', 'unique:users,first_name->ar'],
+            'last_name_en'=>['required', 'unique:users,last_name->en'],
+            'last_name_ar'=>['required', 'unique:users,last_name->ar'],
+
             'user_name' => 'required|unique:users',
         ]);
 
@@ -57,7 +61,14 @@ class UserController extends Controller
                 ['user_name' => $request->user_name],
 
                 [
-                    'name' => $request->name,
+                    'first_name' => [
+                        'ar' => $request->first_name_ar,
+                        'en' => $request->first_name_en,
+                    ],
+                    'last_name' => [
+                        'ar' => $request->last_name_ar,
+                        'en' => $request->last_name_en,
+                    ],
                     'email' => $request->email,
                     'password' => $password,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
