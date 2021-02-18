@@ -15,7 +15,7 @@ class CreateTypesTable extends Migration
     {
         Schema::create('types', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->json('name');
+            $table->text('name');
             // $table->timestamp('deleted_at')->nullable();
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
