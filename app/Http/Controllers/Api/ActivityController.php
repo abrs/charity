@@ -39,7 +39,8 @@ class ActivityController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:activities'],
+            'name_en'=>['required', 'unique:activities,name->en'],
+            'name_ar'=>['required', 'unique:activities,name->ar'],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -50,11 +51,13 @@ class ActivityController extends Controller
         return Tenant::wrapTenant(function() use ($request){
 
             $activity = Activity::firstOrcreate(
-                ['name' => $request->name],
-
-                [
+                [                
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    'name' => [
+                        'ar' => $request->name_ar,
+                        'en' => $request->name_en,
+                    ],
                     'created_by' => auth()->user()->user_name,
                 ]
             );
@@ -87,7 +90,8 @@ class ActivityController extends Controller
     public function update(Request $request, Activity $activity)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:activities,name,' . $activity->id],
+            'name_en'=>['required', 'unique:activities,name->en,' . $activity->id],
+            'name_ar'=>['required', 'unique:activities,name->ar,' . $activity->id],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -99,7 +103,10 @@ class ActivityController extends Controller
 
             $activity->update(
                 [
-                    'name' => $request->name,
+                    'name' => [
+                        'en' => $request->name_en,
+                        'ar' => $request->name_ar,
+                    ],
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'created_by' => $request->created_by,
@@ -136,8 +143,10 @@ class ActivityController extends Controller
             #activity
             'activity_id'=> ['required', new ValidModel('App\Models\Activity')],
             #step
-            'name'=>['required'],
-            'description'=>['nullable'],
+            'name_en'=>['required', 'unique:steps,name->en'],
+            'name_ar'=>['required', 'unique:steps,name->ar'],
+            'description_en'=>['nullable'],
+            'description_ar'=>['nullable'],
             'is_enabled' => 'nullable|boolean',
             #workflow_steps
             'order_num' => ['required', 'unique:activity_workflow_steps'],
@@ -154,12 +163,18 @@ class ActivityController extends Controller
             return \DB::transaction(function () use ($request){
 
                 $step = Step::firstOrcreate(
-                    ['name' => $request->name],
+                    [                        
+                        'name' => [
+                            'ar' => $request->name_ar,
+                            'en' => $request->name_en,
+                        ],
     
-                    [
+                        'description' => [
+                            'ar' => $request->has('description_ar') ? $request->description_ar : Null,
+                            'en' => $request->has('description_en') ? $request->description_en : Null,
+                        ],
                         #if is_enabled is null then it's false
                         'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                        'description' => $request->has('description') ? $request->description : Null,
                         'created_by' => auth()->user()->user_name,
                     ]
                 );

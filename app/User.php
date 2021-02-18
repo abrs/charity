@@ -10,10 +10,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Passport\HasApiTokens;
+use Spatie\Translatable\HasTranslations;
 
 class User extends Authenticatable
 {
-    use Notifiable, HasRoles, HasApiTokens;
+    use Notifiable, HasRoles, HasApiTokens, HasTranslations;
+
+    public $translatable  = [
+        'first_name', 'last_name'
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +26,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'user_name', 'confirm_password',
+        'first_name', 'last_name', 'email', 'password', 'user_name', 'confirm_password',
         'deleted_at', 'is_enabled', 'created_by', 'modified_by',
     ];
 

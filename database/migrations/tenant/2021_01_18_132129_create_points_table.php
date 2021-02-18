@@ -15,10 +15,10 @@ class CreatePointsTable extends Migration
     {
         Schema::create('points', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name')->unique();
+            $table->json('name');
             $table->boolean('is_enabled')->default(true);
-            $table->string('created_by')->nullable();
-            $table->string('modified_by')->nullable();
+            $table->text('created_by')->nullable();
+            $table->text('modified_by')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

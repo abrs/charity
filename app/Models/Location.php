@@ -5,10 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class Location extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasTranslations;
+
+    public $translatable  = [
+        'name'
+    ];
     
     protected $fillable = [
         'point_id', 

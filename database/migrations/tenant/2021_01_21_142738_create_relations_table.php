@@ -16,8 +16,8 @@ class CreateRelationsTable extends Migration
         Schema::create('relations', function (Blueprint $table) {
             $table->bigIncrements('id');
 
-            $table->string('name')->unique();
-            $table->text('description')->nullable();
+            $table->json('name');
+            $table->json('description')->nullable();
             $table->string('code')->unique();
             // $table->unsignedBigInteger('s_beneficiary_id')->nullable();
 
