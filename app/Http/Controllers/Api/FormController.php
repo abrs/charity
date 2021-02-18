@@ -68,7 +68,10 @@ class FormController extends Controller
     public function show(Form $form)
     {
 
-        $form = Form::with('field.property')->where('id',$form->id)->first();
+        $form = Form::with(array('field'=>function($q){
+            $q->distinct('field_id')
+              ->with('property');
+            }))->where('id',$form->id)->first();
         foreach($form->field as $field){
 
             foreach($field->property as $property){
@@ -337,14 +340,14 @@ class FormController extends Controller
                 // $update = StepApproval::updatePrevStepStatus($request->owner_id,$activity->id,$step->id);
                 
             }else{
-                $resubmitctivityWorkflowStepId = ActivityWorkflowSteps::where([
+                $resubmitActivityWorkflowStepId = ActivityWorkflowSteps::where([
                                                                     'activity_id' => $activity->id,
                                                                     'step_id' => $steps->where('name','إعادة ارسال الاستمارة')->first()->id
                                                                 ])->first()->id;
                 
                 $newStepApproval = StepApproval::firstOrCreate([
                     'owner_id' => $request->owner_id,
-                    'activity_workflow_steps_id' => $resubmitctivityWorkflowStepId,
+                    'activity_workflow_steps_id' => $resubmitActivityWorkflowStepId,
                     'status_id' => $approvedStatusId,
                     'is_enabled' => 1
                 ],['user_id' => $request->user()->id]
@@ -378,6 +381,9 @@ class FormController extends Controller
         $roles = User::find($userId)->roles;
         $activity = Activity::where('name','add_new_beneficiary')->first();
         $step = Step::where('name','موافقة الخادم')->first();
+        $waitingStatusId = Status::where('name','waiting')->first()->id;
+        $approvedStatusId = Status::where('name','approved')->first()->id;
+        $cancelledStatusId = Status::where('name','cancelled')->first()->id;
         //$custodianRoleId = Role::where('name','custodian')->first()->id;
 
         //Check if previous step was done
@@ -397,7 +403,6 @@ class FormController extends Controller
                                             ])->get();
 
         $count = $prevStepApproval->count();
-
         if($count == 0)
         {
            return Message::response(false ,'عليك القيام بالخطوة السابقة أولاً:  ' . $prevStep->name);
@@ -408,7 +413,6 @@ class FormController extends Controller
             if($role->name == 'custodian'){
                 $custodianRole = true;
             }
-
             if($role->name == 'manager'){
                 $managerRole = true;
             }
@@ -419,16 +423,136 @@ class FormController extends Controller
         }
         if($custodianRole == true){
             $reSubmit = false;
+            $thisActivityWorkflowStepId = ActivityWorkflowSteps::where([
+                                                                        'activity_id' => $activity->id,
+                                                                        'step_id' => Step::where('name','موافقة الخادم')->first()->id
+                                                                    ])->first()->id;
 
-            $prevStepApproval = StepApproval::where([
+
+            $thisStepApproval = StepApproval::where([
                                                     'owner_id' => $request->owner_id,
-                                                    'activity_workflow_steps_id' => $prevActivityWorkflowStepId,
+                                                    'activity_workflow_steps_id' => $thisActivityWorkflowStepId,
                                                 ])->get();
+                                                 
+            $count = $thisStepApproval->count();
+           if($count == 0)
+           {
+               if($request->resubmit == 1)
+               {
+                $activityWorkflowStepId = ActivityWorkflowSteps::where([
+                                                                        'activity_id' => $activity->id,
+                                                                        'step_id' => Step::where('name','موافقة الخادم')->first()->id
+                                                                    ])->first()->id;
 
+
+                $newStepApproval = StepApproval::firstOrCreate([
+                            'owner_id' => $request->owner_id,
+                            'activity_workflow_steps_id' => $activityWorkflowStepId,
+                            'status_id' => $waitingStatusId,
+                            'is_enabled' => 1
+                            ],['user_id' => $request->user()->id]
+                        );
+
+                $activityWorkflowStepId = ActivityWorkflowSteps::where([
+                                                                        'activity_id' => $activity->id,
+                                                                        'step_id' => Step::where('name','طلب تعديل الاستمارة')->first()->id
+                                                                    ])->first()->id;
+
+                $newStepApproval = StepApproval::updateOrCreate([
+                                                                'owner_id' => $request->owner_id,
+                                                                'activity_workflow_steps_id' => $activityWorkflowStepId,
+                                                                'status_id' => $approvedStatusId,
+                                                                'is_enabled' => 1
+                                                                ],['user_id' => $request->user()->id,
+                                                                   'note' => $request->note,
+                                                                ]
+                                                            );
+                                                            
+               }else if($request->approved == 1)
+               {
+                $activityWorkflowStepId = ActivityWorkflowSteps::where([
+                                                                        'activity_id' => $activity->id,
+                                                                        'step_id' => Step::where('name','موافقة الخادم')->first()->id
+                                                                    ])->first()->id;
+
+
+                $newStepApproval = StepApproval::firstOrCreate([
+                                                                'owner_id' => $request->owner_id,
+                                                                'activity_workflow_steps_id' => $activityWorkflowStepId,
+                                                                'status_id' => $approvedStatusId,
+                                                                'is_enabled' => 1
+                                                                ],['user_id' => $request->user()->id]
+                                                            );
+               }
+
+           }else if($thisStepApproval[$count-1]->status_id == $waitingStatusId){
+            if($request->resubmit == 1)
+            {
+             $activityWorkflowStepId = ActivityWorkflowSteps::where([
+                                                                     'activity_id' => $activity->id,
+                                                                     'step_id' => Step::where('name','طلب تعديل الاستمارة')->first()->id
+                                                                 ])->first()->id;
+
+                                                                
+             $newStepApproval = StepApproval::updateOrCreate([
+                                                             'owner_id' => $request->owner_id,
+                                                             'activity_workflow_steps_id' => $activityWorkflowStepId,
+                                                             'status_id' => $approvedStatusId,
+                                                             'is_enabled' => 1,
+                                                             
+                                                             ],['user_id' => $request->user()->id,
+                                                                'note' => $request->note
+                                                             ]
+                                                         );
+                                                         
+            }else if($request->approved == 1)
+            {
+             $activityWorkflowStepId = ActivityWorkflowSteps::where([
+                                                                     'activity_id' => $activity->id,
+                                                                     'step_id' => Step::where('name','موافقة الخادم')->first()->id
+                                                                 ])->first()->id;
+
+
+             $newStepApproval = StepApproval::updateOrCreate([
+                                                             'owner_id' => $request->owner_id,
+                                                             'activity_workflow_steps_id' => $activityWorkflowStepId,
+                                                             'is_enabled' => 1
+                                                             ],['user_id' => $request->user()->id,
+                                                                'status_id' => $approvedStatusId
+                                                             ]
+                                                         );
+            }
+
+           }else{
+            return Message::response(false ,'لا يمكنك إعادة قبول أو رفض هذه الاستمارة');
+           }
+        }else if($managerRole == true)
+        {
+            $activityWorkflowStepId = ActivityWorkflowSteps::where([
+                                                                    'activity_id' => $activity->id,
+                                                                    'step_id' => Step::where('name','موافقة المدير')->first()->id
+                                                                ])->first()->id;
+
+            if($request->approved == 1){
+                $newStepApproval = StepApproval::firstOrCreate([
+                                                                'owner_id' => $request->owner_id,
+                                                                'activity_workflow_steps_id' => $activityWorkflowStepId,
+                                                                'status_id' => $approvedStatusId,
+                                                                'is_enabled' => 1
+                                                                ],['user_id' => $request->user()->id]
+                                                            );
+            }else if($request->approved == 0){
+                $newStepApproval = StepApproval::firstOrCreate([
+                                                                'owner_id' => $request->owner_id,
+                                                                'activity_workflow_steps_id' => $activityWorkflowStepId,
+                                                                'status_id' => $cancelledStatusId,
+                                                                'is_enabled' => 1
+                                                                ],['user_id' => $request->user()->id]
+                                                            );
+            }
+     
         }
-
         
-
-        return Message::response(true, 'updated', Form::findOrFail($form->id));
+        return Message::response(true, 'Done');
     }
 }
