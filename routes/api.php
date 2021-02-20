@@ -1,6 +1,6 @@
 <?php
 
-use App\Message;
+use App\helpers\Message;
 use Illuminate\Http\Request;
 
 /*
@@ -21,14 +21,14 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 #----------------- -------- -----------------------------
 
 // Form controller
-Route::group(['prefix' => 'forms'], function () {
+// Route::group(['prefix' => 'forms'], function () {
     
-    Route::get('/', 'FormController@index');
-    Route::post('/', 'FormController@store');
-    Route::get('/{form}', 'FormController@show');
-    Route::post('/{form}', 'FormController@update');
-    Route::delete('/{form}', 'FormController@destroy');
-});
+//     Route::get('/', 'FormController@index');
+//     Route::post('/', 'FormController@store');
+//     Route::get('/{form}', 'FormController@show');
+//     Route::post('/{form}', 'FormController@update');
+//     Route::delete('/{form}', 'FormController@destroy');
+// });
 
 #----------------- -------- -----------------------------
 // Field controller

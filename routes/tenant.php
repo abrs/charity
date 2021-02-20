@@ -67,7 +67,6 @@ Route::group([
         //beneficiary infos controller routes
         #create new beneficiary
         Route::post('beneficiary_infos/createNewBeneficiaryDetails', 'Api\BeneficiaryInfoController@createNewBeneficiaryDetails');
-            
         Route::post('beneficiary_infos/assignBeneficiaryRelation', 'Api\BeneficiaryInfoController@assignBeneficiaryRelation');
         Route::post('beneficiary_infos/unAssignBeneficiaryRelation', 'Api\BeneficiaryInfoController@unAssignBeneficiaryRelation');
         Route::apiResource('beneficiary_infos', 'Api\BeneficiaryInfoController')->except('update');
@@ -111,8 +110,23 @@ Route::group([
         //statuses routes
         Route::apiResource('statuses', 'Api\StatusController')->except('update');
         Route::post('statuses/{status}', 'Api\StatusController@update');
+
+        //Form
+        Route::group(['prefix' => 'forms'], function () {
+            
+            Route::get('/', 'Api\FormController@index');
+            Route::post('/', 'Api\FormController@store');
+            Route::post('/submit','Api\FormController@submitForm');
+            Route::get('/{form}', 'Api\FormController@show');
+            Route::post('/{form}', 'Api\FormController@update');
+            Route::delete('/{form}', 'Api\FormController@destroy');
+        });
+        Route::get('/beneficiary_forms', 'Api\FormController@showWaitingBeneficiaryForm');
+        Route::post('/beneficiary_decision', 'Api\FormController@beneficiaryDecision');
+
     });
 
+    
 
     Route::any('{route}', function ($route) {
         return Message::response(false, "Cannot find the route [{$route}]!!");
