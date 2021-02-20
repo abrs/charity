@@ -5,10 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Translatable\HasTranslations;
 
 class Relation extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasTranslations;
+
+    public $translatable  = [
+        'description',
+        'name',
+    ];
 
     protected $fillable = [
         'name',

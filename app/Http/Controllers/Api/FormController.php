@@ -68,7 +68,10 @@ class FormController extends Controller
     public function show(Form $form)
     {
 
-        $form = Form::with('field.property')->where('id',$form->id)->first();
+        $form = Form::with(array('field'=>function($q){
+            $q->distinct('field_id')
+              ->with('property');
+            }))->where('id',$form->id)->first();
         foreach($form->field as $field){
 
             foreach($field->property as $property){

@@ -15,7 +15,7 @@ class CreateStepsTable extends Migration
     {
         Schema::create('steps', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name')->unique();
+            $table->text('name');
             $table->text('description')->nullable();
             $table->boolean('optional')->default(0);
             $table->boolean('is_enabled')->default(true);
