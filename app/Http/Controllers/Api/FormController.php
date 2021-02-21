@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Api;
 use App\helpers\Message;
 use App\Models\Input;
 use App\Models\Form;
+use App\Models\Field;
 use App\Models\FormFieldValue;
+use App\Models\Beneficiary_Info;
 use App\Models\ActivityWorkflowSteps;
 use App\Models\Step;
 use App\Models\Activity;
@@ -105,18 +107,18 @@ class FormController extends Controller
         $steps = Step::all();
         $beneficiaryFormArray = [];
         $form = Form::where('name','استمارة مستفيد')->first();
-        $statusId = Status::where('name','approved')->first()->id;
-        $activity = Activity::where('name','add_new_beneficiary')->first();
+        $statusId = Status::where('name->en','approved')->first()->id;
+        $activity = Activity::where('name->en','add_new_beneficiary')->first();
         
        
         $activityWorkflowStepId1 = ActivityWorkflowSteps::where([
                                                                 'activity_id' => $activity->id,
-                                                                'step_id' => $steps->where('name','تعبئة الاستمارة')->first()->id,
+                                                                'step_id' => Step::where('name->ar','تعبئة الاستمارة')->first()->id,
                                                             ])->first()->id;
 
         $activityWorkflowStepId2 = ActivityWorkflowSteps::where([
                                                                 'activity_id' => $activity->id,
-                                                                'step_id' => $steps->where('name','موافقة الخادم')->first()->id,
+                                                                'step_id' => Step::where('name->ar','موافقة الخادم')->first()->id,
                                                             ])->first()->id;
 
         $ownerIds = StepApproval::where([
@@ -163,6 +165,149 @@ class FormController extends Controller
         );
     }
 
+    public function showCustodianApprovedBeneficiaryForm()
+    {
+
+        $ownerIdsArr = [];
+        $steps = Step::all();
+        $beneficiaryFormArray = [];
+        $form = Form::where('name','استمارة مستفيد')->first();
+        $statusId = Status::where('name->en','approved')->first()->id;
+        $activity = Activity::where('name->en','add_new_beneficiary')->first();
+        
+       
+        $activityWorkflowStepId = ActivityWorkflowSteps::where([
+                                                                'activity_id' => $activity->id,
+                                                                'step_id' => Step::where('name->ar','موافقة الخادم')->first()->id,
+                                                            ])->first()->id;
+
+        $activityWorkflowStepId1 = ActivityWorkflowSteps::where([
+                                                                'activity_id' => $activity->id,
+                                                                'step_id' => Step::where('name->ar','موافقة المدير')->first()->id,
+                                                            ])->first()->id;
+
+        $ownerIds = StepApproval::where([
+                                            'activity_workflow_steps_id' => $activityWorkflowStepId,
+                                            'status_id' => $statusId
+                                        ])->pluck('owner_id')->toArray();
+                        
+        
+        for($i=0; $i<count($ownerIds);$i++)
+        {
+            $stepApproval = StepApproval::where([
+                                                'activity_workflow_steps_id' => $activityWorkflowStepId1,
+                                                'status_id' => $statusId,
+                                                'owner_id' => $ownerIds[$i]
+                                            ])->first();
+                                           
+            if($stepApproval == null){
+                $formFieldValue = Form::where('id',$form->id)->with(array('field.formFieldValue' => function($q)use($ownerIds,$i){
+                    $q->where('form_field_values.owner_id',$ownerIds[$i]);
+                }))->get();
+    
+                array_push($beneficiaryFormArray,$formFieldValue);
+            }
+            
+        }
+        
+        return Message::response(
+            true,
+            'done',
+            $beneficiaryFormArray
+        );
+    }
+
+    public function showAllBeneficiaryForm()
+    {
+
+        $ownerIdsArr = [];
+        $steps = Step::all();
+        $beneficiaryFormArray = [];
+        $form = Form::where('name','استمارة مستفيد')->first();
+        $statusId = Status::where('name->en','approved')->first()->id;
+        $activity = Activity::where('name->en','add_new_beneficiary')->first();
+        
+       
+        $activityWorkflowStepId = ActivityWorkflowSteps::where([
+                                                                'activity_id' => $activity->id,
+                                                                'step_id' => Step::where('name->ar','موافقة الخادم')->first()->id,
+                                                            ])->first()->id;
+
+        $activityWorkflowStepId1 = ActivityWorkflowSteps::where([
+                                                                'activity_id' => $activity->id,
+                                                                'step_id' => Step::where('name->ar','موافقة المدير')->first()->id,
+                                                            ])->first()->id;
+
+        $ownerIds = StepApproval::where([
+                                            'activity_workflow_steps_id' => $activityWorkflowStepId,
+                                            'status_id' => $statusId
+                                        ])->pluck('owner_id')->toArray();
+                        
+        
+        for($i=0; $i<count($ownerIds);$i++)
+        {
+            $stepApproval = StepApproval::where([
+                                                'activity_workflow_steps_id' => $activityWorkflowStepId1,
+                                                'status_id' => $statusId,
+                                                'owner_id' => $ownerIds[$i]
+                                            ])->first();
+                                           
+            if($stepApproval == null){
+                $formFieldValue = Form::where('id',$form->id)->with(array('field.formFieldValue' => function($q)use($ownerIds,$i){
+                    $q->where('form_field_values.owner_id',$ownerIds[$i]);
+                }))->get();
+    
+                array_push($beneficiaryFormArray,$formFieldValue);
+            }
+            
+        }
+        
+        return Message::response(
+            true,
+            'done',
+            $beneficiaryFormArray
+        );
+    }
+
+    public function showByUserId($ownerId)
+    {
+
+        $formArr = [];
+        $activitySteps = [];
+        $statusName = null;
+        $stepName = null;
+        $form = Form::where('name','استمارة مستفيد')->first();
+        $activity = Activity::with('steps')->where('name->en','add_new_beneficiary')->first();
+        foreach($activity->steps as $step){
+            array_push($activitySteps,$step->pivot->id);
+        }
+        
+       
+        $stepApproval = StepApproval::where([
+                                                'owner_id' => $ownerId,
+                                        ])->whereIn('activity_workflow_steps_id',$activitySteps)->get();
+                                           
+        $count = $stepApproval->count();
+        if($count > 0){
+            $stepApproval = $stepApproval[$count-1];   
+            $stepId =  ActivityWorkflowSteps::where('id',$stepApproval->activity_workflow_steps_id)->first()->step_id; 
+            $stepName = Step::where('id',$stepId)->first()->name;
+            $statusName = Status::where('id',$stepApproval->status_id)->first()->name;
+        }
+        
+        $formFieldValue = Form::where('id',$form->id)->with(array('field.formFieldValue' => function($q)use($ownerId){
+            $q->where('form_field_values.owner_id',$ownerId);
+        }))->get();
+         
+        array_push($formArr,$formFieldValue);
+        array_push($formArr,(['status'=>$stepName . ': ' . $statusName]));
+        
+        return Message::response(
+            true,
+            'done',
+            $formArr
+        );
+    }
     /**
      * Update the specified resource in storage.
      *
@@ -218,35 +363,38 @@ class FormController extends Controller
         try{
 
             $reSubmit = false;
-            $activity = Activity::where('name','add_new_beneficiary')->first();
+            $activity = Activity::where('name->en','add_new_beneficiary')->first();
             // $step = Step::where('name','تعبئة الاستمارة')->first();
             // $editStep = Step::where('name','طلب تعديل الاستمارة')->first();
             // $reSubmitStep = Step::where('name','إعادة ارسال الاستمارة')->first();
             $steps = Step::all();
-            $stepOrderNumber = $steps->where('name','تعبئة الاستمارة')->first()->activities->where('name','add_new_beneficiary')->first()->pivot->order_num;
-            $statusId = Status::where('name','waiting')->first()->id;
-            $approvedStatusId = Status::where('name','approved')->first()->id;
+            $stepOrderNumber = Step::with(array('activities'=> function($q)use($activity){
+                $q->where('activity_id',$activity->id);
+            }))->where('name->ar','تعبئة الاستمارة')->first()->activities[0]->pivot->order_num;
+            $statusId = Status::where('name->en','waiting')->first()->id;
+            $approvedStatusId = Status::where('name->en','approved')->first()->id;
 
             $activityWorkflowStepId1 = ActivityWorkflowSteps::where([
                                                                     'activity_id' => $activity->id,
-                                                                    'step_id' => $steps->where('name','تعبئة الاستمارة')->first()->id
+                                                                    'step_id' => Step::where('name->ar','تعبئة الاستمارة')->first()->id
                                                                 ])->first()->id;
 
             $activityWorkflowStepId2 = ActivityWorkflowSteps::where([
                                                                     'activity_id' => $activity->id,
-                                                                    'step_id' => $steps->where('name','موافقة الخادم')->first()->id
+                                                                    'step_id' => Step::where('name->ar','موافقة الخادم')->first()->id
                                                                 ])->first()->id;
 
             $activityWorkflowStepId3 = ActivityWorkflowSteps::where([
                                                                     'activity_id' => $activity->id,
-                                                                    'step_id' => $steps->where('name','طلب تعديل الاستمارة')->first()->id
+                                                                    'step_id' => Step::where('name->ar','طلب تعديل الاستمارة')->first()->id
                                                                 ])->first()->id;
+                                                                
             if($stepOrderNumber > 1){
                 $prevStep = Step::where('optional','!=',1)->whereHas('activities',function($q)use($stepOrderNumber){
-                    $q->where('activities.name','add_new_beneficiary')
+                    $q->where('activities.name->en','add_new_beneficiary')
                       ->where('order_num',$stepOrderNumber-1);
                 })->with(array('activities' => function($q){
-                    $q->where('name','add_new_beneficiary');
+                    $q->where('name->en','add_new_beneficiary');
                 }))->first();
 
 
@@ -342,7 +490,7 @@ class FormController extends Controller
             }else{
                 $resubmitActivityWorkflowStepId = ActivityWorkflowSteps::where([
                                                                     'activity_id' => $activity->id,
-                                                                    'step_id' => $steps->where('name','إعادة ارسال الاستمارة')->first()->id
+                                                                    'step_id' => $steps->where('name->ar','إعادة ارسال الاستمارة')->first()->id
                                                                 ])->first()->id;
                 
                 $newStepApproval = StepApproval::firstOrCreate([
@@ -379,11 +527,12 @@ class FormController extends Controller
         $roleIds = null;
         $userId = $request->user()->id;
         $roles = User::find($userId)->roles;
-        $activity = Activity::where('name','add_new_beneficiary')->first();
-        $step = Step::where('name','موافقة الخادم')->first();
-        $waitingStatusId = Status::where('name','waiting')->first()->id;
-        $approvedStatusId = Status::where('name','approved')->first()->id;
-        $cancelledStatusId = Status::where('name','cancelled')->first()->id;
+        $form = Form::where('name','استمارة مستفيد')->first();
+        $activity = Activity::where('name->en','add_new_beneficiary')->first();
+        $step = Step::where('name->ar','موافقة الخادم')->first();
+        $waitingStatusId = Status::where('name->en','waiting')->first()->id;
+        $approvedStatusId = Status::where('name->en','approved')->first()->id;
+        $cancelledStatusId = Status::where('name->en','cancelled')->first()->id;
         //$custodianRoleId = Role::where('name','custodian')->first()->id;
 
         //Check if previous step was done
@@ -419,16 +568,17 @@ class FormController extends Controller
         }
 
         if($custodianRole == false && $managerRole == false){
-            return Message::response(false, 'You do not have a permission', Form::findOrFail($form->id));
+            return Message::response(false, 'You do not have a permission');
         }
+        
         if($custodianRole == true){
             $reSubmit = false;
             $thisActivityWorkflowStepId = ActivityWorkflowSteps::where([
                                                                         'activity_id' => $activity->id,
-                                                                        'step_id' => Step::where('name','موافقة الخادم')->first()->id
+                                                                        'step_id' => Step::where('name->ar','موافقة الخادم')->first()->id
                                                                     ])->first()->id;
 
-
+                                                                    
             $thisStepApproval = StepApproval::where([
                                                     'owner_id' => $request->owner_id,
                                                     'activity_workflow_steps_id' => $thisActivityWorkflowStepId,
@@ -441,7 +591,7 @@ class FormController extends Controller
                {
                 $activityWorkflowStepId = ActivityWorkflowSteps::where([
                                                                         'activity_id' => $activity->id,
-                                                                        'step_id' => Step::where('name','موافقة الخادم')->first()->id
+                                                                        'step_id' => Step::where('name->ar','موافقة الخادم')->first()->id
                                                                     ])->first()->id;
 
 
@@ -455,7 +605,7 @@ class FormController extends Controller
 
                 $activityWorkflowStepId = ActivityWorkflowSteps::where([
                                                                         'activity_id' => $activity->id,
-                                                                        'step_id' => Step::where('name','طلب تعديل الاستمارة')->first()->id
+                                                                        'step_id' => Step::where('name->ar','طلب تعديل الاستمارة')->first()->id
                                                                     ])->first()->id;
 
                 $newStepApproval = StepApproval::updateOrCreate([
@@ -472,7 +622,7 @@ class FormController extends Controller
                {
                 $activityWorkflowStepId = ActivityWorkflowSteps::where([
                                                                         'activity_id' => $activity->id,
-                                                                        'step_id' => Step::where('name','موافقة الخادم')->first()->id
+                                                                        'step_id' => Step::where('name->ar','موافقة الخادم')->first()->id
                                                                     ])->first()->id;
 
 
@@ -490,7 +640,7 @@ class FormController extends Controller
             {
              $activityWorkflowStepId = ActivityWorkflowSteps::where([
                                                                      'activity_id' => $activity->id,
-                                                                     'step_id' => Step::where('name','طلب تعديل الاستمارة')->first()->id
+                                                                     'step_id' => Step::where('name->ar','طلب تعديل الاستمارة')->first()->id
                                                                  ])->first()->id;
 
                                                                 
@@ -509,7 +659,7 @@ class FormController extends Controller
             {
              $activityWorkflowStepId = ActivityWorkflowSteps::where([
                                                                      'activity_id' => $activity->id,
-                                                                     'step_id' => Step::where('name','موافقة الخادم')->first()->id
+                                                                     'step_id' => Step::where('name->ar','موافقة الخادم')->first()->id
                                                                  ])->first()->id;
 
 
@@ -530,7 +680,7 @@ class FormController extends Controller
         {
             $activityWorkflowStepId = ActivityWorkflowSteps::where([
                                                                     'activity_id' => $activity->id,
-                                                                    'step_id' => Step::where('name','موافقة المدير')->first()->id
+                                                                    'step_id' => Step::where('name->ar','موافقة المدير')->first()->id
                                                                 ])->first()->id;
 
             if($request->approved == 1){
@@ -550,6 +700,28 @@ class FormController extends Controller
                                                                 ],['user_id' => $request->user()->id]
                                                             );
             }
+
+            $beneficiaryArr = array();
+            $data = array();
+            $formFieldValues = FormFieldValue::where('form_id',$form->id)
+                                            ->where('owner_id',$request->owner_id)->get();
+                                            
+
+            foreach($formFieldValues as $formFieldValue){
+                $field = Field::where('id',$formFieldValue->field_id)->first();
+                $beneficiaryArr[$field->name_in_db] = $formFieldValue->value;
+            }
+            // foreach($beneficiaryArr as $beneficiary)
+            // {
+            //     $key = implode('',array_keys($beneficiary));
+            //     array_push($data,[$key => $beneficiary[$key]]);
+            //     // $data  = [
+            //     //     [$key => $beneficiary[$key]], 
+            //     // ];
+            //     //Beneficiary_Info::insert($data);
+            // }
+            Beneficiary_Info::insert($beneficiaryArr);
+            return $beneficiaryArr;
      
         }
         

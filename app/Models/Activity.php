@@ -50,7 +50,7 @@ class Activity extends Model
     public function steps()
     {
         return $this->belongsToMany(Step::class, 'activity_workflow_steps', 'activity_id', 'step_id')
-            ->withPivot('order_num', 'finishing_percentage', 'required', 'created_by')
+            ->withPivot('id','order_num', 'finishing_percentage', 'required', 'created_by')
             ->withTimestamps();
     }
 }

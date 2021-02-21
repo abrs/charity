@@ -121,9 +121,11 @@ Route::group([
             Route::post('/{form}', 'Api\FormController@update');
             Route::delete('/{form}', 'Api\FormController@destroy');
         });
+        Route::get('/beneficiary_forms', 'Api\FormController@showAllBeneficiaryForm');
+        Route::get('/beneficiary_forms/{id}', 'Api\FormController@showByUserId');
         Route::get('/beneficiary_forms', 'Api\FormController@showWaitingBeneficiaryForm');
+        Route::get('/approved_custodian_beneficiary_forms', 'Api\FormController@showCustodianApprovedBeneficiaryForm');
         Route::post('/beneficiary_decision', 'Api\FormController@beneficiaryDecision');
-
     });
 
     

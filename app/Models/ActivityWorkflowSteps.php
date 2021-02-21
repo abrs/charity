@@ -13,6 +13,7 @@ class ActivityWorkflowSteps extends Model
     protected $table = 'activity_workflow_steps';
 
     protected $fillable = [
+        'id',
         'activity_id',    
         'step_id',    
         'order_num',
