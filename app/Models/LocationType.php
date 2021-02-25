@@ -2,36 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-// use Spatie\Translatable\HasTranslations;
+use Spatie\Translatable\HasTranslations;
 
-class Point extends Model
+class LocationType extends Model
 {
     use SoftDeletes;//, HasTranslations;
+
+    protected $table = "location_types";
 
     // public $translatable  = [
     //     'name'
     // ];
-    
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'deleted_at', 
-        'is_enabled', 
-        'created_by', 
-        'modified_by', 
-        'name'
-    ];
 
-    /** Relations ----------- */
-    public function locations() {
-        return $this->hasMany(Location::class);
-    }
+    protected $fillable = [
+        'name',
+        'is_enabled', 
+        'deleted_at', 
+        'created_by',
+        'modified_by', 
+    ];
 
     /**
      * The "booting" method of the model.
@@ -43,7 +35,7 @@ class Point extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('points.is_enabled', 1);
+            $builder->where('location_types.is_enabled', 1);
         });
     }
 }

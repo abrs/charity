@@ -11,11 +11,11 @@ class Beneficiary_Info extends Model
     use SoftDeletes;
     
     protected $table = 'beneficiary_infos';
-    protected $with = ['location', 'relations'];
+    protected $with = ['locations', 'relations'];
 
     protected $fillable = [
         'type_infos_id', 
-        'location_id',
+        // 'location_id',
         'is_enabled', 
         'deleted_at', 
         'created_by',
@@ -26,15 +26,16 @@ class Beneficiary_Info extends Model
     public function type_info() {
         return $this->belongsTo(Type_Info::class, 'type_infos_id');
     }
-
-    public function location() {
-        return $this->belongsTo(Location::class);
+    public function locations() {
+        // return $this->belongsTo(Location::class);
+        return $this->belongsToMany(Location::class, 'beneficiary_location', 'beneficiary_id', 'location_id')
+            ->withPivot('beneficiary_id', 'location_id', 'location_type_id', 'is_enabled', 'created_by')
+            ->withTimestamps();
     }
 
     public function relations()
     {
         return $this->belongsToMany(Relation::class, 'beneficiary_relations', 'beneficiary_id', 'relation_id')
-            // ->as('relations')
             ->withPivot('s_beneficiary_id', 'is_enabled', 'created_by')
             ->withTimestamps();
     }

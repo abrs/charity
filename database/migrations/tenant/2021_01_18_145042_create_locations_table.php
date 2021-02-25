@@ -17,7 +17,7 @@ class CreateLocationsTable extends Migration
 
             $table->bigIncrements('id');
             $table->unsignedBigInteger('point_id')->nullable();
-            $table->text('name');
+            $table->string('name');
             // $table->timestamp('deleted_at')->nullable();
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();

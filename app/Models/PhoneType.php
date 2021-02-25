@@ -5,16 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
-// use Spatie\Translatable\HasTranslations;
 
-class Point extends Model
+class PhoneType extends Model
 {
     use SoftDeletes;//, HasTranslations;
 
-    // public $translatable  = [
-    //     'name'
-    // ];
-    
     /**
      * The attributes that are mass assignable.
      *
@@ -28,11 +23,6 @@ class Point extends Model
         'name'
     ];
 
-    /** Relations ----------- */
-    public function locations() {
-        return $this->hasMany(Location::class);
-    }
-
     /**
      * The "booting" method of the model.
      *
@@ -43,7 +33,7 @@ class Point extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('points.is_enabled', 1);
+            $builder->where('phone_types.is_enabled', 1);
         });
     }
 }

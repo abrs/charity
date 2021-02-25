@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Helpers\{Tenant, Message};
+use App\Models\PhoneType;
 use Illuminate\Http\Request;
-use App\Models\Location;
-use App\Rules\ValidModel;
+use App\Helpers\{Tenant, Message};
+use App\Http\Controllers\Controller;
 
-class LocationController extends Controller
+class PhoneTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,7 +21,7 @@ class LocationController extends Controller
             return Message::response(
                 true,
                 'done',
-                Location::paginate(25)
+                PhoneType::paginate(25)
             );
         });
     }
@@ -36,49 +35,48 @@ class LocationController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'point_id'=>['required', new ValidModel('App\Models\Point')],
-
-            'name'=>['required', 'unique:location_types,name'],
-            // 'name_ar'=>['required', 'unique:location_types,name->ar'],
-
+            'name'=>['required', 'unique:phone_types,name'],
             'is_enabled' => 'nullable|boolean',
+            // 'name_ar'=>['required', 'unique:points,name->ar'],
+            // 'deleted_at' => 'nullable|date',
+            // 'created_by' => 'nullable|alpha_num',
+            // 'modified_by' => 'nullable|alpha_num',
         ]);
 
         if($validator->fails()){
-
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $location = Location::firstOrCreate(
+            $phoneType = PhoneType::firstOrcreate(
                 [
-                    'point_id' => $request->point_id,
+                    #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => $request->name,
                     // 'name' => [
                     //     'ar' => $request->name_ar,
                     //     'en' => $request->name_en,
                     // ],
-                    'created_by' => auth()->user()->user_name,
+                    'name' => $request->name,
+                    'created_by' => auth()->user()->user_name,                     
                 ]
             );
 
-           return Message::response(true, 'created', $location);
+            return Message::response(true, 'created', $phoneType);          
         });
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Location  $location
+     * @param  \App\Models\PhoneType  $phoneType
      * @return \Illuminate\Http\Response
      */
-    public function show(Location $location)
+    public function show(PhoneType $phoneType)
     {
-        return Tenant::wrapTenant(function() use ($location){
+        return Tenant::wrapTenant(function() use ($phoneType){
 
-            return Message::response('true', 'done', $location->load('point', 'beneficiaries'));
+            return Message::response('true', 'done', $phoneType);
         });
     }
 
@@ -86,56 +84,55 @@ class LocationController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Location  $location
+     * @param  \App\Models\PhoneType  $phoneType
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Location $location)
+    public function update(Request $request, PhoneType $phoneType)
     {
         $validator = \Validator::make($request->all(), [
-            'point_id'=>['required', new ValidModel('App\Models\Point')],
-
-            'name'=>['required', 'unique:location_types,name,' . $location->id],
-            // 'name_ar'=>['required', 'unique:location_types,name->ar,' . $location->id],
-
+            'name'=>['required', 'unique:phone_types,name,' . $phoneType->id],
+            // 'name_ar'=>['required', 'unique:points,name->ar,' . $point->id],
+            // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
+            // 'created_by' => 'nullable|alpha_num',
+            // 'modified_by' => 'required|alpha_num',
         ]);
 
         if($validator->fails()){
-
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
+        
+        return Tenant::wrapTenant(function() use ($phoneType, $request){
 
-        return Tenant::wrapTenant(function() use ($request, $location){
-
-            $location->update(
-
+            $phoneType->update(
                 [
                     // 'name' => [
                     //     'en' => $request->name_en,
                     //     'ar' => $request->name_ar,
                     // ],
                     'name' => $request->name,
-                    'point_id' => $request->point_id,
+                    #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    // 'created_by' => $request->created_by,
                     'modified_by' => auth()->user()->user_name,
                 ]
             );
 
-           return Message::response(true, 'updated', Location::findOrFail($location->id));
+            return Message::response(true, 'updated', phoneType::findOrFail($phoneType->id));
         });
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Location  $location
+     * @param  \App\Models\PhoneType  $phoneType
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Location $location)
+    public function destroy(PhoneType $phoneType)
     {
-        return Tenant::wrapTenant(function() use ($location){
+        return Tenant::wrapTenant(function() use ($phoneType){
 
-            $location->delete();
+            $phoneType->delete();
             return Message::response(true, 'deleted');
         });
     }

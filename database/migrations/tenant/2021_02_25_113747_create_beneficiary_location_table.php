@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBeneficiaryInfosTable extends Migration
+class CreateBeneficiaryLocationTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,22 @@ class CreateBeneficiaryInfosTable extends Migration
      */
     public function up()
     {
-        Schema::create('beneficiary_infos', function (Blueprint $table) {
+        Schema::create('beneficiary_location', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('type_infos_id')->nullable();
-            // $table->unsignedBigInteger('location_id')->nullable();
-            // $table->timestamp('deleted_at')->nullable();
+            $table->unsignedBigInteger('location_type_id');
+            $table->unsignedBigInteger('beneficiary_id');
+            $table->unsignedBigInteger('location_id');
+
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
             $table->softDeletes();
+
             $table->timestamps();
 
-            $table->foreign('type_infos_id')->references('id')->on('type_infos')->onDelete('cascade');
+            $table->unique(["location_type_id", "beneficiary_id", "location_id"], 'unique_lbl');
+            $table->foreign('location_type_id')->references('id')->on('location_types')->onDelete('cascade');
+            $table->foreign('beneficiary_id')->references('id')->on('beneficiary_infos')->onDelete('cascade');
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
     }
@@ -36,6 +40,6 @@ class CreateBeneficiaryInfosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('beneficiary_infos');
+        Schema::dropIfExists('beneficiary_location');
     }
 }

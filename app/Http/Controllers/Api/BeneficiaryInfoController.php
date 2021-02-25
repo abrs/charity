@@ -49,7 +49,7 @@ class BeneficiaryInfoController extends Controller
     {
         $validator = \Validator::make($request->all(), [
             'type_infos_id'=>['required', 'unique:beneficiary_infos,type_infos_id', new ValidModel('App\Models\Type_Info')],
-            'location_id'=>['required', new ValidModel('App\Models\Location')],
+            // 'location_id'=>['required', new ValidModel('App\Models\Location')],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -67,7 +67,7 @@ class BeneficiaryInfoController extends Controller
 
                 [
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'location_id' => $request->location_id,
+                    // 'location_id' => $request->location_id,
                     'created_by' => auth()->user()->user_name,
                 ]
             );
@@ -101,7 +101,7 @@ class BeneficiaryInfoController extends Controller
     {
         $validator = \Validator::make($request->all(), [
             'type_infos_id'=>['required', new ValidModel('App\Models\Type_Info'), 'unique:beneficiary_infos,type_infos_id,' . $beneficiary_info->id],
-            'location_id'=>['required', new ValidModel('App\Models\Location')],
+            // 'location_id'=>['required', new ValidModel('App\Models\Location')],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -117,7 +117,7 @@ class BeneficiaryInfoController extends Controller
 
                 [
                     'type_infos_id' => $request->type_infos_id,
-                    'location_id' => $request->location_id,
+                    // 'location_id' => $request->location_id,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,
                 ]
@@ -161,7 +161,7 @@ class BeneficiaryInfoController extends Controller
             'owner_id' => ['required', 'numeric', new ValidModel('App\User')],
 
             #create beneficiary
-            'location_id'=>['required', new ValidModel('App\Models\Location')],
+            // 'location_id'=>['required', new ValidModel('App\Models\Location')],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -189,7 +189,7 @@ class BeneficiaryInfoController extends Controller
 
                     ['type_infos_id' => $typeInfo->id],
                     [
-                        'location_id' => $request->location_id,
+                        // 'location_id' => $request->location_id,
                         'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                         'created_by' => auth()->user()->user_name,
                     ]
@@ -200,6 +200,103 @@ class BeneficiaryInfoController extends Controller
             });
         });
     }
+
+    /**
+     * assign beneficiary a phone
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Helpers\Message
+     */
+    public function assignBeneficiaryPhone(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+            'is_enabled'        => ['nullable', 'boolean'],
+
+            'user_id'    => ['required', new ValidModel('App\Models\Beneficiary_Info')],
+            'phone_type_id'  => ['required', new ValidModel('App\Models\PhoneType')],
+            'number'       => ['required', 'unique:phones,number'],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+                    
+            \DB::table('phones')->insert(
+                [
+                    'user_id' => $request->user_id,
+                    'phone_type_id' => $request->phone_type_id,
+                    'number' => $request->number,
+                
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    'created_by' => auth()->user()->user_name,
+
+                    'created_at' => date("Y-m-d H:i:s", strtotime(now())),
+                ]
+            );
+
+            $phone = \DB::table('phones')->where('number', $request->number)->first();
+            
+            return Message::response(true, 'attached successfully', $phone);
+        });
+    }
+
+    /**
+     * assign beneficiary a location
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Helpers\Message
+     */
+    public function assignBeneficiaryLocation(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+            'is_enabled'        => ['nullable', 'boolean'],
+
+            'beneficiary_id'    => ['required', new ValidModel('App\Models\Beneficiary_Info')],
+            'location_type_id'  => ['required', new ValidModel('App\Models\LocationType')],
+            'location_id'       => ['required', new ValidModel('App\Models\Location')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+
+            $beneficiaryLocation = \DB::table('beneficiary_location')
+                ->where('beneficiary_id', $request->beneficiary_id)
+                ->where('location_type_id', $request->location_type_id)
+                ->where('location_id', $request->location_id)
+                ->first();
+
+            if(!$beneficiaryLocation) {
+
+                \DB::table('beneficiary_location')->insert(
+                    [
+                        'beneficiary_id' => $request->beneficiary_id,
+                        'location_type_id' => $request->location_type_id,
+                        'location_id' => $request->location_id,
+                    
+                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                        'created_by' => auth()->user()->user_name,
+
+                        'created_at' => date("Y-m-d H:i:s", strtotime(now())),
+                    ]
+                );
+                
+                $beneficiaryLocation = \DB::table('beneficiary_location')
+                ->where('beneficiary_id', $request->beneficiary_id)
+                ->where('location_type_id', $request->location_type_id)
+                ->where('location_id', $request->location_id)
+                ->first();
+            }
+
+
+           return Message::response(true, 'attached successfully', $beneficiaryLocation);
+        });
+    }
+
 
     /**
      * assign beneficiary a relation

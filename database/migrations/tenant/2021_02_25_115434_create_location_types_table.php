@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePointsTable extends Migration
+class CreateLocationTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,16 @@ class CreatePointsTable extends Migration
      */
     public function up()
     {
-        Schema::create('points', function (Blueprint $table) {
+        Schema::create('location_types', function (Blueprint $table) {
             $table->bigIncrements('id');
+            
             $table->string('name');
+            
             $table->boolean('is_enabled')->default(true);
-            $table->text('created_by')->nullable();
-            $table->text('modified_by')->nullable();
+            $table->string('created_by')->nullable();
+            $table->string('modified_by')->nullable();
             $table->softDeletes();
+
             $table->timestamps();
         });
     }
@@ -31,6 +34,6 @@ class CreatePointsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('points');
+        Schema::dropIfExists('location_types');
     }
 }

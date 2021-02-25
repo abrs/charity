@@ -36,10 +36,10 @@ class PointController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:points,name->en'],
-            'name_ar'=>['required', 'unique:points,name->ar'],
-            // 'deleted_at' => 'nullable|date',
+            'name'=>['required', 'unique:points,name'],
             'is_enabled' => 'nullable|boolean',
+            // 'name_ar'=>['required', 'unique:points,name->ar'],
+            // 'deleted_at' => 'nullable|date',
             // 'created_by' => 'nullable|alpha_num',
             // 'modified_by' => 'nullable|alpha_num',
         ]);
@@ -54,10 +54,11 @@ class PointController extends Controller
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    // 'name' => [
+                    //     'ar' => $request->name_ar,
+                    //     'en' => $request->name_en,
+                    // ],
+                    'name' => $request->name,
                     'created_by' => auth()->user()->user_name,                     
                 ]
             );
@@ -91,8 +92,8 @@ class PointController extends Controller
     public function update(Request $request, Point $point)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:points,name->en,' . $point->id],
-            'name_ar'=>['required', 'unique:points,name->ar,' . $point->id],
+            'name'=>['required', 'unique:points,name,' . $point->id],
+            // 'name_ar'=>['required', 'unique:points,name->ar,' . $point->id],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -107,10 +108,11 @@ class PointController extends Controller
 
             $point->update(
                 [
-                    'name' => [
-                        'en' => $request->name_en,
-                        'ar' => $request->name_ar,
-                    ],
+                    // 'name' => [
+                    //     'en' => $request->name_en,
+                    //     'ar' => $request->name_ar,
+                    // ],
+                    'name' => $request->name,
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'created_by' => $request->created_by,

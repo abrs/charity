@@ -67,6 +67,8 @@ Route::group([
         //beneficiary infos controller routes
         #create new beneficiary
         Route::post('beneficiary_infos/createNewBeneficiaryDetails', 'Api\BeneficiaryInfoController@createNewBeneficiaryDetails');
+        Route::post('beneficiary_infos/assignBeneficiaryLocation', 'Api\BeneficiaryInfoController@assignBeneficiaryLocation');
+        Route::post('beneficiary_infos/assignBeneficiaryPhone', 'Api\BeneficiaryInfoController@assignBeneficiaryPhone');
         Route::post('beneficiary_infos/assignBeneficiaryRelation', 'Api\BeneficiaryInfoController@assignBeneficiaryRelation');
         Route::post('beneficiary_infos/unAssignBeneficiaryRelation', 'Api\BeneficiaryInfoController@unAssignBeneficiaryRelation');
         Route::apiResource('beneficiary_infos', 'Api\BeneficiaryInfoController')->except('update');
@@ -75,6 +77,14 @@ Route::group([
         //points routes
         Route::apiResource('points', 'Api\PointController')->except('update');
         Route::post('points/{point}', 'Api\PointController@update');
+
+        //phone_types routes
+        Route::apiResource('phone_types', 'Api\PhoneTypeController')->except('update');
+        Route::post('phone_types/{phone_type}', 'Api\PhoneTypeController@update');
+
+        //location_types routes
+        Route::apiResource('location_types', 'Api\LocationTypeController')->except('update');
+        Route::post('location_types/{location_type}', 'Api\LocationTypeController@update');
         
         //activities routes
         Route::post('activities/assignStep', 'Api\ActivityController@assignStep');
