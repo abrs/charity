@@ -77,6 +77,10 @@ Route::group([
         //points routes
         Route::apiResource('points', 'Api\PointController')->except('update');
         Route::post('points/{point}', 'Api\PointController@update');
+        
+        //special needs types routes
+        Route::apiResource('special_need_types', 'Api\SpecialNeedTypeController')->except('update');
+        Route::post('special_need_types/{special_need_type}', 'Api\SpecialNeedTypeController@update');
 
         //phone_types routes
         Route::apiResource('phone_types', 'Api\PhoneTypeController')->except('update');

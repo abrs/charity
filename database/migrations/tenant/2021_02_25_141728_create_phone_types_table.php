@@ -15,10 +15,10 @@ class CreatePhoneTypesTable extends Migration
     {
         Schema::create('phone_types', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
+            $table->json('name');
             $table->boolean('is_enabled')->default(true);
-            $table->text('created_by')->nullable();
-            $table->text('modified_by')->nullable();
+            $table->string('created_by')->nullable();
+            $table->string('modified_by')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

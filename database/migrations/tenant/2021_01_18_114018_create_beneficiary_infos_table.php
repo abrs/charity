@@ -16,8 +16,6 @@ class CreateBeneficiaryInfosTable extends Migration
         Schema::create('beneficiary_infos', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('type_infos_id')->nullable();
-            // $table->unsignedBigInteger('location_id')->nullable();
-            // $table->timestamp('deleted_at')->nullable();
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();
@@ -25,7 +23,6 @@ class CreateBeneficiaryInfosTable extends Migration
             $table->timestamps();
 
             $table->foreign('type_infos_id')->references('id')->on('type_infos')->onDelete('cascade');
-            $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
     }
 

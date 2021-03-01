@@ -9,13 +9,13 @@ use Spatie\Translatable\HasTranslations;
 
 class LocationType extends Model
 {
-    use SoftDeletes;//, HasTranslations;
+    use SoftDeletes, HasTranslations;
 
     protected $table = "location_types";
 
-    // public $translatable  = [
-    //     'name'
-    // ];
+    public $translatable  = [
+        'name'
+    ];
 
     protected $fillable = [
         'name',

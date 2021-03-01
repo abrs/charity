@@ -9,11 +9,11 @@ use Spatie\Translatable\HasTranslations;
 
 class Location extends Model
 {
-    use SoftDeletes;//, HasTranslations;
+    use SoftDeletes, HasTranslations;
 
-    // public $translatable  = [
-    //     'name'
-    // ];
+    public $translatable  = [
+        'name'
+    ];
     
     protected $fillable = [
         'point_id', 

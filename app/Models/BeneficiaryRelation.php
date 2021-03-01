@@ -16,6 +16,7 @@ class BeneficiaryRelation extends Model
         'relation_id',    
         'beneficiary_id',    
         's_beneficiary_id',
+        'family_budget',
         'is_enabled', 
         'deleted_at', 
         'created_by',

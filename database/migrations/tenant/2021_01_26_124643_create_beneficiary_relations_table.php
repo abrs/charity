@@ -18,6 +18,7 @@ class CreateBeneficiaryRelationsTable extends Migration
             $table->unsignedBigInteger('relation_id')->nullable();
             $table->unsignedBigInteger('beneficiary_id')->nullable();
             $table->unsignedBigInteger('s_beneficiary_id')->nullable();
+            $table->unsignedBigInteger('family_budget')->nullable()->after('s_beneficiary_id');
 
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();

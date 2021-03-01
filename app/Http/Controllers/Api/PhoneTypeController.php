@@ -35,9 +35,9 @@ class PhoneTypeController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:phone_types,name'],
+            'name_en'=>['required', 'unique:phone_types,name->en'],
+            'name_ar'=>['required', 'unique:phone_types,name->ar'],
             'is_enabled' => 'nullable|boolean',
-            // 'name_ar'=>['required', 'unique:points,name->ar'],
             // 'deleted_at' => 'nullable|date',
             // 'created_by' => 'nullable|alpha_num',
             // 'modified_by' => 'nullable|alpha_num',
@@ -53,11 +53,11 @@ class PhoneTypeController extends Controller
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    // 'name' => [
-                    //     'ar' => $request->name_ar,
-                    //     'en' => $request->name_en,
-                    // ],
-                    'name' => $request->name,
+                    'name' => [
+                        'ar' => $request->name_ar,
+                        'en' => $request->name_en,
+                    ],
+                    // 'name' => $request->name,
                     'created_by' => auth()->user()->user_name,                     
                 ]
             );
@@ -90,8 +90,8 @@ class PhoneTypeController extends Controller
     public function update(Request $request, PhoneType $phoneType)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:phone_types,name,' . $phoneType->id],
-            // 'name_ar'=>['required', 'unique:points,name->ar,' . $point->id],
+            'name_en'=>['required', 'unique:phone_types,name->en,' . $phoneType->id],
+            'name_ar'=>['required', 'unique:phone_types,name->ar,' . $phoneType->id],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -106,11 +106,11 @@ class PhoneTypeController extends Controller
 
             $phoneType->update(
                 [
-                    // 'name' => [
-                    //     'en' => $request->name_en,
-                    //     'ar' => $request->name_ar,
-                    // ],
-                    'name' => $request->name,
+                    'name' => [
+                        'en' => $request->name_en,
+                        'ar' => $request->name_ar,
+                    ],
+                    // 'name' => $request->name,
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'created_by' => $request->created_by,

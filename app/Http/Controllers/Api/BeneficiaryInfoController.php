@@ -13,6 +13,7 @@ use App\Models\RequestType;
 use App\Models\StepApproval;
 use App\Models\Type;
 use App\Models\Type_Info;
+use App\Rules\BreadwinnerFamilyBudget;
 use App\Rules\ValidModel;
 use App\User;
 use Exception;
@@ -48,9 +49,48 @@ class BeneficiaryInfoController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'type_infos_id'=>['required', 'unique:beneficiary_infos,type_infos_id', new ValidModel('App\Models\Type_Info')],
-            // 'location_id'=>['required', new ValidModel('App\Models\Location')],
+            //no restrictions
+            'first_name_ar' => ['required'],
+            'first_name_en' => ['required'],
+            'second_name_ar' => ['required'],
+            'second_name_en' => ['required'],
+            'third_name_ar' => ['required'],
+            'third_name_en' => ['required'],
+            'fourth_name_ar' => ['required'],
+            'fourth_name_en' => ['required'],
+            'last_name_ar' => ['required'],
+            'last_name_en' => ['required'],
+            'known_as_ar' => ['required'],
+            'known_as_en' => ['required'],
+            'career_ar' => ['required'],
+            'career_en' => ['required'],
 
+            //age restriction
+            'polling_station_name_ar' => [Rule::requiredIf($request->age >= 18)],
+            'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
+            //death restriction
+            'standing_ar' => ['required_if:is_alive,0'],
+            'standing_en' => ['required_if:is_alive,0'],
+                //date restriction
+            'date_of_death' => ['date_format:YYYY-MM-DD', 'required_if:is_alive,0'],
+            //boolean restriction
+            'is_special_needs' => ['required', 'boolean'],
+            //date restriction
+            'birth' => ['date_format:YYYY-MM-DD'],
+            //boolean restriction
+            'gender' => ['required'],
+            //number restriction
+            'national_number' => ['required', 'numeric'],
+            //number unsigned max(3) min(1) restriction
+            'age' => ['required', 'numeric', 'min:1', 'max:200'],
+            //email restriction and unique
+            'email' => ['required', 'email'],
+            //boolean restriction
+            'is_alive' => ['required', 'boolean'],
+            //special needs restriction
+            'special_needs_type_id' => ['required_if:is_special_needs,1'],
+
+            'type_infos_id'=>['required', 'unique:beneficiary_infos,type_infos_id', new ValidModel('App\Models\Type_Info')],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -63,12 +103,61 @@ class BeneficiaryInfoController extends Controller
 
             $beneficiaryInfo = Beneficiary_Info::firstOrCreate(
 
-                ['type_infos_id' => $request->type_infos_id],
+                [
+                    'type_infos_id' => $request->type_infos_id,
+                ],
 
                 [
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    // 'location_id' => $request->location_id,
-                    'created_by' => auth()->user()->user_name,
+                    
+                    'first_name'  => [
+                        'ar' => $request->first_name_ar,
+                        'en' => $request->first_name_en,
+                    ],
+                    'second_name'  => [
+                        'ar' => $request->second_name_ar,
+                        'en' => $request->second_name_en,
+                    ],
+                    'third_name'  => [
+                        'ar' => $request->third_name_ar,
+                        'en' => $request->third_name_en,
+                    ],
+                    'fourth_name'  => [
+                        'ar' => $request->fourth_name_ar,
+                        'en' => $request->fourth_name_en,
+                    ],
+                    'last_name'  => [
+                        'ar' => $request->last_name_ar,
+                        'en' => $request->last_name_en,
+                    ],
+                    'known_as'  => [
+                        'ar' => $request->known_as_ar,
+                        'en' => $request->known_as_en,
+                    ],
+                    'career'  => [
+                        'ar' => $request->career_ar,
+                        'en' => $request->career_en,
+                    ],
+                    'polling_station_name'  => [
+                        'ar' => $request->polling_station_name_ar,
+                        'en' => $request->polling_station_name_en,
+                    ],
+                    'standing'  => [
+                        'ar' => $request->standing_ar,
+                        'en' => $request->standing_en,
+                    ],
+
+                    'date_of_death' => $request->date_of_death,
+                    'is_special_needs' => $request->is_special_needs,
+                    'birth' => $request->birth,
+                    'gender' => $request->gender,
+                    'national_number' => $request->national_number,
+                    'age' => $request->age,
+                    'email' => $request->email,
+                    'is_alive' => $request->is_alive,
+                    'special_needs_type_id' => $request->special_needs_type_id,
+
+                    "created_by" => auth()->user()->user_name,
+                    "is_enabled" => $request->has('is_enabled') ? $request->is_enabled : 1,
                 ]
             );
 
@@ -100,9 +189,47 @@ class BeneficiaryInfoController extends Controller
     public function update(Request $request, Beneficiary_Info $beneficiary_info)
     {
         $validator = \Validator::make($request->all(), [
-            'type_infos_id'=>['required', new ValidModel('App\Models\Type_Info'), 'unique:beneficiary_infos,type_infos_id,' . $beneficiary_info->id],
-            // 'location_id'=>['required', new ValidModel('App\Models\Location')],
+            'first_name_ar' => ['required'],
+            'first_name_en' => ['required'],
+            'second_name_ar' => ['required'],
+            'second_name_en' => ['required'],
+            'third_name_ar' => ['required'],
+            'third_name_en' => ['required'],
+            'fourth_name_ar' => ['required'],
+            'fourth_name_en' => ['required'],
+            'last_name_ar' => ['required'],
+            'last_name_en' => ['required'],
+            'known_as_ar' => ['required'],
+            'known_as_en' => ['required'],
+            'career_ar' => ['required'],
+            'career_en' => ['required'],
 
+            //age restriction
+            'polling_station_name_ar' => [Rule::requiredIf($request->age >= 18)],
+            'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
+            //death restriction
+            'standing_ar' => ['required_if:is_alive,0'],
+            'standing_en' => ['required_if:is_alive,0'],
+                //date restriction
+            'date_of_death' => ['date_format:YYYY-MM-DD', 'required_if:is_alive,0'],
+            //boolean restriction
+            'is_special_needs' => ['required', 'boolean'],
+            //date restriction
+            'birth' => ['date_format:YYYY-MM-DD'],
+            //boolean restriction
+            'gender' => ['required'],
+            //number restriction
+            'national_number' => ['required', 'numeric'],
+            //number unsigned max(3) min(1) restriction
+            'age' => ['required', 'numeric', 'min:1', 'max:200'],
+            //email restriction and unique
+            'email' => ['required', 'email'],
+            //boolean restriction
+            'is_alive' => ['required', 'boolean'],
+            //special needs restriction
+            'special_needs_type_id' => ['required_if:is_special_needs,1'],
+
+            'type_infos_id'=>['required', 'unique:beneficiary_infos,type_infos_id,' . $beneficiary_info->id, new ValidModel('App\Models\Type_Info')],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -118,8 +245,45 @@ class BeneficiaryInfoController extends Controller
                 [
                     'type_infos_id' => $request->type_infos_id,
                     // 'location_id' => $request->location_id,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'modified_by' => auth()->user()->user_name,
+                    'first_name'  => [
+                        'ar' => $request->first_name_ar,
+                        'en' => $request->first_name_en,
+                    ],
+                    'second_name'  => [
+                        'ar' => $request->second_name_ar,
+                        'en' => $request->second_name_en,
+                    ],
+                    'third_name'  => [
+                        'ar' => $request->third_name_ar,
+                        'en' => $request->third_name_en,
+                    ],
+                    'fourth_name'  => [
+                        'ar' => $request->fourth_name_ar,
+                        'en' => $request->fourth_name_en,
+                    ],
+                    'last_name'  => [
+                        'ar' => $request->last_name_ar,
+                        'en' => $request->last_name_en,
+                    ],
+                    'known_as'  => [
+                        'ar' => $request->known_as_ar,
+                        'en' => $request->known_as_en,
+                    ],
+                    'career'  => [
+                        'ar' => $request->career_ar,
+                        'en' => $request->career_en,
+                    ],
+                    'polling_station_name'  => [
+                        'ar' => $request->polling_station_name_ar,
+                        'en' => $request->polling_station_name_en,
+                    ],
+                    'standing'  => [
+                        'ar' => $request->standing_ar,
+                        'en' => $request->standing_en,
+                    ],
+
+                    "updated_by" => auth()->user()->user_name,
+                    "is_enabled" => $request->has('is_enabled') ? $request->is_enabled : 1,
                 ]
             );
 
@@ -311,6 +475,7 @@ class BeneficiaryInfoController extends Controller
             'beneficiary_id'    => ['required', new ValidModel('App\Models\Beneficiary_Info')],
             's_beneficiary_id'  => ['nullable', new ValidModel('App\Models\Beneficiary_Info'), Rule::notIn($request->beneficiary_id)],
             'relation_id'       => ['required', new ValidModel('App\Models\Relation')],
+            'family_budget'     => ['required_if:relation_id,' . Relation::where('name->en', "Breadwinner")->first()->id],
         ]);
 
         if($validator->fails()){
@@ -327,6 +492,7 @@ class BeneficiaryInfoController extends Controller
                     's_beneficiary_id' => $request->s_beneficiary_id,
                 ],
                 [
+                    'family_budget' => $request->has('family_budget') ? $request->family_budget : NULL,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'created_by' => auth()->user()->user_name,
                 ]

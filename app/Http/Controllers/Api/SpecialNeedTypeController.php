@@ -4,11 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
+use App\Models\SpecialNeedType;
 use Illuminate\Http\Request;
-use App\Models\Point;
-use Exception;
 
-class PointController extends Controller
+class SpecialNeedTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,7 +21,7 @@ class PointController extends Controller
             return Message::response(
                 true,
                 'done',
-                Point::paginate(25)
+                SpecialNeedType::paginate(25)
             );
         });
     }
@@ -36,12 +35,9 @@ class PointController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:points,name->en'],
-            'name_ar'=>['required', 'unique:points,name->ar'],
+            'name_en'=>['required', 'unique:special_need_types,name->en'],
+            'name_ar'=>['required', 'unique:special_need_types,name->ar'],            
             'is_enabled' => 'nullable|boolean',
-            // 'deleted_at' => 'nullable|date',
-            // 'created_by' => 'nullable|alpha_num',
-            // 'modified_by' => 'nullable|alpha_num',
         ]);
 
         if($validator->fails()){
@@ -50,7 +46,7 @@ class PointController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $point = Point::firstOrcreate(
+            $specialNeedType = SpecialNeedType::firstOrcreate(
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
@@ -63,22 +59,21 @@ class PointController extends Controller
                 ]
             );
 
-            return Message::response(true, 'created', $point);          
+            return Message::response(true, 'created', $specialNeedType);          
         });
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Point  $point
+     * @param  \App\Models\SpecialNeedType  $specialNeedType
      * @return \Illuminate\Http\Response
      */
-    public function show(Point $point)
+    public function show(SpecialNeedType $specialNeedType)
     {
-        // return Point::where('created_by->ar', 'مجرب1')->get();
-        return Tenant::wrapTenant(function() use ($point){
+        return Tenant::wrapTenant(function() use ($specialNeedType){
 
-            return Message::response('true', 'done', $point);
+            return Message::response('true', 'done', $specialNeedType);
         });
     }
 
@@ -86,14 +81,14 @@ class PointController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Point  $point
+     * @param  \App\Models\SpecialNeedType  $specialNeedType
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Point $point)
+    public function update(Request $request, SpecialNeedType $specialNeedType)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:points,name->en,' . $point->id],
-            'name_ar'=>['required', 'unique:points,name->ar,' . $point->id],
+            'name_ar'=>['required', 'unique:special_need_types,name->ar,' . $specialNeedType->id],
+            'name_en'=>['required', 'unique:special_need_types,name->en,' . $specialNeedType->id],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -104,9 +99,9 @@ class PointController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
         
-        return Tenant::wrapTenant(function() use ($point, $request){
+        return Tenant::wrapTenant(function() use ($specialNeedType, $request){
 
-            $point->update(
+            $specialNeedType->update(
                 [
                     'name' => [
                         'en' => $request->name_en,
@@ -120,21 +115,21 @@ class PointController extends Controller
                 ]
             );
 
-            return Message::response(true, 'updated', Point::findOrFail($point->id));
+            return Message::response(true, 'updated', SpecialNeedType::findOrFail($specialNeedType->id));
         });
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Point  $point
+     * @param  \App\Models\SpecialNeedType  $specialNeedType
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Point $point)
+    public function destroy(SpecialNeedType $specialNeedType)
     {
-        return Tenant::wrapTenant(function() use ($point){
+        return Tenant::wrapTenant(function() use ($specialNeedType){
 
-            $point->delete();
+            $specialNeedType->delete();
             return Message::response(true, 'deleted');
         });
     }

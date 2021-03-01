@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStatusesTable extends Migration
+class CreateSpecialNeedTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,15 @@ class CreateStatusesTable extends Migration
      */
     public function up()
     {
-        Schema::create('statuses', function (Blueprint $table) {
+        Schema::create('special_need_types', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->json('name');
+            $table->timestamps();
+
             $table->boolean('is_enabled')->default(true);
-            $table->string('created_by')->nullable();
-            $table->string('modified_by')->nullable();
+            $table->text('created_by')->nullable();
+            $table->text('modified_by')->nullable();
             $table->softDeletes();
-            // $table->timestamps();
         });
     }
 
@@ -31,6 +32,6 @@ class CreateStatusesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('statuses');
+        Schema::dropIfExists('special_need_types');
     }
 }
