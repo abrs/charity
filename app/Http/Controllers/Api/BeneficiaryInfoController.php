@@ -50,27 +50,27 @@ class BeneficiaryInfoController extends Controller
     {
         $validator = \Validator::make($request->all(), [
             //no restrictions
-            'first_name_ar' => ['required'],
-            'first_name_en' => ['required'],
-            'second_name_ar' => ['required'],
-            'second_name_en' => ['required'],
-            'third_name_ar' => ['required'],
-            'third_name_en' => ['required'],
-            'fourth_name_ar' => ['required'],
-            'fourth_name_en' => ['required'],
-            'last_name_ar' => ['required'],
-            'last_name_en' => ['required'],
-            'known_as_ar' => ['required'],
-            'known_as_en' => ['required'],
-            'career_ar' => ['required'],
-            'career_en' => ['required'],
+            'first_name' => ['required'],
+            // 'first_name_en' => ['required'],
+            'second_name' => ['required'],
+            // 'second_name_en' => ['required'],
+            'third_name' => ['required'],
+            // 'third_name_en' => ['required'],
+            'fourth_name' => ['required'],
+            // 'fourth_name_en' => ['required'],
+            'last_name' => ['required'],
+            // 'last_name_en' => ['required'],
+            'known_as' => ['required'],
+            // 'known_as_en' => ['required'],
+            'career' => ['required'],
+            // 'career_en' => ['required'],
 
             //age restriction
-            'polling_station_name_ar' => [Rule::requiredIf($request->age >= 18)],
-            'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
+            'polling_station_name' => [Rule::requiredIf($request->age >= 18)],
+            // 'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
             //death restriction
-            'standing_ar' => ['required_if:is_alive,0'],
-            'standing_en' => ['required_if:is_alive,0'],
+            'standing' => ['required_if:is_alive,0'],
+            // 'standing_en' => ['required_if:is_alive,0'],
                 //date restriction
             'date_of_death' => ['date_format:YYYY-MM-DD', 'required_if:is_alive,0'],
             //boolean restriction
@@ -109,42 +109,33 @@ class BeneficiaryInfoController extends Controller
 
                 [
                     
-                    'first_name'  => [
-                        'ar' => $request->first_name_ar,
-                        'en' => $request->first_name_en,
-                    ],
-                    'second_name'  => [
-                        'ar' => $request->second_name_ar,
-                        'en' => $request->second_name_en,
-                    ],
-                    'third_name'  => [
-                        'ar' => $request->third_name_ar,
-                        'en' => $request->third_name_en,
-                    ],
-                    'fourth_name'  => [
-                        'ar' => $request->fourth_name_ar,
-                        'en' => $request->fourth_name_en,
-                    ],
-                    'last_name'  => [
-                        'ar' => $request->last_name_ar,
-                        'en' => $request->last_name_en,
-                    ],
-                    'known_as'  => [
-                        'ar' => $request->known_as_ar,
-                        'en' => $request->known_as_en,
-                    ],
-                    'career'  => [
-                        'ar' => $request->career_ar,
-                        'en' => $request->career_en,
-                    ],
-                    'polling_station_name'  => [
-                        'ar' => $request->polling_station_name_ar,
-                        'en' => $request->polling_station_name_en,
-                    ],
-                    'standing'  => [
-                        'ar' => $request->standing_ar,
-                        'en' => $request->standing_en,
-                    ],
+                    'first_name'  => $request->first_name,
+                        // 'en' => $request->first_name_en,
+                    // ],
+                    'second_name'  => $request->second_name,
+                        // 'en' => $request->second_name_en,
+                    // ],
+                    'third_name'  => $request->third_name,
+                        // 'en' => $request->third_name_en,
+                    // ],
+                    'fourth_name'  => $request->fourth_name,
+                        // 'en' => $request->fourth_name_en,
+                    // ],
+                    'last_name'  => $request->last_name,
+                        // 'en' => $request->last_name_en,
+                    // ],
+                    'known_as'  => $request->known_as,
+                        // 'en' => $request->known_as_en,
+                    // ],
+                    'career'  => $request->career,
+                        // 'en' => $request->career_en,
+                    // ],
+                    'polling_station_name'  => $request->polling_station_name,
+                        // 'en' => $request->polling_station_name_en,
+                    // ],
+                    'standing'  => $request->standing,
+                        // 'en' => $request->standing_en,
+                    // ],
 
                     'date_of_death' => $request->date_of_death,
                     'is_special_needs' => $request->is_special_needs,
@@ -189,27 +180,27 @@ class BeneficiaryInfoController extends Controller
     public function update(Request $request, Beneficiary_Info $beneficiary_info)
     {
         $validator = \Validator::make($request->all(), [
-            'first_name_ar' => ['required'],
-            'first_name_en' => ['required'],
-            'second_name_ar' => ['required'],
-            'second_name_en' => ['required'],
-            'third_name_ar' => ['required'],
-            'third_name_en' => ['required'],
-            'fourth_name_ar' => ['required'],
-            'fourth_name_en' => ['required'],
-            'last_name_ar' => ['required'],
-            'last_name_en' => ['required'],
-            'known_as_ar' => ['required'],
-            'known_as_en' => ['required'],
-            'career_ar' => ['required'],
-            'career_en' => ['required'],
+            'first_name' => ['required'],
+            // 'first_name_en' => ['required'],
+            'second_name' => ['required'],
+            // 'second_name_en' => ['required'],
+            'third_name' => ['required'],
+            // 'third_name_en' => ['required'],
+            'fourth_name' => ['required'],
+            // 'fourth_name_en' => ['required'],
+            'last_name' => ['required'],
+            // 'last_name_en' => ['required'],
+            'known_as' => ['required'],
+            // 'known_as_en' => ['required'],
+            'career' => ['required'],
+            // 'career_en' => ['required'],
 
             //age restriction
-            'polling_station_name_ar' => [Rule::requiredIf($request->age >= 18)],
-            'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
+            'polling_station_name' => [Rule::requiredIf($request->age >= 18)],
+            // 'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
             //death restriction
-            'standing_ar' => ['required_if:is_alive,0'],
-            'standing_en' => ['required_if:is_alive,0'],
+            'standing' => ['required_if:is_alive,0'],
+            // 'standing_en' => ['required_if:is_alive,0'],
                 //date restriction
             'date_of_death' => ['date_format:YYYY-MM-DD', 'required_if:is_alive,0'],
             //boolean restriction
@@ -245,42 +236,33 @@ class BeneficiaryInfoController extends Controller
                 [
                     'type_infos_id' => $request->type_infos_id,
                     // 'location_id' => $request->location_id,
-                    'first_name'  => [
-                        'ar' => $request->first_name_ar,
-                        'en' => $request->first_name_en,
-                    ],
-                    'second_name'  => [
-                        'ar' => $request->second_name_ar,
-                        'en' => $request->second_name_en,
-                    ],
-                    'third_name'  => [
-                        'ar' => $request->third_name_ar,
-                        'en' => $request->third_name_en,
-                    ],
-                    'fourth_name'  => [
-                        'ar' => $request->fourth_name_ar,
-                        'en' => $request->fourth_name_en,
-                    ],
-                    'last_name'  => [
-                        'ar' => $request->last_name_ar,
-                        'en' => $request->last_name_en,
-                    ],
-                    'known_as'  => [
-                        'ar' => $request->known_as_ar,
-                        'en' => $request->known_as_en,
-                    ],
-                    'career'  => [
-                        'ar' => $request->career_ar,
-                        'en' => $request->career_en,
-                    ],
-                    'polling_station_name'  => [
-                        'ar' => $request->polling_station_name_ar,
-                        'en' => $request->polling_station_name_en,
-                    ],
-                    'standing'  => [
-                        'ar' => $request->standing_ar,
-                        'en' => $request->standing_en,
-                    ],
+                    'first_name' => $request->first_name_ar,
+                        // 'en' => $request->first_name_en,
+                    // ],
+                    'second_name' => $request->second_name_ar,
+                        // 'en' => $request->second_name_en,
+                    // ],
+                    'third_name' => $request->third_name_ar,
+                        // 'en' => $request->third_name_en,
+                    // ],
+                    'fourth_name' => $request->fourth_name_ar,
+                        // 'en' => $request->fourth_name_en,
+                    // ],
+                    'last_name' => $request->last_name_ar,
+                        // 'en' => $request->last_name_en,
+                    // ],
+                    'known_as' => $request->known_as_ar,
+                        // 'en' => $request->known_as_en,
+                    // ],
+                    'career' => $request->career_ar,
+                        // 'en' => $request->career_en,
+                    // ],
+                    'polling_station_name' => $request->polling_station_name_ar,
+                        // 'en' => $request->polling_station_name_en,
+                    // ],
+                    'standing' => $request->standing_ar,
+                        // 'en' => $request->standing_en,
+                    // ],
 
                     "updated_by" => auth()->user()->user_name,
                     "is_enabled" => $request->has('is_enabled') ? $request->is_enabled : 1,
@@ -475,7 +457,7 @@ class BeneficiaryInfoController extends Controller
             'beneficiary_id'    => ['required', new ValidModel('App\Models\Beneficiary_Info')],
             's_beneficiary_id'  => ['nullable', new ValidModel('App\Models\Beneficiary_Info'), Rule::notIn($request->beneficiary_id)],
             'relation_id'       => ['required', new ValidModel('App\Models\Relation')],
-            'family_budget'     => ['required_if:relation_id,' . Relation::where('name->en', "Breadwinner")->first()->id],
+            'family_budget'     => ['required_if:relation_id,' . Relation::where('name', "Breadwinner")->first()->id],
         ]);
 
         if($validator->fails()){

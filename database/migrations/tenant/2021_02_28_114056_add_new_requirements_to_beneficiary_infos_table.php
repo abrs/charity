@@ -15,15 +15,15 @@ class AddNewRequirementsToBeneficiaryInfosTable extends Migration
     {
         Schema::table('beneficiary_infos', function (Blueprint $table) {
     
-            $table->json('first_name')->nullable();
-            $table->json('second_name')->nullable();
-            $table->json('third_name')->nullable();
-            $table->json('fourth_name')->nullable();
-            $table->json('last_name')->nullable();
-            $table->json('known_as')->nullable();
-            $table->json('career')->nullable();
-            $table->json('polling_station_name')->nullable();
-            $table->json('standing')->nullable();
+            $table->string('first_name')->nullable();
+            $table->string('second_name')->nullable();
+            $table->string('third_name')->nullable();
+            $table->string('fourth_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('known_as')->nullable();
+            $table->string('career')->nullable();
+            $table->string('polling_station_name')->nullable();
+            $table->string('standing')->nullable();
             
             $table->date('date_of_death')->nullable();
             $table->boolean('is_special_needs')->default(0);

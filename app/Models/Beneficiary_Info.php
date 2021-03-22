@@ -5,23 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Translatable\HasTranslations;
+// use Spatie\Translatable\HasTranslations;
 
 class Beneficiary_Info extends Model
 {
-    use SoftDeletes, HasTranslations;
+    use SoftDeletes;//, HasTranslations;
 
-    public $translatable  = [
-        'first_name',
-        'second_name',
-        'third_name',
-        'fourth_name',
-        'last_name',
-        'known_as',
-        'career',
-        'polling_station_name',
-        'standing',
-    ];
+    // public $translatable  = [
+    //     'first_name',
+    //     'second_name',
+    //     'third_name',
+    //     'fourth_name',
+    //     'last_name',
+    //     'known_as',
+    //     'career',
+    //     'polling_station_name',
+    //     'standing',
+    // ];
     
     protected $table = 'beneficiary_infos';
     protected $with = ['locations', 'relations'];

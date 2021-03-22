@@ -35,8 +35,8 @@ class SpecialNeedTypeController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:special_need_types,name->en'],
-            'name_ar'=>['required', 'unique:special_need_types,name->ar'],            
+            // 'name_en'=>['required', 'unique:special_need_types,name->en'],
+            'name'=>['required', 'unique:special_need_types,name'],            
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -50,10 +50,9 @@ class SpecialNeedTypeController extends Controller
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    'name' => $request->name,
+                        // 'en' => $request->name_en,
+                    // ],
                     // 'name' => $request->name,
                     'created_by' => auth()->user()->user_name,                     
                 ]
@@ -87,8 +86,8 @@ class SpecialNeedTypeController extends Controller
     public function update(Request $request, SpecialNeedType $specialNeedType)
     {
         $validator = \Validator::make($request->all(), [
-            'name_ar'=>['required', 'unique:special_need_types,name->ar,' . $specialNeedType->id],
-            'name_en'=>['required', 'unique:special_need_types,name->en,' . $specialNeedType->id],
+            'name'=>['required', 'unique:special_need_types,name,' . $specialNeedType->id],
+            // 'name_en'=>['required', 'unique:special_need_types,name->en,' . $specialNeedType->id],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -103,10 +102,9 @@ class SpecialNeedTypeController extends Controller
 
             $specialNeedType->update(
                 [
-                    'name' => [
-                        'en' => $request->name_en,
-                        'ar' => $request->name_ar,
-                    ],
+                    'name' => $request->name,
+                        // 'en' => $request->name_en,
+                    // ],
                     // 'name' => $request->name,
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,

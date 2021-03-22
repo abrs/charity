@@ -15,7 +15,7 @@ class CreateSpecialNeedTypesTable extends Migration
     {
         Schema::create('special_need_types', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->json('name');
+            $table->string('name');
             $table->timestamps();
 
             $table->boolean('is_enabled')->default(true);
