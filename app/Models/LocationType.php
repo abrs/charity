@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Translatable\HasTranslations;
+// use Spatie\Translatable\HasTranslations;
 
 class LocationType extends Model
 {
-    use SoftDeletes, HasTranslations;
+    use SoftDeletes;//, HasTranslations;
 
     protected $table = "location_types";
 
-    public $translatable  = [
-        'name'
-    ];
+    // public $translatable  = [
+    //     'name'
+    // ];
 
     protected $fillable = [
         'name',

@@ -35,8 +35,8 @@ class PhoneTypeController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:phone_types,name->en'],
-            'name_ar'=>['required', 'unique:phone_types,name->ar'],
+            // 'name_en'=>['required', 'unique:phone_types,name->en'],
+            'name'=>['required', 'unique:phone_types,name'],
             'is_enabled' => 'nullable|boolean',
             // 'deleted_at' => 'nullable|date',
             // 'created_by' => 'nullable|alpha_num',
@@ -53,10 +53,9 @@ class PhoneTypeController extends Controller
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    'name' => $request->name,
+                        // 'en' => $request->name_en,
+                    // ],
                     // 'name' => $request->name,
                     'created_by' => auth()->user()->user_name,                     
                 ]
@@ -90,8 +89,8 @@ class PhoneTypeController extends Controller
     public function update(Request $request, PhoneType $phoneType)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:phone_types,name->en,' . $phoneType->id],
-            'name_ar'=>['required', 'unique:phone_types,name->ar,' . $phoneType->id],
+            // 'name_en'=>['required', 'unique:phone_types,name->en,' . $phoneType->id],
+            'name'=>['required', 'unique:phone_types,name,' . $phoneType->id],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -106,10 +105,9 @@ class PhoneTypeController extends Controller
 
             $phoneType->update(
                 [
-                    'name' => [
-                        'en' => $request->name_en,
-                        'ar' => $request->name_ar,
-                    ],
+                    'name' => $request->name,
+                        // 'en' => $request->name_en,
+                    // ],
                     // 'name' => $request->name,
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,

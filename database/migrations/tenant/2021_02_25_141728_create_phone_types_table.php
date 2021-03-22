@@ -15,7 +15,7 @@ class CreatePhoneTypesTable extends Migration
     {
         Schema::create('phone_types', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->json('name');
+            $table->string('name');
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
             $table->string('modified_by')->nullable();

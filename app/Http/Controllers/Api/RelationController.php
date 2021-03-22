@@ -35,10 +35,10 @@ class RelationController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:relations,name->en'],
-            'name_ar'=>['required', 'unique:relations,name->ar'],
-            'description_en'=>['nullable'],
-            'description_ar'=>['nullable'],            
+            // 'name_en'=>['required', 'unique:relations,name->en'],
+            'name'=>['required', 'unique:relations,name'],
+            // 'description_en'=>['nullable'],
+            'description'=>['nullable'],            
             // 's_beneficiary_id' => ['nullable', new ValidModel('App\Models\Beneficiary_Info')],
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -53,15 +53,13 @@ class RelationController extends Controller
             $relation = Relation::firstOrCreate(
 
                 [
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    'name' => $request->name,
+                    //     'en' => $request->name_en,
+                    // ],
 
-                    'description' => [
-                        'ar' => $request->has('description_ar') ? $request->description_ar : Null,
-                        'en' => $request->has('description_en') ? $request->description_en : Null,
-                    ],
+                    'description' => $request->has('description') ? $request->description : Null,
+                    //     'en' => $request->has('description_en') ? $request->description_en : Null,
+                    // ],
                     'code' => $this->getCode(5, now()),
                     // 's_beneficiary_id' => $request->has('s_beneficiary_id') ? $request->s_beneficiary_id : Null,
                     
@@ -97,10 +95,10 @@ class RelationController extends Controller
     public function update(Request $request, Relation $relation)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:relations,name->en,' . $relation->id],
-            'name_ar'=>['required', 'unique:relations,name->ar,' . $relation->id],
-            'description_en'=>['nullable'],
-            'description_ar'=>['nullable'],
+            // 'name_en'=>['required', 'unique:relations,name->en,' . $relation->id],
+            'name'=>['required', 'unique:relations,name,' . $relation->id],
+            // 'description_en'=>['nullable'],
+            'description'=>['nullable'],
 
             // 's_beneficiary_id' => ['nullable', new ValidModel('App\Models\Beneficiary_Info'), Rule::notIn([$relation->beneficiary->id])],
             'is_enabled' => 'nullable|boolean',
@@ -116,15 +114,13 @@ class RelationController extends Controller
             $relation->update(
 
                 [
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    'name' => $request->name,
+                    //     'en' => $request->name_en,
+                    // ],
 
-                    'description' => [
-                        'ar' => $request->has('description_ar') ? $request->description_ar : $step->description_ar,
-                        'en' => $request->has('description_en') ? $request->description_en : $step->description_en,
-                    ],
+                    'description' => $request->has('description') ? $request->description : $relation->description,
+                    //     'en' => $request->has('description_en') ? $request->description_en : $relation->description_en,
+                    // ],
                     // 's_beneficiary_id' => $request->has('s_beneficiary_id') ? $request->s_beneficiary_id : Null,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,

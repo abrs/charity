@@ -35,8 +35,8 @@ class TypeController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:types,name->en'],
-            'name_ar'=>['required', 'unique:types,name->ar'],
+            // 'name_en'=>['required', 'unique:types,name->en'],
+            'name'=>['required', 'unique:types,name'],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -53,10 +53,9 @@ class TypeController extends Controller
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    'name' => $request->name,
+                    //     'en' => $request->name_en,
+                    // ],
                     'created_by' => auth()->user()->user_name,
                 ]
             );
@@ -89,8 +88,8 @@ class TypeController extends Controller
     public function update(Request $request, Type $type)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:types,name->en,' . $type->id],
-            'name_ar'=>['required', 'unique:types,name->ar,' . $type->id],
+            'name'=>['required', 'unique:types,name,' . $type->id],
+            // 'name_ar'=>['required', 'unique:types,name->ar,' . $type->id],
             // 'deleted_at' => 'nullable|date',
             'is_enabled' => 'nullable|boolean',
             // 'created_by' => 'nullable|alpha_num',
@@ -105,10 +104,9 @@ class TypeController extends Controller
 
             $type->update(
                 [
-                    'name' => [
-                        'en' => $request->name_en,
-                        'ar' => $request->name_ar,
-                    ],
+                    'name' => $request->name,
+                    //     'ar' => $request->name_ar,
+                    // ],
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'created_by' => $request->created_by,

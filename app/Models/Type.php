@@ -6,15 +6,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\User;
 use Illuminate\Database\Eloquent\Builder;
-use Spatie\Translatable\HasTranslations;
+// use Spatie\Translatable\HasTranslations;
 
 class Type extends Model
 {
-    use SoftDeletes, HasTranslations;
+    use SoftDeletes;//, HasTranslations;
 
-    public $translatable  = [
-        'name'
-    ];
+    // public $translatable  = [
+    //     'name'
+    // ];
 
     /**
      * The attributes that are mass assignable.

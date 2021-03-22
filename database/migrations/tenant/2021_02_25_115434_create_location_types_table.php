@@ -16,7 +16,7 @@ class CreateLocationTypesTable extends Migration
         Schema::create('location_types', function (Blueprint $table) {
             $table->bigIncrements('id');
             
-            $table->json('name');
+            $table->string('name');
             
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();

@@ -38,8 +38,8 @@ class LocationController extends Controller
         $validator = \Validator::make($request->all(), [
             'point_id'=>['required', new ValidModel('App\Models\Point')],
 
-            'name_en'=>['required', 'unique:locations,name->en'],
-            'name_ar'=>['required', 'unique:locations,name->ar'],
+            'name'=>['required', 'unique:locations,name'],
+            // 'name_ar'=>['required', 'unique:locations,name->ar'],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -56,10 +56,9 @@ class LocationController extends Controller
                     'point_id' => $request->point_id,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'name' => $request->name,
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    'name' => $request->name,
+                    //     'en' => $request->name_en,
+                    // ],
                     'created_by' => auth()->user()->user_name,
                 ]
             );
@@ -94,8 +93,8 @@ class LocationController extends Controller
         $validator = \Validator::make($request->all(), [
             'point_id'=>['required', new ValidModel('App\Models\Point')],
 
-            'name_en'=>['required', 'unique:locations,name->en,' . $location->id],
-            'name_ar'=>['required', 'unique:locations,name->ar,' . $location->id],
+            'name'=>['required', 'unique:locations,name,' . $location->id],
+            // 'name_ar'=>['required', 'unique:locations,name->ar,' . $location->id],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -110,10 +109,9 @@ class LocationController extends Controller
             $location->update(
 
                 [
-                    'name' => [
-                        'en' => $request->name_en,
-                        'ar' => $request->name_ar,
-                    ],
+                    'name' => $request->name,
+                    //     'ar' => $request->name_ar,
+                    // ],
                     // 'name' => $request->name,
                     'point_id' => $request->point_id,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,

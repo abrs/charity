@@ -35,8 +35,8 @@ class LocationTypeController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:location_types,name->en'],
-            'name_ar'=>['required', 'unique:location_types,name->ar'],
+            // 'name_en'=>['required', 'unique:location_types,name->en'],
+            'name'=>['required', 'unique:location_types,name'],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -52,10 +52,9 @@ class LocationTypeController extends Controller
                 [
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'name' => $request->name,
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    'name' => $request->name,
+                        // 'en' => $request->name_en,
+                    // ],
                     'created_by' => auth()->user()->user_name,
                 ]
             );
@@ -88,8 +87,8 @@ class LocationTypeController extends Controller
     public function update(Request $request, LocationType $locationType)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:location_types,name->en,' . $locationType->id],
-            'name_ar'=>['required', 'unique:location_types,name->ar,' . $locationType->id],
+            'name'=>['required', 'unique:location_types,name,' . $locationType->id],
+            // 'name_ar'=>['required', 'unique:location_types,name->ar,' . $locationType->id],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -104,10 +103,9 @@ class LocationTypeController extends Controller
             $locationType->update(
 
                 [
-                    'name' => [
-                        'en' => $request->name_en,
-                        'ar' => $request->name_ar,
-                    ],
+                    'name' => $request->name,
+                        // 'ar' => $request->name_ar,
+                    // ],
                     // 'name' => $request->name,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,

@@ -35,10 +35,10 @@ class StepController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:steps,name->en'],
-            'name_ar'=>['required', 'unique:steps,name->ar'],
-            'description_en'=>['nullable'],
-            'description_ar'=>['nullable'],
+            // 'name_en'=>['required', 'unique:steps,name->en'],
+            'name'=>['required', 'unique:steps,name'],
+            // 'description_en'=>['nullable'],
+            'description'=>['nullable'],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -50,15 +50,13 @@ class StepController extends Controller
 
             $step = Step::firstOrcreate(
                 [
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    'name' => $request->name,
+                        // 'en' => $request->name_en,
+                    // ],
 
-                    'description' => [
-                        'ar' => $request->has('description_ar') ? $request->description_ar : Null,
-                        'en' => $request->has('description_en') ? $request->description_en : Null,
-                    ],
+                    'description' => $request->has('description') ? $request->description : Null,
+                    //     'en' => $request->has('description_en') ? $request->description_en : Null,
+                    // ],
                     
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
@@ -94,10 +92,10 @@ class StepController extends Controller
     public function update(Request $request, Step $step)
     {
         $validator = \Validator::make($request->all(), [
-            'name_en'=>['required', 'unique:steps,name->en,' . $step->id],
-            'name_ar'=>['required', 'unique:steps,name->ar,' . $step->id],
-            'description_en'=>['nullable'],
-            'description_ar'=>['nullable'],
+            'name'=>['required', 'unique:steps,name,' . $step->id],
+            // 'name_ar'=>['required', 'unique:steps,name->ar,' . $step->id],
+            'description'=>['nullable'],
+            // 'description_ar'=>['nullable'],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -109,15 +107,13 @@ class StepController extends Controller
 
             $step->update(
                 [
-                    'name' => [
-                        'ar' => $request->name_ar,
-                        'en' => $request->name_en,
-                    ],
+                    'name' => $request->name,
+                    //     'en' => $request->name_en,
+                    // ],
 
-                    'description' => [
-                        'ar' => $request->has('description_ar') ? $request->description_ar : $step->description_ar,
-                        'en' => $request->has('description_en') ? $request->description_en : $step->description_en,
-                    ],
+                    'description' => $request->has('description') ? $request->description : $step->description,
+                    //     'en' => $request->has('description_en') ? $request->description_en : $step->description_en,
+                    // ],
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     // 'created_by' => $request->created_by,
