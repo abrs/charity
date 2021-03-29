@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Relation extends Model
 {
-    use SoftDeletes;//, HasTranslations;
+    use SoftDeletes, EventsTrait;//, HasTranslations;
 
     // public $translatable  = [
     //     'description',
@@ -39,5 +40,21 @@ class Relation extends Model
         static::addGlobalScope('is_enabled', function (Builder $builder) {
             $builder->where('relations.is_enabled', 1);
         });
+    }
+
+    /*=======   =========   ============
+    |    extra functionality...         |
+    =======   =========   ============*/
+    public static function getModelAttributes($model) {
+
+        $classAttributes = ['name'];
+        $result = '';
+
+        foreach($classAttributes as $attr){
+
+            $result.= ($attr . ': ' . $model->$attr . ', ');
+        }
+
+        return $result;
     }
 }

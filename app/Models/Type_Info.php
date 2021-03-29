@@ -6,10 +6,13 @@ use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\EventsTrait;
 
 class Type_Info extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, EventsTrait;
+
+    // public $fieldName = 'name';
     
     protected $table = 'type_infos';
     protected $with = ['beneficiary_info'];
@@ -48,5 +51,21 @@ class Type_Info extends Model
         static::addGlobalScope('is_enabled', function (Builder $builder) {
             $builder->where('type_infos.is_enabled', 1);
         });
+    }
+
+    /*=======   =========   ============
+    |    extra functionality...         |
+    =======   =========   ============*/
+    public static function getModelAttributes($model) {
+
+        $classAttributes = ['user_id', 'type_id'];
+        $result = '';
+
+        foreach($classAttributes as $attr){
+
+            $result.= ($attr . ': ' . $model->$attr . ', ');
+        }
+
+        return $result;
     }
 }

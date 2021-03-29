@@ -111,6 +111,21 @@ Route::group([
         Route::apiResource('relations', 'Api\RelationController')->except('update');
         Route::post('relations/{relation}', 'Api\RelationController@update');
 
+        //logs routes
+        Route::prefix('events')->group(function () {
+            
+            Route::get('/', 'Api\EventController@showAll');
+            Route::get('show-by-id/{id}', 'Api\EventController@showById');
+            Route::post('show-by-action', 'Api\EventController@showByAction');
+            Route::get('show-user-events/{id}', 'Api\EventController@showUserEvents');
+            Route::get('show-last-week-event', 'Api\EventController@showLastWeekEvent');
+            Route::get('show-last-month-event', 'Api\EventController@showLastMonthEvent');
+            Route::get('show-last-day-event', 'Api\EventController@showLastDayEvent');
+            Route::post('show-between-dates-event', 'Api\EventController@showBetweenDaysEvent');
+            Route::post('show-all-model-events', 'Api\EventController@showAllModelEvents');
+            Route::delete('delete/{id}', 'Api\EventController@delete');
+        });
+
         //roles routes
         Route::post('roles/addPermission', 'Api\RoleController@addPermissionToRole');
         Route::post('roles/removePermission', 'Api\RoleController@removePermissionFromRole');

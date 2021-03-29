@@ -52,7 +52,7 @@ class TypeInfoController extends Controller
                 ['user_id' => $request->user_id, 'type_id' => $request->type_id],
                 [
                     #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'created_by' => auth()->user()->user_name,
                 ]
             );
@@ -103,7 +103,7 @@ class TypeInfoController extends Controller
                     'type_id' => $request->type_id,
                 
                     #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,
                 ]
             );
