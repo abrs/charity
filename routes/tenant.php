@@ -66,13 +66,24 @@ Route::group([
 
         //beneficiary infos controller routes
         #create new beneficiary
-        Route::post('beneficiary_infos/createNewBeneficiaryDetails', 'Api\BeneficiaryInfoController@createNewBeneficiaryDetails');
-        Route::post('beneficiary_infos/assignBeneficiaryLocation', 'Api\BeneficiaryInfoController@assignBeneficiaryLocation');
-        Route::post('beneficiary_infos/assignBeneficiaryPhone', 'Api\BeneficiaryInfoController@assignBeneficiaryPhone');
-        Route::post('beneficiary_infos/assignBeneficiaryRelation', 'Api\BeneficiaryInfoController@assignBeneficiaryRelation');
-        Route::post('beneficiary_infos/unAssignBeneficiaryRelation', 'Api\BeneficiaryInfoController@unAssignBeneficiaryRelation');
-        Route::apiResource('beneficiary_infos', 'Api\BeneficiaryInfoController')->except('update');
-        Route::post('beneficiary_infos/{beneficiary_info}', 'Api\BeneficiaryInfoController@update');
+        Route::prefix('beneficiary_infos')->group(function () {
+            
+            Route::post('createNewBeneficiaryDetails', 'Api\BeneficiaryInfoController@createNewBeneficiaryDetails');
+            Route::post('assignBeneficiaryLocation', 'Api\BeneficiaryInfoController@assignBeneficiaryLocation');
+            Route::post('assignBeneficiaryPhone', 'Api\BeneficiaryInfoController@assignBeneficiaryPhone');
+            Route::post('assignBeneficiaryRelation', 'Api\BeneficiaryInfoController@assignBeneficiaryRelation');
+            Route::post('unAssignBeneficiaryRelation', 'Api\BeneficiaryInfoController@unAssignBeneficiaryRelation');
+            Route::apiResource('/', 'Api\BeneficiaryInfoController')->except('update');
+            Route::post('{beneficiary_info}', 'Api\BeneficiaryInfoController@update');
+        });
+
+        //sentences routes
+        Route::apiResource('sentences', 'Api\SentenceController')->except('update');
+        Route::post('sentences/{sentence}', 'Api\SentenceController@update');
+
+        //languages routes
+        Route::apiResource('languages', 'Api\LanguageController')->except('update');
+        Route::post('languages/{language}', 'Api\LanguageController@update');
 
         //points routes
         Route::apiResource('points', 'Api\PointController')->except('update');

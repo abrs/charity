@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
 use Illuminate\Http\Request;
-use App\Models\Point;
-use Exception;
+use App\Models\Language;
+use App\Rules\ValidModel;
 
-class PointController extends Controller
+class LanguageController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,7 +22,7 @@ class PointController extends Controller
             return Message::response(
                 true,
                 'done',
-                Point::paginate(25)
+                Language::paginate(25)
             );
         });
     }
@@ -36,7 +36,8 @@ class PointController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:points,name'],
+            'title'=>['required', 'unique:languages,title'],
+            'abbrivation'=>['required', 'unique:languages,abbrivation'],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -46,31 +47,33 @@ class PointController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $point = Point::firstOrcreate(
+            $language = Language::firstOrcreate(
+                [
+                    'title' => $request->title,
+                    'abbrivation' => $request->abbrivation,
+                ],
                 [
                     #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => $request->name,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,                    
                     'created_by' => auth()->user()->user_name,                     
                 ]
             );
 
-            return Message::response(true, 'created', $point);          
+            return Message::response(true, 'created', $language);          
         });
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Point  $point
+     * @param  \App\Models\Language  $language
      * @return \Illuminate\Http\Response
      */
-    public function show(Point $point)
+    public function show(Language $language)
     {
-        // return Point::where('created_by->ar', 'مجرب1')->get();
-        return Tenant::wrapTenant(function() use ($point){
+        return Tenant::wrapTenant(function() use ($language){
 
-            return Message::response('true', 'done', $point);
+            return Message::response('true', 'done', $language);
         });
     }
 
@@ -78,13 +81,14 @@ class PointController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Point  $point
+     * @param  \App\Models\Language  $language
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Point $point)
+    public function update(Request $request, Language $language)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:points,name,' . $point->id],
+            'title'=>['required', 'unique:languages,title,' . $language->id],
+            'abbrivation'=>['required', 'unique:languages,abbrivation,' . $language->id],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -92,31 +96,32 @@ class PointController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
         
-        return Tenant::wrapTenant(function() use ($point, $request){
+        return Tenant::wrapTenant(function() use ($language, $request){
 
-            $point->update(
+            $language->update(
                 [
-                    'name' => $request->name,
+                    'title' => $request->title,
+                    'abbrivation' => $request->abbrivation,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,
                 ]
             );
 
-            return Message::response(true, 'updated', Point::findOrFail($point->id));
+            return Message::response(true, 'updated', Language::findOrFail($language->id));
         });
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Point  $point
+     * @param  \App\Models\Language  $language
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Point $point)
+    public function destroy(Language $language)
     {
-        return Tenant::wrapTenant(function() use ($point){
+        return Tenant::wrapTenant(function() use ($language){
 
-            $point->delete();
+            $language->delete();
             return Message::response(true, 'deleted');
         });
     }
