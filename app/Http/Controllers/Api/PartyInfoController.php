@@ -156,11 +156,11 @@ class PartyInfoController extends Controller
         $validator = \Validator::make($request->all(), [            
 
             #create new user
-            'email' => 'required|email|unique:users',
+            // 'email' => 'required|email|unique:users',
             'password' => 'required',
             'confirm_password' => 'required|same:password', 
 
-            'name' => 'required', 
+            // 'name' => 'required', 
             'user_name' => 'required|unique:users',
 
             #create party
@@ -192,8 +192,8 @@ class PartyInfoController extends Controller
                     ['user_name' => $request->user_name],
 
                     [
-                        'name' => $request->name,
-                        'email' => $request->email,
+                        // 'name' => $request->name,
+                        // 'email' => $request->email,
                         'password' => $password,
                         'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
                         'created_by' => auth()->user()->user_name,
