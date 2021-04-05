@@ -25,7 +25,7 @@ class Beneficiary_Info extends Model
     // ];
     
     protected $table = 'beneficiary_infos';
-    protected $with = ['locations', 'relations'];
+    protected $with = ['locations'];
 
 
 
@@ -51,7 +51,6 @@ class Beneficiary_Info extends Model
         'gender',
         'national_number',
         'age',
-        'email',
         'is_alive',
         'special_needs_type_id',
     ];
@@ -62,15 +61,8 @@ class Beneficiary_Info extends Model
     }
     public function locations() {
         // return $this->belongsTo(Location::class);
-        return $this->belongsToMany(Location::class, 'beneficiary_location', 'beneficiary_id', 'location_id')
-            ->withPivot('beneficiary_id', 'location_id', 'location_type_id', 'is_enabled', 'created_by')
-            ->withTimestamps();
-    }
-
-    public function relations()
-    {
-        return $this->belongsToMany(Relation::class, 'beneficiary_relations', 'beneficiary_id', 'relation_id')
-            ->withPivot('s_beneficiary_id', 'is_enabled', 'created_by')
+        return $this->belongsToMany(Location::class, 'user_location', 'user_id', 'location_id')
+            ->withPivot('user_id', 'location_id', 'location_type_id', 'is_enabled', 'created_by')
             ->withTimestamps();
     }
 
@@ -110,7 +102,6 @@ class Beneficiary_Info extends Model
             'gender',
             'national_number',
             'age',
-            'email',
             'is_alive',
             'special_needs_type_id',
         ];

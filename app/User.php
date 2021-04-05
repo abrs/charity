@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Relation;
 use App\Models\Type;
 use App\Models\Type_Info;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -11,10 +12,11 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Translatable\HasTranslations;
+use App\Traits\EventsTrait;
 
 class User extends Authenticatable
 {
-    use Notifiable, HasRoles, HasApiTokens;//, HasTranslations;
+    use Notifiable, HasRoles, HasApiTokens, EventsTrait;//, HasTranslations;
 
     // public $translatable  = [
     //     'first_name', 'last_name'
@@ -28,7 +30,7 @@ class User extends Authenticatable
     protected $fillable = [
         //'first_name', 'last_name', 'email', 
         'password', 'user_name', 'confirm_password',
-        'deleted_at', 'is_enabled', 'created_by', 'modified_by',
+        'deleted_at', 'is_enabled', 'created_by', 'modified_by', 'email'
     ];
 
     /**
@@ -50,9 +52,8 @@ class User extends Authenticatable
     ];
 
     protected $with = [
-        'types', 'roles.permissions', 'type_infos'
+        'types', 'roles.permissions', 'type_infos', 'relations'
     ];
-
 
 
     /**
@@ -79,7 +80,6 @@ class User extends Authenticatable
 
         return Type_Info::where('user_id', $this->id)
             ->where('type_id', $type->id)->first();
-        
     }
 
     /**
@@ -94,5 +94,29 @@ class User extends Authenticatable
         static::addGlobalScope('is_enabled', function (Builder $builder) {
             $builder->where('users.is_enabled', 1);
         });
+    }
+
+    //relations
+    public function relations()
+    {
+        return $this->belongsToMany(Relation::class, 'user_relations', 'user_id', 'relation_id')
+            ->withPivot('s_user_id', 'is_enabled', 'created_by')
+            ->withTimestamps();
+    }
+
+    /*=======   =========   ============
+    |    extra functionality...         |
+    =======   =========   ============*/
+    public static function getModelAttributes($model) {
+
+        $classAttributes = ['user_name'];
+        $result = '';
+
+        foreach($classAttributes as $attr){
+
+            $result.= ($attr . ': ' . $model->$attr . ', ');
+        }
+
+        return $result;
     }
 }

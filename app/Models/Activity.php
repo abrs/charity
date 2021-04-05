@@ -15,6 +15,8 @@ class Activity extends Model
     //     'name'
     // ];
     
+    protected $with = ['steps'];
+
     /**
      * The attributes that are mass assignable.
      *

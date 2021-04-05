@@ -38,6 +38,18 @@ Route::group([
     //auth:api routes.
     Route::group(['middleware' => ['auth:api', 'check_expiration']], function () {
 
+        Route::prefix('users')->group(function () {
+            
+            #assign user a location
+            Route::post('assignUserLocation', 'Api\UserController@assignUserLocation');
+            #assign user a phone
+            Route::post('assignUserPhone', 'Api\UserController@assignUserPhone');
+            #assign user a relation
+            Route::post('assignUserRelation', 'Api\UserController@assignUserRelation');
+            #un-assign user a relation
+            Route::post('unAssignUserRelation', 'Api\UserController@unAssignUserRelation');
+        });
+
         #get all the users
         Route::get('users', 'Api\UserController@index');
 
@@ -68,11 +80,9 @@ Route::group([
         #create new beneficiary
         Route::prefix('beneficiary_infos')->group(function () {
             
-            Route::post('createNewBeneficiaryDetails', 'Api\BeneficiaryInfoController@createNewBeneficiaryDetails');
-            Route::post('assignBeneficiaryLocation', 'Api\BeneficiaryInfoController@assignBeneficiaryLocation');
-            Route::post('assignBeneficiaryPhone', 'Api\BeneficiaryInfoController@assignBeneficiaryPhone');
-            Route::post('assignBeneficiaryRelation', 'Api\BeneficiaryInfoController@assignBeneficiaryRelation');
-            Route::post('unAssignBeneficiaryRelation', 'Api\BeneficiaryInfoController@unAssignBeneficiaryRelation');
+            // Route::post('createNewBeneficiaryDetails', 'Api\BeneficiaryInfoController@createNewBeneficiaryDetails');
+            
+            Route::post('createNewBeneficiaryFast', 'Api\BeneficiaryInfoController@createNewBeneficiaryFast');
             Route::apiResource('/', 'Api\BeneficiaryInfoController')->except('update');
             Route::post('{beneficiary_info}', 'Api\BeneficiaryInfoController@update');
         });

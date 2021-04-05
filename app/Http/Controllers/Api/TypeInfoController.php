@@ -33,7 +33,7 @@ class TypeInfoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, bool $fastSignup = false)
     {
         $validator = \Validator::make($request->all(), [
 
@@ -46,7 +46,7 @@ class TypeInfoController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        return Tenant::wrapTenant(function() use ($request, $fastSignup){
 
             $typeInfo = Type_Info::firstOrcreate(
                 ['user_id' => $request->user_id, 'type_id' => $request->type_id],
@@ -57,7 +57,8 @@ class TypeInfoController extends Controller
                 ]
             );
 
-            return Message::response(true, 'created', $typeInfo);          
+            return $fastSignup ? $typeInfo :
+                Message::response(true, 'created', $typeInfo);          
         });
     }
 

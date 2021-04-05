@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class BeneficiaryRelation extends Model
+class UserRelation extends Model
 {
     use SoftDeletes, EventsTrait;
     
-    protected $table = 'beneficiary_relations';
+    protected $table = 'user_relations';
 
     protected $fillable = [
         'relation_id',    
-        'beneficiary_id',    
-        's_beneficiary_id',
+        'user_id',    
+        's_user_id',
         'family_budget',
         'is_enabled', 
         'deleted_at', 
@@ -34,19 +34,19 @@ class BeneficiaryRelation extends Model
         parent::boot();
 
         static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('beneficiary_relations.is_enabled', 1);
+            $builder->where('user_relations.is_enabled', 1);
         });
     }
 
-    /*=======   =========   ============
+    /*=======   =========---============|
     |    extra functionality...         |
     =======   =========   ============*/
     public static function getModelAttributes($model) {
 
         $classAttributes = [
             'relation_id',    
-            'beneficiary_id',    
-            's_beneficiary_id',
+            'user_id',    
+            's_user_id',
             'family_budget',
         ];
         

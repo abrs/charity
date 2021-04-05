@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBeneficiaryRelationsTable extends Migration
+class CreateUserRelationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateBeneficiaryRelationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('beneficiary_relations', function (Blueprint $table) {
+        Schema::create('user_relations', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('relation_id')->nullable();
-            $table->unsignedBigInteger('beneficiary_id')->nullable();
-            $table->unsignedBigInteger('s_beneficiary_id')->nullable();
-            $table->unsignedBigInteger('family_budget')->nullable()->after('s_beneficiary_id');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('s_user_id')->nullable();
+            $table->unsignedBigInteger('family_budget')->nullable();
 
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
@@ -26,10 +26,10 @@ class CreateBeneficiaryRelationsTable extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->unique(['relation_id', 'beneficiary_id', 's_beneficiary_id'], 'unique_r_b_s');
+            $table->unique(['relation_id', 'user_id', 's_user_id'], 'unique_r_u_s');
             $table->foreign('relation_id')->references('id')->on('relations')->onDelete('cascade');
-            $table->foreign('beneficiary_id')->references('id')->on('beneficiary_infos')->onDelete('cascade');
-            $table->foreign('s_beneficiary_id')->references('id')->on('beneficiary_infos')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('s_user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

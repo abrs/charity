@@ -26,7 +26,7 @@ class CreatePhonesTable extends Migration
             $table->softDeletes();
 
             $table->foreign('phone_type_id')->references('id')->on('phone_types')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('beneficiary_infos')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
         });
     }

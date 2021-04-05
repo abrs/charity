@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Step;
 use App\Models\Activity;
-use ActivityWorkflowSteps;
+use App\Models\ActivityWorkflowSteps;
 
 class StepApproval extends Model
 {
@@ -46,17 +46,17 @@ class StepApproval extends Model
 
         $status = Status::where('name','approved')->first();        
         
-        $prevStep = StepApproval::getPrevStep($step_id,$activity_id);
+        $prevStep = $this->getPrevStep($step_id,$activity_id);
         if($prevStep == null) return null;
         $prevActivityWorkflowStepId = ActivityWorkflowSteps::where([
-                                                                'activity_id' => $activity->id,
-                                                                'step_id' => $prevStep->id
-                                                            ])->first()->value('id');
+            'activity_id' => $activity_id,
+            'step_id' => $prevStep->id
+        ])->first()->value('id');
 
         StepApproval::where([
-                            'owner_id' => $owner_id,
-                            'activity_workflow_steps_id' => $prevActivityWorkflowStepId
-                        ])->update(['sataus' => $status->id]);
+            'owner_id' => $owner_id,
+            'activity_workflow_steps_id' => $prevActivityWorkflowStepId
+        ])->update(['sataus' => $status->id]);
         
         return true;
     }
@@ -65,16 +65,16 @@ class StepApproval extends Model
     {
         $isOptional = false;
         $step = Step::where('id',$step_id)->first();
-        $stepOrderNumber = $step->activities->where('id',$activity_id)->first()->pivot->order_num;
+        $stepOrderNumber = $step->activities()->where('id',$activity_id)->first()->pivot->order_num;
         if($stepOrderNumber > 1){
             do{
-                $prevStep = Step::whereHas('activities',function($q)use($stepOrderNumber,$activity_id){
+                $prevStep = Step::whereHas('activities',function($q)use($stepOrderNumber, $activity_id){
                     $q->where('activities.id',$activity_id)
                       ->where('order_num',$stepOrderNumber-1);
                 })->first();
                 if($prevStep->optional == 1) $isOptional = true;
             }while($isOptional == true);
-            
+
             return $prevStep;
         }else return null;
     }
@@ -83,16 +83,16 @@ class StepApproval extends Model
     {
         $step = Step::where('id',$step_id)->first();
         $activity = Activity::find($activity_id);
-        $stepOrderNumber = $step->activities->where('id',$activity_id)->first()->pivot->order_num;
+        $stepOrderNumber = $step->activities()->where('id',$activity_id)->first()->pivot->order_num;
         
         if($stepOrderNumber == $activity->step->count()){  
             return null;
         }else{
             $nextStep = Step::where('optional','!=',1)
-                            ->whereHas('activities',function($q)use($stepOrderNumber){
-                                                            $q->where('activities.id',$activity_id)
-                                                              ->where('order_num',$stepOrderNumber+1);
-                                                        })->first();
+                ->whereHas('activities',function($q) use ($stepOrderNumber, $activity_id){
+                    $q->where('activities.id',$activity_id)
+                        ->where('order_num',$stepOrderNumber+1);
+                })->first();
             return $nextStep;
         };
     }

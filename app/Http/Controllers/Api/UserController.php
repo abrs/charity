@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Helpers\{Tenant, Message};
+use App\Models\Relation;
 use App\Rules\ValidModel;
 use App\User;
 use App\Models\Role;
 use App\Models\Type;
+use App\Models\UserRelation;
+use phpDocumentor\Reflection\Types\Boolean;
 
 class UserController extends Controller
 {
@@ -32,22 +36,26 @@ class UserController extends Controller
         });
     }
 
-    public function signup(Request $request) 
-    {
+    public function signup(Request $request, bool $fastSignup = false) 
+    {     
         $validator = \Validator::make($request->all(), [
 
             'password' => 'required',
+            'email' => ['required', 'email'],
             'confirm_password' => 'required|same:password', 
             'user_name' => 'required|unique:users',
+
         ]);
 
         if ($validator->fails()) {
+
+            // return $fastSignup ? $validator->errors() : 
             return Message::response(false,'Invalid Input' ,$validator->errors());
         }
 
         $password = bcrypt($request->password);
 
-        return Tenant::wrapTenant(function() use ($request, $password){
+        return Tenant::wrapTenant(function() use ($request, $password, $fastSignup){
 
             $created_user = User::firstOrCreate(
                 #a user with the same name is an old user.
@@ -62,14 +70,15 @@ class UserController extends Controller
             #after creating a user by default he is a normal user
             $created_user->assignRole('normal');
 
-            return Message::response(true, 'user created successfully', $created_user);
+            return $fastSignup ? $created_user : 
+                Message::response(true, 'user created successfully', $created_user);
         });
     }
 
     #--------- ---------- -------------- ------------ ---------------
 
     public function login(Request $request)
-    {     
+    {
         $validator = \Validator::make($request->all(), [
 
             'user_name' => 'required',
@@ -173,7 +182,7 @@ class UserController extends Controller
     }
 
     #assign user a type
-    public function assignType(Request $request) {
+    public function assignType(Request $request, bool $fastSignup = false) {
 
         $validator = \Validator::make($request->all(), [
 
@@ -185,7 +194,7 @@ class UserController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());
         }
 
-        return Tenant::wrapTenant(function() use ($request) {
+        return Tenant::wrapTenant(function() use ($request, $fastSignup) {
 
             $type = Type::find($request->type_id);
             $user = User::find($request->user_id);
@@ -197,8 +206,180 @@ class UserController extends Controller
                 ]);
             }
 
-            return Message::response(true, 'assigned', $type);
+            return $fastSignup ? $type :
+                Message::response(true, 'assigned', $type);
         });
     }
-    
+
+        /**
+     * ===============================================================
+     * ===================== extra functionality =====================
+     * ==================================================
+     */
+
+     
+    /**
+     * assign user a phone
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Helpers\Message
+     */
+    public function assignUserPhone(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+            'is_enabled'        => ['nullable', 'boolean'],
+
+            'user_id'    => ['required', new ValidModel('App\User')],
+            'phone_type_id'  => ['required', new ValidModel('App\Models\PhoneType')],
+            'number'       => ['required', 'unique:phones,number'],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+                    
+            \DB::table('phones')->insert(
+                [
+                    'user_id' => $request->user_id,
+                    'phone_type_id' => $request->phone_type_id,
+                    'number' => $request->number,
+                
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    'created_by' => auth()->user()->user_name,
+
+                    'created_at' => date("Y-m-d H:i:s", strtotime(now())),
+                ]
+            );
+
+            $phone = \DB::table('phones')->where('number', $request->number)->first();
+            
+            return Message::response(true, 'attached successfully', $phone);
+        });
+    }
+
+    /**
+     * assign user a location
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Helpers\Message
+     */
+    public function assignUserLocation(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+            'is_enabled'        => ['nullable', 'boolean'],
+
+            'user_id'    => ['required', new ValidModel('App\User')],
+            'location_type_id'  => ['required', new ValidModel('App\Models\LocationType')],
+            'location_id'       => ['required', new ValidModel('App\Models\Location')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+
+            $userLocation = \DB::table('user_location')
+                ->where('user_id', $request->user_id)
+                ->where('location_type_id', $request->location_type_id)
+                ->where('location_id', $request->location_id)
+                ->first();
+
+            if(!$userLocation) {
+
+                \DB::table('user_location')->insert(
+                    [
+                        'user_id' => $request->user_id,
+                        'location_type_id' => $request->location_type_id,
+                        'location_id' => $request->location_id,
+                    
+                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                        'created_by' => auth()->user()->user_name,
+
+                        'created_at' => date("Y-m-d H:i:s", strtotime(now())),
+                    ]
+                );
+                
+                $userLocation = \DB::table('user_location')
+                ->where('user_id', $request->user_id)
+                ->where('location_type_id', $request->location_type_id)
+                ->where('location_id', $request->location_id)
+                ->first();
+            }
+
+
+           return Message::response(true, 'attached successfully', $userLocation);
+        });
+    }
+
+
+    /**
+     * assign user a relation
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Helpers\Message
+     */
+    public function assignUserRelation(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+            'is_enabled'        => ['nullable', 'boolean'],
+
+            'user_id'    => ['required', new ValidModel('App\User')],
+            's_user_id'  => ['nullable', new ValidModel('App\User'), Rule::notIn($request->user_id)],
+            'relation_id'       => ['required', new ValidModel('App\Models\Relation')],
+            'family_budget'     => ['required_if:relation_id,' . Relation::where('name', "Breadwinner")->first()->id],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+
+            UserRelation::firstOrCreate(
+                [
+                    'user_id' => $request->user_id,
+                    'relation_id' => $request->relation_id,
+                    's_user_id' => $request->s_user_id,
+                ],
+                [
+                    'family_budget' => $request->has('family_budget') ? $request->family_budget : NULL,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    'created_by' => auth()->user()->user_name,
+                ]
+            );
+
+           return Message::response(true, 'attached successfully');
+        });
+    }
+
+    /**
+     * unassign user a relation
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Helpers\Message
+     */
+    public function unAssignUserRelation(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+
+            'user_id' => ['required', new ValidModel('App\User')],
+            'relation_id'    => ['required', new ValidModel('App\Models\Relation')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+
+            $user = User::find($request->user_id);
+
+            $user->relations()->detach($request->relation_id);
+
+           return Message::response(true, 'unattached successfully');
+        });
+    }
 }

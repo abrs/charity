@@ -13,7 +13,8 @@ class Tenant {
             return $function();
             
         } catch (\Exception $e) {
-            return Message::response(false,'Invalid Input' ,$e->getMessage());
+            return $e;
+            // return Message::response(false,'Invalid Input' ,$e->getMessage());
         }
         // });
     
