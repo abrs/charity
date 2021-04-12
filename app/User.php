@@ -51,9 +51,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $with = [
-        'types', 'roles.permissions', 'type_infos', 'relations'
-    ];
+    // protected $with = [
+    //     'types', 'roles.permissions', 'type_infos', 'relations'
+    // ];
 
 
     /**
@@ -67,34 +67,7 @@ class User extends Authenticatable
 
     public function type_infos() {
         return $this->hasMany(Type_Info::class);
-    }
-
-    public function assignType(Type $type) {
-
-        if(! $this->types->contains($type)) {
-
-            $this->types()->save($type, [            
-                'created_by' => auth()->user()->user_name,                    
-            ]);
-        }
-
-        return Type_Info::where('user_id', $this->id)
-            ->where('type_id', $type->id)->first();
-    }
-
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('users.is_enabled', 1);
-        });
-    }
+    }    
 
     //relations
     public function relations()
@@ -118,5 +91,18 @@ class User extends Authenticatable
         }
 
         return $result;
+    }
+
+    public function assignType(Type $type) {
+
+        if(! $this->types->contains($type)) {
+
+            $this->types()->save($type, [            
+                'created_by' => auth()->user()->user_name,                    
+            ]);
+        }
+
+        return Type_Info::where('user_id', $this->id)
+            ->where('type_id', $type->id)->first();
     }
 }

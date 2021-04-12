@@ -14,13 +14,16 @@ class StepApproval extends Model
     use SoftDeletes;
 
     protected $table = 'step_approvals';
-    
+
+    protected $with = ['activityWorkflowStep'];
+
     protected $fillable = [
         'activity_workflow_steps_id', 
-        'user_id',
-        'owner_id',
+        // 'user_id',
+        // 'owner_id',
         'status_id',
         'note',
+        'description',
         
         'is_enabled', 
         'deleted_at', 
@@ -28,20 +31,21 @@ class StepApproval extends Model
         'modified_by', 
     ];
 
-     /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('step_approvals.is_enabled', 1);
-        });
+    /* =====    ========    ========
+        relations
+    */
+    public function activityWorkflowStep() {
+        return $this->belongsTo(ActivityWorkflowSteps::class, 'activity_workflow_steps_id')
+            //get me only steps belongs to my roles
+            ->whereIn('step_supervisor_id', \Auth::user()->roles->pluck('id')->all());
+            // ->where('order_num', ActivityWorkflowSteps::min('order_num'))
+            // ->where('status', $this->selectedStatus);
     }
+    
 
+    /*  ==========================
+        extra functionality
+    = */
     protected function updatePrevStepStatus($owner_id,$activity_id,$step_id){
 
         $status = Status::where('name','approved')->first();        

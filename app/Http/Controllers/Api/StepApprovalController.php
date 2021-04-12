@@ -6,8 +6,10 @@ use App\Models\StepApproval;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
+use App\Models\ActivityWorkflowSteps;
 use App\Rules\ValidModel;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\Eloquent\Builder;
 
 class StepApprovalController extends Controller
 {
@@ -38,8 +40,8 @@ class StepApprovalController extends Controller
     {
         $validator = \Validator::make($request->all(), [
             'activity_workflow_steps_id'=>['required', new ValidModel('App\Models\ActivityWorkflowSteps')],
-            'user_id'=>['required', new ValidModel('App\User')],
-            'owner_id'=>['required', new ValidModel('App\User'), Rule::notIn($request->user_id)],
+            // 'user_id'=>['required', new ValidModel('App\User')],
+            // 'owner_id'=>['required', new ValidModel('App\User'), Rule::notIn($request->user_id)],
             'status_id'=>['required', new ValidModel('App\Models\Status')],
 
             'is_enabled' => 'nullable|boolean',
@@ -56,12 +58,13 @@ class StepApprovalController extends Controller
 
                 [
                     'activity_workflow_steps_id' => $request->activity_workflow_steps_id,
-                    'user_id' => $request->user_id,
-                    'owner_id' => $request->owner_id,
-                    'status_id' => $request->status_id,
+                    // 'user_id' => $request->user_id,
+                    // 'owner_id' => $request->owner_id,
+                    //TODO:
                 ],
-
+                
                 [
+                    'status_id' => $request->status_id,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'created_by' => auth()->user()->user_name,
                 ]
@@ -95,9 +98,9 @@ class StepApprovalController extends Controller
     public function update(Request $request, StepApproval $step_approval)
     {
         $validator = \Validator::make($request->all(), [
-            'activity_workflow_steps_id'=>['required', new ValidModel('App\Models\ActivityWorkflowSteps')],
-            'user_id'=>['required', new ValidModel('App\User')],
-            'owner_id'=>['required', new ValidModel('App\User'), Rule::notIn($request->user_id)],
+            'activity_workflow_steps_id'=>['required', 'unique:step_approvals,activity_workflow_steps_id,' . $step_approval->id, new ValidModel('App\Models\ActivityWorkflowSteps')],
+            // 'user_id'=>['required', new ValidModel('App\User')],
+            // 'owner_id'=>['required', new ValidModel('App\User'), Rule::notIn($request->user_id)],
             'status_id'=>['required', new ValidModel('App\Models\Status')],
 
             'is_enabled' => 'nullable|boolean',
@@ -114,8 +117,8 @@ class StepApprovalController extends Controller
 
                 [
                     'activity_workflow_steps_id' => $request->activity_workflow_steps_id,
-                    'user_id' => $request->user_id,
-                    'owner_id' => $request->owner_id,
+                    // 'user_id' => $request->user_id,
+                    // 'owner_id' => $request->owner_id,
                     'status_id' => $request->status_id,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'modified_by' => auth()->user()->user_name,
@@ -139,5 +142,37 @@ class StepApprovalController extends Controller
             $step_approval->delete();
             return Message::response(true, 'deleted');
         });
+    }
+
+    public function processingRequest(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+
+            'status_id'=>['required', new ValidModel('App\Models\Status')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+
+        //get the steps that associated to one of my roles
+        $stepApprovals = StepApproval::with('activityWorkflowStep')
+
+            ->join('activity_workflow_steps', function ($join) use ($request){
+
+                $join->on('step_approvals.activity_workflow_steps_id', '=', 'activity_workflow_steps.id')
+                //TODO: test this method again.
+                //and they must has the minimum order num
+                ->where('activity_workflow_steps.order_num', ActivityWorkflowSteps::min('order_num'))
+                //and status id I specify
+                ->where('step_approvals.status_id', $request->status_id);
+            })
+
+            //get me as my main request all step_approvals columns
+            ->get('step_approvals.*');
+        
+        return Message::response(true, 'done', $stepApprovals);
     }
 }

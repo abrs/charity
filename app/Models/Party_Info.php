@@ -27,17 +27,4 @@ class Party_Info extends Model
         return $this->belongsTo(Type_Info::class, 'type_infos_id');
     }
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('party_infos.is_enabled', 1);
-        });
-    }
 }

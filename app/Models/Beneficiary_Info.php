@@ -26,6 +26,9 @@ class Beneficiary_Info extends Model
     
     protected $table = 'beneficiary_infos';
     protected $with = ['locations'];
+    protected $hidden = ['type_infos_id', 'special_needs_type_id'];
+    protected $appends = ['special_needs_type'];
+    protected $casts = ['is_special_needs' => 'boolean',];
 
 
 
@@ -59,6 +62,7 @@ class Beneficiary_Info extends Model
     public function type_info() {
         return $this->belongsTo(Type_Info::class, 'type_infos_id');
     }
+
     public function locations() {
         // return $this->belongsTo(Location::class);
         return $this->belongsToMany(Location::class, 'user_location', 'user_id', 'location_id')
@@ -67,22 +71,25 @@ class Beneficiary_Info extends Model
     }
 
     /**
-     * The "booting" method of the model.
-     *
-     * @return void
+     * Get all of the beneficiary's activitables.
      */
-    protected static function boot()
+    public function activitables()
     {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('beneficiary_infos.is_enabled', 1);
-        });
+        return $this->morphMany(Activitable::class, 'activitable');        
     }
+
+    // public function special_need_type() {
+    //     return $this->belongsTo(SpecialNeedType::class);
+    // }
 
     /*=======   =========   ============
     |    extra functionality...         |
     =======   =========   ============*/
+    public function getSpecialNeedsTypeAttribute()
+    {
+        return SpecialNeedType::find($this->special_needs_type_id)->name;
+    }
+
     public static function getModelAttributes($model) {
 
         $classAttributes = [

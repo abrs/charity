@@ -20,14 +20,14 @@ class CreateActivityWorkflowStepsTable extends Migration
             $table->string('modified_by')->nullable();
             $table->softDeletes();
             
-            $table->unsignedBigInteger('activity_id')->nullable();
+            $table->unsignedBigInteger('activitable_id')->nullable();
             $table->unsignedBigInteger('step_id')->nullable();
             $table->unsignedInteger('order_num');
             $table->string('finishing_percentage')->nullable();
             $table->boolean('required')->default(true);
             $table->timestamps();
 
-            $table->foreign('activity_id')->references('id')->on('activities')->onDelete('cascade');
+            $table->foreign('activitable_id')->references('id')->on('activitable')->onDelete('cascade');
             $table->foreign('step_id')->references('id')->on('steps')->onDelete('cascade');
 
         });

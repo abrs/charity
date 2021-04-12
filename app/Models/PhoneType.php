@@ -28,19 +28,6 @@ class PhoneType extends Model
         'name'
     ];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('phone_types.is_enabled', 1);
-        });
-    }
 
     /*=======   =========   ============
     |    extra functionality...         |

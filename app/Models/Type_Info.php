@@ -39,19 +39,6 @@ class Type_Info extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('type_infos.is_enabled', 1);
-        });
-    }
 
     /*=======   =========   ============
     |    extra functionality...         |

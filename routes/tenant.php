@@ -48,6 +48,8 @@ Route::group([
             Route::post('assignUserRelation', 'Api\UserController@assignUserRelation');
             #un-assign user a relation
             Route::post('unAssignUserRelation', 'Api\UserController@unAssignUserRelation');
+            #getAllUsersBelongsToType
+            Route::post('getAllUsersBelongsToType', 'Api\UserController@getAllUsersBelongsToType');
         });
 
         #get all the users
@@ -78,14 +80,11 @@ Route::group([
 
         //beneficiary infos controller routes
         #create new beneficiary
-        Route::prefix('beneficiary_infos')->group(function () {
             
-            // Route::post('createNewBeneficiaryDetails', 'Api\BeneficiaryInfoController@createNewBeneficiaryDetails');
-            
-            Route::post('createNewBeneficiaryFast', 'Api\BeneficiaryInfoController@createNewBeneficiaryFast');
-            Route::apiResource('/', 'Api\BeneficiaryInfoController')->except('update');
-            Route::post('{beneficiary_info}', 'Api\BeneficiaryInfoController@update');
-        });
+        Route::post('beneficiary_infos/createNewBeneficiaryNormal', 'Api\BeneficiaryInfoController@createNewBeneficiaryNormal');
+        Route::post('beneficiary_infos/createNewBeneficiaryFast', 'Api\BeneficiaryInfoController@createNewBeneficiaryFast');
+        Route::apiResource('beneficiary_infos', 'Api\BeneficiaryInfoController')->except('update');
+        Route::post('beneficiary_infos/{beneficiary_info}', 'Api\BeneficiaryInfoController@update');
 
         //sentences routes
         Route::apiResource('sentences', 'Api\SentenceController')->except('update');
@@ -111,8 +110,10 @@ Route::group([
         Route::apiResource('location_types', 'Api\LocationTypeController')->except('update');
         Route::post('location_types/{location_type}', 'Api\LocationTypeController@update');
         
+        //ActivityWorkflowStepController
+        Route::post('activities/assignStep', 'Api\ActivityWorkflowStepController@store');
         //activities routes
-        Route::post('activities/assignStep', 'Api\ActivityController@assignStep');
+        // Route::post('activities/assignAndCreateNewStep', 'Api\ActivityController@assignAndCreateNewStep');
         Route::apiResource('activities', 'Api\ActivityController')->except('update');
         Route::post('activities/{activity}', 'Api\ActivityController@update');
 
@@ -121,6 +122,7 @@ Route::group([
         Route::post('steps/{step}', 'Api\StepController@update');
 
         //step approval routes
+        Route::post('step_approvals/processingRequest', 'Api\StepApprovalController@processingRequest');
         Route::apiResource('step_approvals', 'Api\StepApprovalController')->except('update');
         Route::post('step_approvals/{step_approval}', 'Api\StepApprovalController@update');
 

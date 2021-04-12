@@ -12,10 +12,14 @@ class ActivityWorkflowSteps extends Model
 
     protected $table = 'activity_workflow_steps';
 
+    protected $with = ['activitables'];
+
     protected $fillable = [
         'id',
-        'activity_id',    
+        'activitable_id',    
         'step_id',    
+        'step_supervisor_id',
+        // 'step_supervisor_type',
         'order_num',
         'finishing_percentage',
         'required',
@@ -25,18 +29,15 @@ class ActivityWorkflowSteps extends Model
         'modified_by',
     ];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
+    #===============
+    //=== relations
+    #=============
+    public function step_approval() {
 
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('activity_workflow_steps.is_enabled', 1);
-        });
+        return $this->belongsToMany(Status::class, 'step_approvals')->withTimestamps();
     }
 
+    public function activitables() {
+        return $this->belongsTo(Activitable::class, 'activitable_id');
+    }
 }

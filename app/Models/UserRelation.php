@@ -24,19 +24,6 @@ class UserRelation extends Model
         'modified_by',
     ];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('user_relations.is_enabled', 1);
-        });
-    }
 
     /*=======   =========---============|
     |    extra functionality...         |

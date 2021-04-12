@@ -15,6 +15,7 @@ use App\Models\Role;
 use App\Models\Type;
 use App\Models\UserRelation;
 use phpDocumentor\Reflection\Types\Boolean;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserController extends Controller
 {
@@ -118,7 +119,9 @@ class UserController extends Controller
     
             
             return Message::response(true, 'Authorization Granted', [
-                'user' => $user,
+
+                'user' => $user->with('types', 'roles.permissions', 'type_infos', 'relations'),
+                
                 'Auth-details' => [
                     'access_token' => $tokenResult->accessToken,
                     'token_type' => 'Bearer',
@@ -380,6 +383,30 @@ class UserController extends Controller
             $user->relations()->detach($request->relation_id);
 
            return Message::response(true, 'unattached successfully');
+        });
+    }
+
+    public function getAllUsersBelongsToType(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+
+            'type_id' => ['required', new ValidModel('App\Models\Type')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+
+            $beneficiaryUsers = User::whereHas('types', function(Builder $query) use ($request) {
+
+                $query->where('type_id', $request->type_id);
+
+            })->get();
+
+           return Message::response(true, 'done', $beneficiaryUsers);
         });
     }
 }

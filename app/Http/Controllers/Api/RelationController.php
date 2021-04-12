@@ -21,7 +21,8 @@ class RelationController extends Controller
             return Message::response(
                 true,
                 'done',
-                Relation::paginate(25)
+                Relation::all()
+                // Relation::paginate(25)
             );
         });
     }

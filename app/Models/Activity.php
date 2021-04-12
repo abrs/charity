@@ -15,7 +15,7 @@ class Activity extends Model
     //     'name'
     // ];
     
-    protected $with = ['steps'];
+    // protected $with = ['activitables'];
 
     /**
      * The attributes that are mass assignable.
@@ -31,28 +31,12 @@ class Activity extends Model
     ];
 
     /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('activities.is_enabled', 1);
-        });
-    }
-
-    /**
      * ================
      * relations
      * =====
      */
-    public function steps()
-    {
-        return $this->belongsToMany(Step::class, 'activity_workflow_steps', 'activity_id', 'step_id')
-            ->withPivot('id','order_num', 'finishing_percentage', 'required', 'created_by')
-            ->withTimestamps();
+    public function activitables() {
+        
+        return $this->hasMany(Activitable::class);
     }
 }

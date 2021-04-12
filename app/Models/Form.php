@@ -19,16 +19,6 @@ class Form extends Model
      */
 
     
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('forms.is_enabled', 1);
-        });
-    }
-
-    
     // public function formField()
     // {
     //     return $this->hasMany('App\Models\FormField');

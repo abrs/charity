@@ -17,9 +17,9 @@ class CreateStepApprovalsTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->unsignedBigInteger('activity_workflow_steps_id')->nullable();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('owner_id')->nullable();
+            $table->unsignedBigInteger('activity_workflow_steps_id')->unique();
+            // $table->unsignedBigInteger('user_id')->nullable();
+            // $table->unsignedBigInteger('owner_id')->nullable();
             $table->unsignedBigInteger('status_id')->nullable();
 
             $table->boolean('is_enabled')->default(true);
@@ -28,8 +28,9 @@ class CreateStepApprovalsTable extends Migration
             $table->softDeletes();
 
             $table->foreign('activity_workflow_steps_id')->references('id')->on('activity_workflow_steps')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->unique(['activity_workflow_steps_id', 'status_id']);
+            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade');
         });
     }

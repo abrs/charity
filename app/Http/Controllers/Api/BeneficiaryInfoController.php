@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
+use App\Models\Activitable;
+use App\Models\Activity;
 use App\Models\Beneficiary_Info;
 use App\Models\Type;
 use App\Rules\ValidModel;
@@ -78,7 +80,7 @@ class BeneficiaryInfoController extends Controller
             //special needs restriction
             'special_needs_type_id' => ['required_if:is_special_needs,1'],
 
-            'type_infos_id'=>['required', 'unique:beneficiary_infos,type_infos_id', new ValidModel('App\Models\Type_Info')],
+            'type_infos_id'=>['required', new ValidModel('App\Models\Type_Info')],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -89,58 +91,63 @@ class BeneficiaryInfoController extends Controller
 
         return Tenant::wrapTenant(function() use ($request, $fastSignup){
 
-            $beneficiaryInfo = Beneficiary_Info::firstOrCreate(
+            // $beneficiaryInfo = Beneficiary_Info::where('type_infos_id', $request->type_infos_id)->first();
 
-                [
-                    'type_infos_id' => $request->type_infos_id,
-                ],
+            // if(!$beneficiaryInfo) {
 
-                [
-                    
-                    'first_name'  => $request->first_name,
-                        // 'en' => $request->first_name_en,
-                    // ],
-                    'second_name'  => $request->second_name,
-                        // 'en' => $request->second_name_en,
-                    // ],
-                    'third_name'  => $request->third_name,
-                        // 'en' => $request->third_name_en,
-                    // ],
-                    'fourth_name'  => $request->fourth_name,
-                        // 'en' => $request->fourth_name_en,
-                    // ],
-                    'last_name'  => $request->last_name,
-                        // 'en' => $request->last_name_en,
-                    // ],
-                    'known_as'  => $request->known_as,
-                        // 'en' => $request->known_as_en,
-                    // ],
-                    'career'  => $request->career,
-                        // 'en' => $request->career_en,
-                    // ],
-                    'polling_station_name'  => $request->polling_station_name,
-                        // 'en' => $request->polling_station_name_en,
-                    // ],
-                    'standing'  => $request->standing,
-                        // 'en' => $request->standing_en,
-                    // ],
+                $beneficiaryInfo = Beneficiary_Info::firstOrcreate(
 
-                    'date_of_death' => $request->date_of_death,
-                    'is_special_needs' => $request->is_special_needs,
-                    'birth' => $request->birth,
-                    'gender' => $request->gender,
-                    'national_number' => $request->national_number,
-                    'age' => $request->age,
-                    'is_alive' => $request->is_alive,
-                    'special_needs_type_id' => $request->special_needs_type_id,
+                    [
+                        'type_infos_id' => $request->type_infos_id,
+                    ],
 
-                    "created_by" => auth()->user()->user_name,
-                    "is_enabled" => $fastSignup,
-                ]
-            );
+                    [
+
+                        'first_name'  => $request->first_name,
+                            // 'en' => $request->first_name_en,
+                        // ],
+                        'second_name'  => $request->second_name,
+                            // 'en' => $request->second_name_en,
+                        // ],
+                        'third_name'  => $request->third_name,
+                            // 'en' => $request->third_name_en,
+                        // ],
+                        'fourth_name'  => $request->fourth_name,
+                            // 'en' => $request->fourth_name_en,
+                        // ],
+                        'last_name'  => $request->last_name,
+                            // 'en' => $request->last_name_en,
+                        // ],
+                        'known_as'  => $request->known_as,
+                            // 'en' => $request->known_as_en,
+                        // ],
+                        'career'  => $request->career,
+                            // 'en' => $request->career_en,
+                        // ],
+                        'polling_station_name'  => $request->polling_station_name,
+                            // 'en' => $request->polling_station_name_en,
+                        // ],
+                        'standing'  => $request->standing,
+                            // 'en' => $request->standing_en,
+                        // ],
+
+                        'date_of_death' => $request->date_of_death,
+                        'is_special_needs' => $request->is_special_needs,
+                        'birth' => $request->birth,
+                        'gender' => $request->gender,
+                        'national_number' => $request->national_number,
+                        'age' => $request->age,
+                        'is_alive' => $request->is_alive,
+                        'special_needs_type_id' => $request->special_needs_type_id,
+
+                        "created_by" => auth()->user()->user_name,
+                        "is_enabled" => $fastSignup,
+                    ]
+                );
+            // }
 
             return $fastSignup ? Message::response(true, 'beneficiary fast assigned successfully', $beneficiaryInfo) :
-                Message::response(true, 'created', $beneficiaryInfo);
+                $beneficiaryInfo;
         });
     }
 
@@ -154,7 +161,7 @@ class BeneficiaryInfoController extends Controller
     {
         return Tenant::wrapTenant(function() use ($beneficiary_info){
 
-            return Message::response('true', 'done', $beneficiary_info);
+            return Message::response(true, 'done', $beneficiary_info);
         });
     }
 
@@ -285,25 +292,58 @@ class BeneficiaryInfoController extends Controller
 
         $beneficiaryType = Type::where('name', 'beneficiary')->first();
 
-        if(!$beneficiaryType) {return Message::response(true, 'create beneficiary type first!!');}
+        if(!$beneficiaryType) {return Message::response(true, 'create the beneficiary type first!!');}
 
         return \DB::transaction(function () use ($request, $beneficiaryType, $adminRequest){
 
-            //create new user
-            $user = app('App\Http\Controllers\Api\UserController')->signup($request, true);
-            if($user instanceof \Illuminate\Http\JsonResponse) return $user;
+            if($adminRequest) {
+                //create new user using admin privilige
+                $user = app('App\Http\Controllers\Api\UserController')->signup($request, true);
+                if($user instanceof \Illuminate\Http\JsonResponse) return $user;
+            }else {
+                //not an admin => a beneficiary is inserting his data
+                $user = \Auth::user();
+            }
             //assign the user a beneficiary type
             $type_info = $user->assignType($beneficiaryType);
             //create the user's beneficiary details.
-            $res = $this->store($request->merge(['type_infos_id' => $type_info->id]), $adminRequest);
+            $beneficiaryInfo = $this->store($request->merge(['type_infos_id' => $type_info->id]), $adminRequest);
 
-            return $res;
+            return $beneficiaryInfo;
         });
     }
 
     //1- create new beneficiary fast but his account won't be enabled yet
     public function createNewBeneficiaryNormal(Request $request) {
-        
-        $this->createNewBeneficiaryFast($request, false);
+
+        $validator = \Validator::make($request->all(), [
+            'activity_id' => 'required'
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return \DB::transaction(function () use ($request){
+
+            #1- create new beneficiary
+            $beneficiaryInfo = $this->createNewBeneficiaryFast($request, false);
+            $beneficiaryInfo->update(['is_enabled' => 0]);
+            
+            #2- link a new normal insertion between a beneficiary and his activity of becoming beneficiary
+            $activity = Activity::findOrFail($request->activity_id);
+
+            $activitable = new Activitable();
+            $activitable->fill([
+
+                'activitable_id' => $beneficiaryInfo->id,
+                'activitable_type' => Beneficiary_Info::class
+            ]);
+
+            $activitable = $activity->activitables()->save($activitable);
+
+            return Message::response(true, 'beneficiary created and is waiting for processing..', $activitable);
+        });
     }
 }

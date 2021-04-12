@@ -21,7 +21,7 @@ class SpecialNeedTypeController extends Controller
             return Message::response(
                 true,
                 'done',
-                SpecialNeedType::paginate(25)
+                SpecialNeedType::all()
             );
         });
     }

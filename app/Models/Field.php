@@ -18,16 +18,6 @@ class Field extends Model
 
     protected $hidden = ['name_in_db','pivot','created_at','updated_at'];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope('is_enabled', function (Builder $builder) {
-            $builder->where('fields.is_enabled', 1);
-        });
-
-    }
-
     // public function formField()
     // {
     //     return $this->hasMany('App\Models\FormField');

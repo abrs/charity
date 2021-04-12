@@ -136,7 +136,7 @@ class ActivityController extends Controller
      * extra functionality
      * -------
      */
-    public function assignStep(Request $request) {
+    public function assignAndCreateNewStep(Request $request) {
         $validator = \Validator::make($request->all(), [
             #activity
             'activity_id'=> ['required', new ValidModel('App\Models\Activity')],
@@ -188,4 +188,6 @@ class ActivityController extends Controller
             });
         });
     }
+
+    
 }
