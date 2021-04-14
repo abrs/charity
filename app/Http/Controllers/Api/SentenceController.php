@@ -38,6 +38,7 @@ class SentenceController extends Controller
         $validator = \Validator::make($request->all(), [
             'body'=>['required', 'unique:sentences,body'],
             'language_id'=>['required', new ValidModel('App\Models\Language')],
+            'translation' => 'required',
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -60,7 +61,9 @@ class SentenceController extends Controller
                     ]
                 );
 
-                $sentence->languages()->attach($request->language_id);
+                $sentence->languages()->attach($request->language_id, [
+                    'translation' => $request->translation
+                ]);
 
                 return Message::response(true, 'created', $sentence);
             });

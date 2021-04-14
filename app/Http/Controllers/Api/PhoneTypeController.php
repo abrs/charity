@@ -21,7 +21,7 @@ class PhoneTypeController extends Controller
             return Message::response(
                 true,
                 'done',
-                PhoneType::paginate(25)
+                PhoneType::all()
             );
         });
     }

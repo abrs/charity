@@ -29,7 +29,9 @@ class Sentence extends Model
     /** Relations ----------- */
     public function languages() {
 
-        return $this->belongsToMany(Language::class);
+        return $this->belongsToMany(Language::class)
+            ->withPivot('translation')
+            ->withTimestamps();
     }
 
 }

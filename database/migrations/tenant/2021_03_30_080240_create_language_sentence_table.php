@@ -18,6 +18,7 @@ class CreateLanguageSentenceTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('sentence_id')->nullable();
             $table->unsignedBigInteger('language_id')->nullable();
+            $table->string('translation')->nullable();
 
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
