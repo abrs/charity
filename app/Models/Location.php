@@ -25,7 +25,8 @@ class Location extends Model
         'modified_by', 
     ];
 
-    protected $with = ['point'];
+    // protected $with = ['point'];
+    protected $hidden = ['point', 'pivot'];
 
     /** Relations ----------- */
     public function point() {

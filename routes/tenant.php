@@ -50,6 +50,11 @@ Route::group([
             Route::post('unAssignUserRelation', 'Api\UserController@unAssignUserRelation');
             #getAllUsersBelongsToType
             Route::post('getAllUsersBelongsToType', 'Api\UserController@getAllUsersBelongsToType');
+            #getAllTheBeneficiariesUsers
+            Route::get('getAllTheBeneficiariesUsers', 'Api\UserController@getAllTheBeneficiariesUsers');
+            #getUserProfile
+            Route::get('getProfile', 'Api\UserController@getProfile');
+            
         });
 
         #get all the users
@@ -62,7 +67,7 @@ Route::group([
         Route::post('users/assignType', 'Api\UserController@assignType');
 
         #logout a logged in user
-        Route::get('logout', 'Api\UserController@logout');
+        Route::post('users/logout', 'Api\UserController@logout');
 
         //types controller routes
         Route::apiResource('types', 'Api\TypeController')->except('update');
@@ -111,9 +116,11 @@ Route::group([
         Route::post('location_types/{location_type}', 'Api\LocationTypeController@update');
         
         //ActivityWorkflowStepController
+        Route::post('activities/processingRequest', 'Api\ActivityWorkflowStepController@processingRequest');
         Route::post('activities/assignStep', 'Api\ActivityWorkflowStepController@store');
+        Route::post('activities/updateWorkflowStep/{activityWorkflowStep}', 'Api\ActivityWorkflowStepController@update');
+
         //activities routes
-        // Route::post('activities/assignAndCreateNewStep', 'Api\ActivityController@assignAndCreateNewStep');
         Route::apiResource('activities', 'Api\ActivityController')->except('update');
         Route::post('activities/{activity}', 'Api\ActivityController@update');
 

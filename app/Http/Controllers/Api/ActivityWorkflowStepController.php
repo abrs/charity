@@ -6,6 +6,7 @@ use App\Helpers\Message;
 use App\Http\Controllers\Controller;
 use App\Models\Activitable;
 use App\Models\ActivityWorkflowSteps;
+use App\Models\Beneficiary_Info;
 use App\Models\Status;
 use App\Models\StepApproval;
 use App\Rules\ValidModel;
@@ -13,6 +14,8 @@ use Illuminate\Http\Request;
 
 class ActivityWorkflowStepController extends Controller
 {
+
+    #store new activity workflow step..
     public function store(Request $request) {
 
         $validator = \Validator::make($request->all(), [
@@ -35,6 +38,7 @@ class ActivityWorkflowStepController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
+        #there might be notifications here => use transactions
         return \DB::transaction(function () use ($request){
             
             $activityWorkflowStep = ActivityWorkflowSteps::firstOrCreate(
@@ -48,26 +52,97 @@ class ActivityWorkflowStepController extends Controller
                     'order_num' => $request->order_num,
                     'finishing_percentage' => $request->finishing_percentage,
                     'required' => $request->required,
+
+                    'description' => $request->description,
+                    'status_id' => $request->status_id,
+
                     'created_by' => auth()->user()->user_name,
                 ]
-            );
-                
-            $oldStepApproval = StepApproval::where('activity_workflow_steps_id', $activityWorkflowStep->id)->first();
-
-            if($oldStepApproval) {
-
-                return Message::response(false, 'You\'ve assigned old activity and step');
-            }
-
-            //after the activity Workflow Step created successfully assign it to a step_approval with a choosen status and description
-            $activityWorkflowStep->step_approval()->attach($request->status_id, [
-                'description' => $request->description,
-                'created_by' => auth()->user()->user_name,
-            ]);
+            );                
             //TODO: you may send notification to the beneficiary tells him about the new step here.
 
 
             return Message::response(true, 'activity assigned step successfully.', $activityWorkflowStep);
         });
     }    
+
+    #----------  ---------   ---------   ----------    ----------  ---------   ---------   ----------
+
+    #process beneficiary request
+    public function processingRequest(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+
+            'status_id'=>['required', new ValidModel('App\Models\Status')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        //1- get the beneficiary locations
+        $beneficiaryId = \DB::table('activity_workflow_steps')
+            ->join('activitable', 'activity_workflow_steps.activitable_id', '=', 'activitable.id')
+            ->distinct()
+            ->value('activitable.activitable_id');
+
+        //2- get the authenticated user locations
+        $beneficiaryLocationsIds = Beneficiary_Info::findOrFail($beneficiaryId)->getUser()->locations->pluck('id')->all();
+
+        //3- interscet the result (take in case if the admin is custodian(locations) or manager(point))
+        $IntersectWithAuthUserLocations = \Auth::user()->locations()
+            ->whereIn('locations.id', $beneficiaryLocationsIds)->get();
+            
+        //4- if there is common locations with the loggedIN user continue in the process else => don't continue in the process
+        if($IntersectWithAuthUserLocations->isEmpty()) {
+            
+            return Message::response(true, 'there\'s no new beneficiaries within loggedIn user\'s locations');
+        }
+
+        //5- get only ActivityWorkflowSteps assigned to my roles
+        $queryBelongsToMyRolesQuery = \DB::table('activity_workflow_steps')
+            ->whereIn('step_supervisor_id', \Auth::user()->roles->pluck('id')->all());
+
+        //get all the ActivityWorkflowSteps that have the status_id I choose
+        $queryBelongsToMyRolesQuery->where('status_id', $request->status_id);
+        //filter them to the ones have the minimum order_num
+        $activityWorkflowStep = $queryBelongsToMyRolesQuery
+            ->where('order_num', $queryBelongsToMyRolesQuery->min('order_num'))->get();
+
+        return Message::response(true, 'done', $activityWorkflowStep);
+    }
+
+    #-------    ----------  ---------   ---------   ----------    ----------  ---------   ---------   ----------
+
+    #update an activity workflow step
+    public function update(Request $request, ActivityWorkflowSteps $activityWorkflowStep) {
+
+        $validator = \Validator::make($request->only('status_id', 'description'), [
+
+            'status_id' => ['required', new ValidModel('App\Models\Status')],
+            'description' => ['required', 'min:10'],
+        ]);
+
+        if($validator->fails()){
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        #there might be notifications here => use transactions
+        return \DB::transaction(function () use ($request, $activityWorkflowStep){
+            
+            $activityWorkflowStep->update(
+                [
+                    'description' => $request->description,
+                    'status_id' => $request->status_id,
+
+                    'modified_by' => auth()->user()->user_name,
+                ]
+            );
+
+            //TODO: you may send notification to the beneficiary tells him about the new step here.
+
+            return Message::response(true, 'activity step updated successfully..');
+        });
+    }
 }

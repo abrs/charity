@@ -22,11 +22,12 @@ class CreateActivityWorkflowStepsTable extends Migration
             
             $table->unsignedBigInteger('activitable_id')->nullable();
             $table->unsignedBigInteger('step_id')->nullable();
+            
             $table->unsignedInteger('order_num');
             $table->string('finishing_percentage')->nullable();
             $table->boolean('required')->default(true);
             $table->timestamps();
-
+            
             $table->foreign('activitable_id')->references('id')->on('activitable')->onDelete('cascade');
             $table->foreign('step_id')->references('id')->on('steps')->onDelete('cascade');
 

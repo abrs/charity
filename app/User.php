@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Models\Location;
+use App\Models\PhoneType;
 use App\Models\Relation;
 use App\Models\Type;
 use App\Models\Type_Info;
@@ -69,6 +71,18 @@ class User extends Authenticatable
         return $this->hasMany(Type_Info::class);
     }    
 
+    public function locations() {
+        return $this->belongsToMany(Location::class, 'user_location', 'user_id', 'location_id')
+            ->withPivot('user_id', 'location_id', 'location_type_id', 'is_enabled', 'created_by')
+            ->withTimestamps();
+    }
+
+    public function phones() {
+        return $this->belongsToMany(PhoneType::class, 'phones', 'user_id', 'phone_type_id')
+            ->withPivot('number', 'is_enabled', 'created_by')
+            ->withTimestamps();
+    }
+
     //relations
     public function relations()
     {
@@ -80,6 +94,10 @@ class User extends Authenticatable
     /*=======   =========   ============
     |    extra functionality...         |
     =======   =========   ============*/
+    public function getBeneficiaryInfoDetails() {
+        return $this->type_infos()->where('types.name', 'beneficiary')->beneficiary_info;
+    }
+
     public static function getModelAttributes($model) {
 
         $classAttributes = ['user_name'];

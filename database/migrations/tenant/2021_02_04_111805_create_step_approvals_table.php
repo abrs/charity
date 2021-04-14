@@ -21,6 +21,7 @@ class CreateStepApprovalsTable extends Migration
             // $table->unsignedBigInteger('user_id')->nullable();
             // $table->unsignedBigInteger('owner_id')->nullable();
             $table->unsignedBigInteger('status_id')->nullable();
+            $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade');
 
             $table->boolean('is_enabled')->default(true);
             $table->string('created_by')->nullable();
@@ -31,7 +32,6 @@ class CreateStepApprovalsTable extends Migration
             // $table->unique(['activity_workflow_steps_id', 'status_id']);
             // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             // $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade');
         });
     }
 

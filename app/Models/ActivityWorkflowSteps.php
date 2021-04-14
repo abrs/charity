@@ -2,24 +2,26 @@
 
 namespace App\Models;
 
+use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ActivityWorkflowSteps extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, EventsTrait;
 
     protected $table = 'activity_workflow_steps';
 
-    protected $with = ['activitables'];
+    protected $with = ['activitable', 'step'];
 
     protected $fillable = [
         'id',
         'activitable_id',    
         'step_id',    
         'step_supervisor_id',
-        // 'step_supervisor_type',
+        'status_id',
+        'description',
         'order_num',
         'finishing_percentage',
         'required',
@@ -32,12 +34,32 @@ class ActivityWorkflowSteps extends Model
     #===============
     //=== relations
     #=============
-    public function step_approval() {
+    // public function step_approval() {
 
-        return $this->belongsToMany(Status::class, 'step_approvals')->withTimestamps();
+    //     return $this->belongsToMany(Status::class, 'step_approvals')->withTimestamps();
+    // }
+
+    public function activitable() {
+        return $this->belongsTo(Activitable::class, 'activitable_id');
     }
 
-    public function activitables() {
-        return $this->belongsTo(Activitable::class, 'activitable_id');
+    public function step() {
+        return $this->belongsTo(Step::class, 'step_id');
+    }
+
+        /*=======   =========   ============
+    |    extra functionality...         |
+    =======   =========   ============*/
+    public static function getModelAttributes($model) {
+
+        $classAttributes = ['status_id','description'];
+        $result = '';
+
+        foreach($classAttributes as $attr){
+
+            $result.= ($attr . ': ' . $model->$attr . ', ');
+        }
+
+        return $result;
     }
 }

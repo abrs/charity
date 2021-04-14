@@ -215,7 +215,7 @@ class BeneficiaryInfoController extends Controller
             //special needs restriction
             'special_needs_type_id' => ['required_if:is_special_needs,1'],
 
-            'type_infos_id'=>['required', 'unique:beneficiary_infos,type_infos_id,' . $beneficiary_info->id, new ValidModel('App\Models\Type_Info')],
+            // 'type_infos_id'=>['required', 'unique:beneficiary_infos,type_infos_id,' . $beneficiary_info->id, new ValidModel('App\Models\Type_Info')],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -229,33 +229,33 @@ class BeneficiaryInfoController extends Controller
             $beneficiary_info->update(
 
                 [
-                    'type_infos_id' => $request->type_infos_id,
+                    // 'type_infos_id' => $request->type_infos_id,
                     // 'location_id' => $request->location_id,
-                    'first_name' => $request->first_name_ar,
+                    'first_name' => $request->first_name,
                         // 'en' => $request->first_name_en,
                     // ],
-                    'second_name' => $request->second_name_ar,
+                    'second_name' => $request->second_name,
                         // 'en' => $request->second_name_en,
                     // ],
-                    'third_name' => $request->third_name_ar,
+                    'third_name' => $request->third_name,
                         // 'en' => $request->third_name_en,
                     // ],
-                    'fourth_name' => $request->fourth_name_ar,
+                    'fourth_name' => $request->fourth_name,
                         // 'en' => $request->fourth_name_en,
                     // ],
-                    'last_name' => $request->last_name_ar,
+                    'last_name' => $request->last_name,
                         // 'en' => $request->last_name_en,
                     // ],
-                    'known_as' => $request->known_as_ar,
+                    'known_as' => $request->known_as,
                         // 'en' => $request->known_as_en,
                     // ],
-                    'career' => $request->career_ar,
+                    'career' => $request->career,
                         // 'en' => $request->career_en,
                     // ],
-                    'polling_station_name' => $request->polling_station_name_ar,
+                    'polling_station_name' => $request->polling_station_name,
                         // 'en' => $request->polling_station_name_en,
                     // ],
-                    'standing' => $request->standing_ar,
+                    'standing' => $request->standing,
                         // 'en' => $request->standing_en,
                     // ],
 

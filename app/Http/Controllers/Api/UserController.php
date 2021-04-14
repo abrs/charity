@@ -120,7 +120,7 @@ class UserController extends Controller
             
             return Message::response(true, 'Authorization Granted', [
 
-                'user' => $user->with('types', 'roles.permissions', 'type_infos', 'relations'),
+                'user' => $user,
                 
                 'Auth-details' => [
                     'access_token' => $tokenResult->accessToken,
@@ -133,6 +133,22 @@ class UserController extends Controller
         });
         
         return $result;
+    }
+
+    #----------------------------------------------------
+    //get the user profile
+    public function getProfile() {
+
+        // return Tenant::wrapTenant(function() {
+
+            return Message::response(true, 'done' ,User::find(\Auth::user()->id)
+                ->load(['types', 'roles.permissions', 'relations', 'phones', 'locations'])
+                ->loadMissing(['type_infos' => function ($query) {
+                    $query->has('beneficiary_info');
+                }])
+                // ->load('type_infos')->has('type_infos.beneficiary_info')
+            );
+        // });
     }
 
     #----------------------------------------------------
@@ -403,6 +419,27 @@ class UserController extends Controller
             $beneficiaryUsers = User::whereHas('types', function(Builder $query) use ($request) {
 
                 $query->where('type_id', $request->type_id);
+
+            })->get();
+
+           return Message::response(true, 'done', $beneficiaryUsers);
+        });
+    }
+
+    public function getAllTheBeneficiariesUsers() {
+
+        return Tenant::wrapTenant(function() {
+
+            $beneficiaryType = Type::where('name', 'beneficiary')->first();
+
+            if(!$beneficiaryType) {
+                
+                return Message::response(false, 'create beneficiary type first!!');
+            }
+
+            $beneficiaryUsers = User::whereHas('types', function(Builder $query) use ($beneficiaryType) {
+
+                $query->where('type_id', $beneficiaryType->id);
 
             })->get();
 

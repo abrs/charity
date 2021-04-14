@@ -25,16 +25,15 @@ class Beneficiary_Info extends Model
     // ];
     
     protected $table = 'beneficiary_infos';
-    protected $with = ['locations'];
+    // protected $with = ['locations'];
     protected $hidden = ['type_infos_id', 'special_needs_type_id'];
     protected $appends = ['special_needs_type'];
-    protected $casts = ['is_special_needs' => 'boolean',];
+    // protected $casts = ['is_special_needs' => 'boolean',];
 
 
 
     protected $fillable = [
         'type_infos_id', 
-        // 'location_id',
         'is_enabled', 
         'deleted_at', 
         'created_by',
@@ -63,13 +62,6 @@ class Beneficiary_Info extends Model
         return $this->belongsTo(Type_Info::class, 'type_infos_id');
     }
 
-    public function locations() {
-        // return $this->belongsTo(Location::class);
-        return $this->belongsToMany(Location::class, 'user_location', 'user_id', 'location_id')
-            ->withPivot('user_id', 'location_id', 'location_type_id', 'is_enabled', 'created_by')
-            ->withTimestamps();
-    }
-
     /**
      * Get all of the beneficiary's activitables.
      */
@@ -78,13 +70,15 @@ class Beneficiary_Info extends Model
         return $this->morphMany(Activitable::class, 'activitable');        
     }
 
-    // public function special_need_type() {
-    //     return $this->belongsTo(SpecialNeedType::class);
-    // }
 
     /*=======   =========   ============
     |    extra functionality...         |
     =======   =========   ============*/
+    public function getUser() {
+        return $this->type_info->user;
+    }
+
+
     public function getSpecialNeedsTypeAttribute()
     {
         return SpecialNeedType::find($this->special_needs_type_id)->name;

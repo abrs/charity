@@ -8,7 +8,7 @@ class Activitable extends Model
 {
     protected $table = 'activitable';
 
-    protected $with = ['steps', 'activity'];
+    protected $with = ['activity'];
 
     protected $fillable = ['activitable_id', 'activitable_type'];
 
@@ -24,10 +24,10 @@ class Activitable extends Model
         return $this->belongsTo(Activity::class);
     }
 
-    public function steps() {
+    // public function steps() {
 
-        return $this->belongsToMany(Step::class, 'activity_workflow_steps', 'activitable_id', 'step_id')
-            ->withPivot('id','order_num', 'finishing_percentage', 'required', 'created_by')
-            ->withTimestamps();
-    }
+    //     return $this->belongsToMany(Step::class, 'activity_workflow_steps', 'activitable_id', 'step_id')
+    //         ->withPivot('id','order_num', 'finishing_percentage', 'required', 'created_by')
+    //         ->withTimestamps();
+    // }
 }
