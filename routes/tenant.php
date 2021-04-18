@@ -90,6 +90,8 @@ Route::group([
         //beneficiary infos controller routes
         #create new beneficiary
             
+
+        Route::post('beneficiary_infos/changeAcceptanceType', 'Api\BeneficiaryInfoController@changeAcceptanceType');
         Route::post('beneficiary_infos/createNewBeneficiaryNormal', 'Api\BeneficiaryInfoController@createNewBeneficiaryNormal');
         Route::post('beneficiary_infos/createNewBeneficiaryFast', 'Api\BeneficiaryInfoController@createNewBeneficiaryFast');
         Route::apiResource('beneficiary_infos', 'Api\BeneficiaryInfoController')->except('update');
@@ -136,6 +138,10 @@ Route::group([
         Route::post('step_approvals/processingRequest', 'Api\StepApprovalController@processingRequest');
         Route::apiResource('step_approvals', 'Api\StepApprovalController')->except('update');
         Route::post('step_approvals/{step_approval}', 'Api\StepApprovalController@update');
+
+        //polling stations routes
+        Route::apiResource('polling_stations', 'Api\PollingStationController')->except('update');
+        Route::post('polling_stations/{polling_station}', 'Api\PollingStationController@update');
 
         //locations routes
         Route::apiResource('locations', 'Api\LocationController')->except('update');

@@ -5,9 +5,8 @@ namespace App\Models;
 use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-// use Spatie\Translatable\HasTranslations;
 
-class Location extends Model
+class PollingStation extends Model
 {
     use SoftDeletes, EventsTrait;//, HasTranslations;
 
@@ -16,20 +15,18 @@ class Location extends Model
     // ];
     
     protected $fillable = [
-        'point_id', 
         'name',
+        'location_id', 
         'is_enabled', 
         'deleted_at', 
         'created_by',
         'modified_by', 
     ];
 
-    // protected $with = ['point'];
-    protected $hidden = ['point', 'pivot'];
 
     /** Relations ----------- */
-    public function point() {
-        return $this->belongsTo(Point::class);
+    public function location() {
+        return $this->belongsTo(Location::class);
     }
 
     public function beneficiaries() {
@@ -42,7 +39,7 @@ class Location extends Model
     =======   =========   ============*/
     public static function getModelAttributes($model) {
 
-        $classAttributes = ['name', 'point_id'];
+        $classAttributes = ['name', 'location_id'];
         $result = '';
 
         foreach($classAttributes as $attr){

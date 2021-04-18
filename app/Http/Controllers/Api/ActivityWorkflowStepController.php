@@ -122,6 +122,9 @@ class ActivityWorkflowStepController extends Controller
 
             'status_id' => ['required', new ValidModel('App\Models\Status')],
             'description' => ['required', 'min:10'],
+            /*TODO: let me update the type of the beneficiary to accepted, rejected or let it as it is
+                in this phase -just change its status_id- till the next one, I'll make it in another api.
+            */
         ]);
 
         if($validator->fails()){

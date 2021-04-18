@@ -42,6 +42,10 @@ class BeneficiaryInfoController extends Controller
     public function store(Request $request, bool $fastSignup = false, bool $beneficiaryRelatedToRelation = false)
     {
         $validator = \Validator::make($request->all(), [
+
+            #phone required unique for certain beneficiaryinfo
+            'phone' => ['required_if:gender,1', 'min:7', 'max:10', 'unique:beneficiary_infos,phone'],
+
             //no restrictions
             'first_name' => ['required'],
             
@@ -59,7 +63,7 @@ class BeneficiaryInfoController extends Controller
             
 
             //age restriction
-            'polling_station_name' => [Rule::requiredIf($request->age >= 18)],
+            'polling_station_id' => [Rule::requiredIf($request->age >= 18), new ValidModel('App/Models/pollingStation')],
             // 'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
             //death restriction
             'standing' => ['required_if:is_alive,0'],
@@ -99,14 +103,9 @@ class BeneficiaryInfoController extends Controller
 
             return \DB::transaction(function () use ($request, $fastSignup, $beneficiaryRelatedToRelation){
                     
-                $beneficiaryInfo = Beneficiary_Info::create(
+                $beneficiaryInfo = Beneficiary_Info::firstorcreate(
                     
                     [
-                        'type_infos_id' => $request->type_infos_id,
-                        // ],
-
-                        // [
-
                         'first_name'  => $request->first_name,
                         // 'en' => $request->first_name_en,
                         // ],
@@ -117,6 +116,14 @@ class BeneficiaryInfoController extends Controller
                         // 'en' => $request->third_name_en,
                         // ],
                         'fourth_name'  => $request->fourth_name,
+                    ],
+
+                    [
+
+                        'phone' => $request->phone,
+
+                        'type_infos_id' => $request->type_infos_id,
+                        
                         // 'en' => $request->fourth_name_en,
                         // ],
                         'last_name'  => $request->last_name,
@@ -128,7 +135,7 @@ class BeneficiaryInfoController extends Controller
                         'career'  => $request->career,
                             // 'en' => $request->career_en,
                         // ],
-                        'polling_station_name'  => $request->polling_station_name,
+                        'polling_station_id'  => $request->polling_station_id,
                             // 'en' => $request->polling_station_name_en,
                         // ],
                         'standing'  => $request->standing,
@@ -192,6 +199,9 @@ class BeneficiaryInfoController extends Controller
     public function update(Request $request, Beneficiary_Info $beneficiary_info)
     {
         $validator = \Validator::make($request->all(), [
+
+            'phone' => ['required', 'min:7', 'max:10', 'unique:beneficiary_infos,phone,' . $beneficiary_info->id],
+
             'first_name' => ['required'],
             // 'first_name_en' => ['required'],
             'second_name' => ['required'],
@@ -208,7 +218,8 @@ class BeneficiaryInfoController extends Controller
             // 'career_en' => ['required'],
 
             //age restriction
-            'polling_station_name' => [Rule::requiredIf($request->age >= 18)],
+            'polling_station_id' => [Rule::requiredIf($request->age >= 18), new ValidModel('App/Models/pollingStation')],
+
             // 'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
             //death restriction
             'standing' => ['required_if:is_alive,0'],
@@ -269,7 +280,7 @@ class BeneficiaryInfoController extends Controller
                     'career' => $request->career,
                         // 'en' => $request->career_en,
                     // ],
-                    'polling_station_name' => $request->polling_station_name,
+                    'polling_station_id' => $request->polling_station_id,
                         // 'en' => $request->polling_station_name_en,
                     // ],
                     'standing' => $request->standing,
@@ -356,7 +367,7 @@ class BeneficiaryInfoController extends Controller
 
     //1- create new beneficiary fast but his account won't be enabled yet
     public function createNewBeneficiaryNormal(Request $request) {
-//TODO:  assign beneficiary type mechanisem to normal insertion of new beneficiary
+    //TODO:  assign beneficiary type mechanisem to normal insertion of new beneficiary
         $validator = \Validator::make($request->all(), [
             'activity_id' => 'required'
         ]);
@@ -369,9 +380,7 @@ class BeneficiaryInfoController extends Controller
         return \DB::transaction(function () use ($request){
 
             #1- create new beneficiary
-            $beneficiaryInfo = $this->createNewBeneficiaryFast($request, false);
-
-            // $beneficiaryInfo->update(['is_enabled' => 0]);
+            $beneficiaryInfo = $this->createNewBeneficiaryFast($request, false);            
             
             #2- link a new normal insertion between a beneficiary and his activity of becoming beneficiary
             $activity = Activity::findOrFail($request->activity_id);
@@ -388,4 +397,28 @@ class BeneficiaryInfoController extends Controller
             return Message::response(true, 'beneficiary created and is waiting for processing..', $activitable);
         });
     }
+
+    /**=========    ==========  ==========  =======
+     *  change the beneficiary acceptance type
+     ====   ==========  ==========*/
+     public function changeAcceptanceType(Request $request) {
+
+        $validator = \Validator::make($request->all(), [
+
+            'beneficiary_id' => ['required', new ValidModel('App\Models\Beneficiary_Info')],
+            'beneficiary_type_id' => ['required', new ValidModel('App\Models\BeneficiaryType')],
+        ]);
+
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        $beneficiaryInfo = Beneficiary_Info::find($request->beneficiary_id);
+
+        $beneficiaryInfo->beneficiary_type()->associate($request->beneficiary_type_id);
+        $beneficiaryInfo->save();
+
+        return Message::response(true, 'done');
+     }
 }
