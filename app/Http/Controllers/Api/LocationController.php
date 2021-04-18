@@ -22,7 +22,7 @@ class LocationController extends Controller
             return Message::response(
                 true,
                 'done',
-                Location::paginate(25)
+                Location::all()
             );
         });
     }

@@ -17,7 +17,7 @@ class CreateUserRelationsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('relation_id')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('s_user_id')->nullable();
+            $table->unsignedBigInteger('beneficiary_id')->nullable();
             $table->unsignedBigInteger('family_budget')->nullable();
 
             $table->boolean('is_enabled')->default(true);
@@ -26,10 +26,10 @@ class CreateUserRelationsTable extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->unique(['relation_id', 'user_id', 's_user_id'], 'unique_r_u_s');
+            $table->unique(['relation_id', 'user_id', 'beneficiary_id'], 'unique_r_u_s');
             $table->foreign('relation_id')->references('id')->on('relations')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('s_user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('beneficiary_id')->references('id')->on('beneficiary_infos')->onDelete('cascade');
         });
     }
 

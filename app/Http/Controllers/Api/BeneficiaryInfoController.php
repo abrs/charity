@@ -7,6 +7,7 @@ use App\Helpers\{Tenant, Message};
 use App\Models\Activitable;
 use App\Models\Activity;
 use App\Models\Beneficiary_Info;
+use App\Models\BeneficiaryType;
 use App\Models\Type;
 use App\Rules\ValidModel;
 use Illuminate\Http\Request;
@@ -38,24 +39,24 @@ class BeneficiaryInfoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, bool $fastSignup = false)
+    public function store(Request $request, bool $fastSignup = false, bool $beneficiaryRelatedToRelation = false)
     {
         $validator = \Validator::make($request->all(), [
             //no restrictions
             'first_name' => ['required'],
-            // 'first_name_en' => ['required'],
+            
             'second_name' => ['required'],
-            // 'second_name_en' => ['required'],
+            
             'third_name' => ['required'],
-            // 'third_name_en' => ['required'],
+            
             'fourth_name' => ['required'],
-            // 'fourth_name_en' => ['required'],
+            
             'last_name' => ['required'],
-            // 'last_name_en' => ['required'],
+            
             'known_as' => ['required'],
-            // 'known_as_en' => ['required'],
+            
             'career' => ['required'],
-            // 'career_en' => ['required'],
+            
 
             //age restriction
             'polling_station_name' => [Rule::requiredIf($request->age >= 18)],
@@ -74,13 +75,14 @@ class BeneficiaryInfoController extends Controller
             //number restriction
             'national_number' => ['required', 'numeric'],
             //number unsigned max(3) min(1) restriction
-            'age' => ['required', 'numeric', 'min:1', 'max:200'],            
+            'age' => ['required', 'numeric', 'min:1', 'max:125'],            
             //boolean restriction
             'is_alive' => ['required', 'boolean'],
             //special needs restriction
             'special_needs_type_id' => ['required_if:is_special_needs,1'],
 
-            'type_infos_id'=>['required', new ValidModel('App\Models\Type_Info')],
+            //this type_infos_id is important whenever you need to link between user, type and beneficiary
+            'type_infos_id'=>['nullable', new ValidModel('App\Models\Type_Info')],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -89,38 +91,40 @@ class BeneficiaryInfoController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $fastSignup){
+        return Tenant::wrapTenant(function() use ($request, $fastSignup, $beneficiaryRelatedToRelation){
 
             // $beneficiaryInfo = Beneficiary_Info::where('type_infos_id', $request->type_infos_id)->first();
 
             // if(!$beneficiaryInfo) {
 
-                $beneficiaryInfo = Beneficiary_Info::firstOrcreate(
-
+            return \DB::transaction(function () use ($request, $fastSignup, $beneficiaryRelatedToRelation){
+                    
+                $beneficiaryInfo = Beneficiary_Info::create(
+                    
                     [
                         'type_infos_id' => $request->type_infos_id,
-                    ],
+                        // ],
 
-                    [
+                        // [
 
                         'first_name'  => $request->first_name,
-                            // 'en' => $request->first_name_en,
+                        // 'en' => $request->first_name_en,
                         // ],
                         'second_name'  => $request->second_name,
-                            // 'en' => $request->second_name_en,
+                        // 'en' => $request->second_name_en,
                         // ],
                         'third_name'  => $request->third_name,
-                            // 'en' => $request->third_name_en,
+                        // 'en' => $request->third_name_en,
                         // ],
                         'fourth_name'  => $request->fourth_name,
-                            // 'en' => $request->fourth_name_en,
+                        // 'en' => $request->fourth_name_en,
                         // ],
                         'last_name'  => $request->last_name,
-                            // 'en' => $request->last_name_en,
+                        // 'en' => $request->last_name_en,
                         // ],
                         'known_as'  => $request->known_as,
                             // 'en' => $request->known_as_en,
-                        // ],
+                            // ],
                         'career'  => $request->career,
                             // 'en' => $request->career_en,
                         // ],
@@ -128,7 +132,7 @@ class BeneficiaryInfoController extends Controller
                             // 'en' => $request->polling_station_name_en,
                         // ],
                         'standing'  => $request->standing,
-                            // 'en' => $request->standing_en,
+                        // 'en' => $request->standing_en,
                         // ],
 
                         'date_of_death' => $request->date_of_death,
@@ -141,13 +145,26 @@ class BeneficiaryInfoController extends Controller
                         'special_needs_type_id' => $request->special_needs_type_id,
 
                         "created_by" => auth()->user()->user_name,
-                        "is_enabled" => $fastSignup,
+                        // "is_enabled" => $fastSignup,
+                        'is_enabled' => 1,
                     ]
                 );
-            // }
 
-            return $fastSignup ? Message::response(true, 'beneficiary fast assigned successfully', $beneficiaryInfo) :
+                // die('beneficiaryRelatedToRelation: ' . $beneficiaryRelatedToRelation);
+                
+                if($beneficiaryRelatedToRelation) {
+                    #if for relation then it is disabled
+                    $beneficiaryInfo->is_enabled = 0;
+                    $beneficiaryInfo->save();
+
+                    // die('you are assigning relation to a beneficiary');
+                    return $beneficiaryInfo;
+                }
+
+                return !$fastSignup ? Message::response(true, 'beneficiary fast assigned successfully', $beneficiaryInfo) :
                 $beneficiaryInfo;
+                
+            });
         });
     }
 
@@ -260,7 +277,7 @@ class BeneficiaryInfoController extends Controller
                     // ],
 
                     "updated_by" => auth()->user()->user_name,
-                    "is_enabled" => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    "is_enabled" => $request->has('is_enabled') ? $request->is_enabled : $beneficiary_info->is_enabled,
                 ]
             );
 
@@ -290,24 +307,48 @@ class BeneficiaryInfoController extends Controller
     //create new beneficiary fast => admin
     public function createNewBeneficiaryFast(Request $request, bool $adminRequest = true) {
 
-        $beneficiaryType = Type::where('name', 'beneficiary')->first();
+        $beneficiaryUserType = Type::where('name', 'beneficiary')->first();
 
-        if(!$beneficiaryType) {return Message::response(true, 'create the beneficiary type first!!');}
+        if(!$beneficiaryUserType) {return Message::response(true, 'create the beneficiary type first!!');}
 
-        return \DB::transaction(function () use ($request, $beneficiaryType, $adminRequest){
+        return \DB::transaction(function () use ($request, $beneficiaryUserType, $adminRequest){
 
             if($adminRequest) {
                 //create new user using admin privilige
                 $user = app('App\Http\Controllers\Api\UserController')->signup($request, true);
                 if($user instanceof \Illuminate\Http\JsonResponse) return $user;
-            }else {
+
+                /*TODO: send notification to the newely created beneficiary tells him
+                    to add locations relations and phones.
+                */
+            }else {                
                 //not an admin => a beneficiary is inserting his data
                 $user = \Auth::user();
             }
             //assign the user a beneficiary type
-            $type_info = $user->assignType($beneficiaryType);
+            $type_info = $user->assignType($beneficiaryUserType);
             //create the user's beneficiary details.
             $beneficiaryInfo = $this->store($request->merge(['type_infos_id' => $type_info->id]), $adminRequest);
+
+            #the inserted beneficiary type according to who added him/her.
+            \DB::table('beneficiary_types')
+                ->when($adminRequest, function ($query) use ($beneficiaryInfo){
+                    //assign the new fast created beneficiary type of "accepted" if an admin who added it
+                    $acceptedBeneficiaryType = $query->where('name', 'accepted')->first();
+                    if(!$acceptedBeneficiaryType) {return Message::response(true, 'create the beneficiary type \"accepted\" first!!');}
+
+                    $beneficiaryInfo->beneficiary_type()->associate($acceptedBeneficiaryType->id);                    
+                    $beneficiaryInfo->save();
+
+                }, function ($query) use ($beneficiaryInfo){
+                    #else assign the beneficiary type "pending registered" if it's him who inserting the data.
+                    $PendedBeneficiaryType = $query->where('name', 'pending registered')->first();
+                    if(!$PendedBeneficiaryType) {return Message::response(true, 'create the beneficiary type \"pending registered\" first!!');}
+
+                    $beneficiaryInfo->beneficiary_type()->associate($PendedBeneficiaryType->id);
+                    $beneficiaryInfo->save();
+                });
+
 
             return $beneficiaryInfo;
         });
@@ -315,7 +356,7 @@ class BeneficiaryInfoController extends Controller
 
     //1- create new beneficiary fast but his account won't be enabled yet
     public function createNewBeneficiaryNormal(Request $request) {
-
+//TODO:  assign beneficiary type mechanisem to normal insertion of new beneficiary
         $validator = \Validator::make($request->all(), [
             'activity_id' => 'required'
         ]);
@@ -329,7 +370,8 @@ class BeneficiaryInfoController extends Controller
 
             #1- create new beneficiary
             $beneficiaryInfo = $this->createNewBeneficiaryFast($request, false);
-            $beneficiaryInfo->update(['is_enabled' => 0]);
+
+            // $beneficiaryInfo->update(['is_enabled' => 0]);
             
             #2- link a new normal insertion between a beneficiary and his activity of becoming beneficiary
             $activity = Activity::findOrFail($request->activity_id);

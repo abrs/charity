@@ -4,17 +4,11 @@ namespace App\Models;
 
 use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
-// use Spatie\Translatable\HasTranslations;
 
 class Point extends Model
 {
-    use SoftDeletes, EventsTrait;//, HasTranslations;
-
-    // public $translatable  = [
-    //     'name'
-    // ];
+    use SoftDeletes, EventsTrait;
     
     /**
      * The attributes that are mass assignable.

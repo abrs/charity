@@ -4,39 +4,37 @@ namespace App\Models;
 
 use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class UserRelation extends Model
+class BeneficiaryType extends Model
 {
     use SoftDeletes, EventsTrait;
     
-    protected $table = 'user_relations';
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'relation_id',    
-        'user_id',    
-        'beneficiary_id',
-        'family_budget',
-        'is_enabled', 
         'deleted_at', 
-        'created_by',
-        'modified_by',
+        'is_enabled', 
+        'created_by', 
+        'modified_by', 
+        'name'
     ];
 
+    /** Relations ----------- */
+    public function beneficiary_infos() {
+        return $this->hasMany(Beneficiary_Info::class, 'beneficiary_type_id');
+    }
 
-    /*=======   =========---============|
+
+    /*=======   =========   ============
     |    extra functionality...         |
     =======   =========   ============*/
     public static function getModelAttributes($model) {
 
-        $classAttributes = [
-            'relation_id',    
-            'user_id',    
-            's_user_id',
-            'family_budget',
-        ];
-        
+        $classAttributes = ['name'];
         $result = '';
 
         foreach($classAttributes as $attr){

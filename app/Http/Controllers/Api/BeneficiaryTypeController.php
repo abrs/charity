@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
+use App\Models\BeneficiaryType;
 use Illuminate\Http\Request;
-use App\Models\Point;
 
-class PointController extends Controller
+class BeneficiaryTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,7 +21,7 @@ class PointController extends Controller
             return Message::response(
                 true,
                 'done',
-                Point::all()
+                BeneficiaryType::all()
             );
         });
     }
@@ -35,7 +35,7 @@ class PointController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:points,name'],
+            'name'=>['required', 'unique:beneficiary_types,name'],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -45,7 +45,7 @@ class PointController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $point = Point::firstOrcreate(
+            $beneficiaryType = BeneficiaryType::firstOrcreate(
                 [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
@@ -54,22 +54,21 @@ class PointController extends Controller
                 ]
             );
 
-            return Message::response(true, 'created', $point);          
+            return Message::response(true, 'created', $beneficiaryType);          
         });
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Point  $point
+     * @param  \App\Api\Models\BeneficiaryType  $beneficiaryType
      * @return \Illuminate\Http\Response
      */
-    public function show(Point $point)
+    public function show(BeneficiaryType $beneficiaryType)
     {
-        // return Point::where('created_by->ar', 'مجرب1')->get();
-        return Tenant::wrapTenant(function() use ($point){
+        return Tenant::wrapTenant(function() use ($beneficiaryType){
 
-            return Message::response(true, 'done', $point);
+            return Message::response(true, 'done', $beneficiaryType);
         });
     }
 
@@ -77,13 +76,13 @@ class PointController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Point  $point
+     * @param  \App\Api\Models\BeneficiaryType  $beneficiaryType
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Point $point)
+    public function update(Request $request, BeneficiaryType $beneficiaryType)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:points,name,' . $point->id],
+            'name'=>['required', 'unique:beneficiary_types,name,' . $beneficiaryType->id],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -91,9 +90,9 @@ class PointController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
         
-        return Tenant::wrapTenant(function() use ($point, $request){
+        return Tenant::wrapTenant(function() use ($beneficiaryType, $request){
 
-            $point->update(
+            $beneficiaryType->update(
                 [
                     'name' => $request->name,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
@@ -101,21 +100,21 @@ class PointController extends Controller
                 ]
             );
 
-            return Message::response(true, 'updated', Point::findOrFail($point->id));
+            return Message::response(true, 'updated', BeneficiaryType::findOrFail($beneficiaryType->id));
         });
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Point  $point
+     * @param  \App\Api\Models\BeneficiaryType  $beneficiaryType
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Point $point)
+    public function destroy(BeneficiaryType $beneficiaryType)
     {
-        return Tenant::wrapTenant(function() use ($point){
+        return Tenant::wrapTenant(function() use ($beneficiaryType){
 
-            $point->delete();
+            $beneficiaryType->delete();
             return Message::response(true, 'deleted');
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Beneficiary_Info;
 use App\Models\Location;
 use App\Models\PhoneType;
 use App\Models\Relation;
@@ -87,10 +88,18 @@ class User extends Authenticatable
     public function relations()
     {
         return $this->belongsToMany(Relation::class, 'user_relations', 'user_id', 'relation_id')
-            ->withPivot('s_user_id', 'is_enabled', 'created_by')
+            ->withPivot('beneficiary_id', 'is_enabled', 'created_by')
             ->withTimestamps();
     }
 
+    //relations
+    public function beneficiary_relations()
+    {
+        return $this->belongsToMany(Beneficiary_Info::class, 'user_relations', 'user_id', 'beneficiary_id')
+            ->withPivot('beneficiary_id', 'is_enabled', 'created_by')
+            ->withTimestamps();
+    }
+    
     /*=======   =========   ============
     |    extra functionality...         |
     =======   =========   ============*/

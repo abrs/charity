@@ -83,6 +83,10 @@ Route::group([
         Route::apiResource('party_infos', 'Api\PartyInfoController')->except('update');
         Route::post('party_infos/{party_info}', 'Api\PartyInfoController@update');
 
+        //beneficiary_types
+        Route::apiResource('beneficiary_types', 'Api\BeneficiaryTypeController')->except('update');
+        Route::post('beneficiary_types/{beneficiary_type}', 'Api\BeneficiaryTypeController@update');
+
         //beneficiary infos controller routes
         #create new beneficiary
             

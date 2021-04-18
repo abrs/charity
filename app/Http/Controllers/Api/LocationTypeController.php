@@ -21,7 +21,7 @@ class LocationTypeController extends Controller
             return Message::response(
                 true,
                 'done',
-                LocationType::paginate(25)
+                LocationType::all()
             );
         });
     }

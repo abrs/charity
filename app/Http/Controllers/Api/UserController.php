@@ -344,8 +344,8 @@ class UserController extends Controller
         $validator = \Validator::make($request->all(), [
             'is_enabled'        => ['nullable', 'boolean'],
 
-            'user_id'    => ['required', new ValidModel('App\User')],
-            's_user_id'  => ['nullable', new ValidModel('App\User'), Rule::notIn($request->user_id)],
+            'user_id'    => ['nullable', new ValidModel('App\User')],
+            // 'beneficiary_id'  => ['nullable', new ValidModel('App\Models\Beneficiary_Info')],
             'relation_id'       => ['required', new ValidModel('App\Models\Relation')],
             'family_budget'     => ['required_if:relation_id,' . Relation::where('name', "Breadwinner")->first()->id],
         ]);
@@ -357,20 +357,33 @@ class UserController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            UserRelation::firstOrCreate(
-                [
-                    'user_id' => $request->user_id,
+            return \DB::transaction(function () use ($request){
+
+                #if provided with user_id then take it else an auth user who is assigning the relation
+                $request->user_id = $request->user_id ?? \Auth::user()->id;
+
+                #1- add the beneficiary related to the user
+                $beneficiaryInfo = app('App\Http\Controllers\Api\BeneficiaryInfoController')->store($request->merge([
+
+                    #it doesn't belong to type it's just a reference to a beneficiary
+                    'type_infos_id' => Null,
+
+                ]), true, true);
+
+                #if there were wrong return it
+                if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) return $beneficiaryInfo;
+
+
+                $beneficiaryInfo->relations()->attach($request->user_id, [
+
                     'relation_id' => $request->relation_id,
-                    's_user_id' => $request->s_user_id,
-                ],
-                [
                     'family_budget' => $request->has('family_budget') ? $request->family_budget : NULL,
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
                     'created_by' => auth()->user()->user_name,
-                ]
-            );
+                ]);
 
-           return Message::response(true, 'attached successfully');
+                return Message::response(true, 'attached successfully');
+            });
         });
     }
 
@@ -385,6 +398,7 @@ class UserController extends Controller
 
             'user_id' => ['required', new ValidModel('App\User')],
             'relation_id'    => ['required', new ValidModel('App\Models\Relation')],
+            'beneficiary_id'  => ['nullable', new ValidModel('App\Models\Beneficiary_Info')],
         ]);
 
         if($validator->fails()){
@@ -396,12 +410,17 @@ class UserController extends Controller
 
             $user = User::find($request->user_id);
 
-            $user->relations()->detach($request->relation_id);
+            $user->relations()->detach($request->relation_id, [
+
+                'beneficiary_id' => $request->beneficiary_id,
+                'modified_by' => \Auth::user()->user_name,
+            ]);
 
            return Message::response(true, 'unattached successfully');
         });
     }
 
+    //get all the users belongs to type
     public function getAllUsersBelongsToType(Request $request) {
 
         $validator = \Validator::make($request->all(), [

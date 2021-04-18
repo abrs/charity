@@ -6,6 +6,7 @@ use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\User;
 // use Spatie\Translatable\HasTranslations;
 
 class Beneficiary_Info extends Model
@@ -55,11 +56,20 @@ class Beneficiary_Info extends Model
         'age',
         'is_alive',
         'special_needs_type_id',
+        'beneficiary_type_id',
     ];
 
     /** Relations ----------- */
     public function type_info() {
         return $this->belongsTo(Type_Info::class, 'type_infos_id');
+    }
+
+    //relations
+    public function relations()
+    {
+        return $this->belongsToMany(User::class, 'user_relations', 'beneficiary_id', 'user_id')
+            ->withPivot('beneficiary_id', 'is_enabled', 'created_by')
+            ->withTimestamps();
     }
 
     /**
@@ -68,6 +78,10 @@ class Beneficiary_Info extends Model
     public function activitables()
     {
         return $this->morphMany(Activitable::class, 'activitable');        
+    }
+
+    public function beneficiary_type() {
+        return $this->belongsTo(BeneficiaryType::class);
     }
 
 
