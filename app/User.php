@@ -88,7 +88,7 @@ class User extends Authenticatable
     public function relations()
     {
         return $this->belongsToMany(Relation::class, 'user_relations', 'user_id', 'relation_id')
-            ->withPivot('beneficiary_id', 'is_enabled', 'created_by')
+            ->withPivot('beneficiary_id', 'relation_id', 'is_enabled', 'created_by')
             ->withTimestamps();
     }
 
@@ -96,7 +96,7 @@ class User extends Authenticatable
     public function beneficiary_relations()
     {
         return $this->belongsToMany(Beneficiary_Info::class, 'user_relations', 'user_id', 'beneficiary_id')
-            ->withPivot('beneficiary_id', 'is_enabled', 'created_by')
+            ->withPivot('beneficiary_id', 'relation_id', 'is_enabled', 'created_by')
             ->withTimestamps();
     }
     

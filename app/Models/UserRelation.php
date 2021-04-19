@@ -12,6 +12,7 @@ class UserRelation extends Model
     use SoftDeletes, EventsTrait;
     
     protected $table = 'user_relations';
+    protected $with = ['beneficiaries'];
 
     protected $fillable = [
         'relation_id',    

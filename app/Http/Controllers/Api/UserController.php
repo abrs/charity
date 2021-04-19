@@ -139,16 +139,19 @@ class UserController extends Controller
     //get the user profile
     public function getProfile() {
 
-        // return Tenant::wrapTenant(function() {
 
-            return Message::response(true, 'done' ,User::find(\Auth::user()->id)
-                ->load(['types', 'roles.permissions', 'relations', 'phones', 'locations'])
-                ->loadMissing(['type_infos' => function ($query) {
-                    $query->has('beneficiary_info');
-                }])
-                // ->load('type_infos')->has('type_infos.beneficiary_info')
-            );
-        // });
+        return Message::response(true, 'done' ,User::find(\Auth::user()->id)
+            ->load(['types', 'roles.permissions', 'phones', 'locations'])
+            ->loadMissing(['type_infos' => function ($query) {
+                $query->has('beneficiary_info');
+            }])
+            ->loadMissing(['beneficiary_relations' => function ($query) {
+                $query->where('relation_id', Relation::where('name', 'Breadwinner')->first()->id);
+            }])
+            ->loadCount(['beneficiary_relations' => function ($query) {
+                $query->where('relation_id', Relation::where('name', 'Breadwinner')->first()->id);
+            }])
+        );
     }
 
     #----------------------------------------------------
