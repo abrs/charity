@@ -10,6 +10,7 @@ use App\Models\Beneficiary_Info;
 use App\Models\BeneficiaryType;
 use App\Models\Type;
 use App\Rules\ValidModel;
+use BadMethodCallException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -39,12 +40,12 @@ class BeneficiaryInfoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, bool $fastSignup = false, bool $beneficiaryRelatedToRelation = false)
+    public function store(Request $request, bool $adminRequest = false, bool $beneficiaryRelatedToRelation = false)
     {
         $validator = \Validator::make($request->all(), [
 
             #phone required unique for certain beneficiaryinfo
-            'phone' => ['required_if:gender,1', 'min:7', 'max:10', 'unique:beneficiary_infos,phone'],
+            'phone' => ['required_if:gender,1', 'min:7', 'max:10', 'numeric', 'unique:beneficiary_infos,phone'],
 
             //no restrictions
             'first_name' => ['required'],
@@ -63,7 +64,7 @@ class BeneficiaryInfoController extends Controller
             
 
             //age restriction
-            'polling_station_id' => [Rule::requiredIf($request->age >= 18), new ValidModel('App/Models/pollingStation')],
+            'polling_station_id' => [Rule::requiredIf($request->age >= 18), new ValidModel('App\Models\PollingStation')],
             // 'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
             //death restriction
             'standing' => ['required_if:is_alive,0'],
@@ -95,13 +96,13 @@ class BeneficiaryInfoController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $fastSignup, $beneficiaryRelatedToRelation){
+        return Tenant::wrapTenant(function() use ($request, $adminRequest, $beneficiaryRelatedToRelation){
 
             // $beneficiaryInfo = Beneficiary_Info::where('type_infos_id', $request->type_infos_id)->first();
 
             // if(!$beneficiaryInfo) {
 
-            return \DB::transaction(function () use ($request, $fastSignup, $beneficiaryRelatedToRelation){
+            return \DB::transaction(function () use ($request, $adminRequest, $beneficiaryRelatedToRelation){
                     
                 $beneficiaryInfo = Beneficiary_Info::firstorcreate(
                     
@@ -152,7 +153,7 @@ class BeneficiaryInfoController extends Controller
                         'special_needs_type_id' => $request->special_needs_type_id,
 
                         "created_by" => auth()->user()->user_name,
-                        // "is_enabled" => $fastSignup,
+                        // "is_enabled" => $adminRequest,
                         'is_enabled' => 1,
                     ]
                 );
@@ -168,7 +169,7 @@ class BeneficiaryInfoController extends Controller
                     return $beneficiaryInfo;
                 }
 
-                return !$fastSignup ? Message::response(true, 'beneficiary fast assigned successfully', $beneficiaryInfo) :
+                return $adminRequest ? Message::response(true, 'beneficiary fast assigned successfully', $beneficiaryInfo) :
                 $beneficiaryInfo;
                 
             });
@@ -340,6 +341,7 @@ class BeneficiaryInfoController extends Controller
             $type_info = $user->assignType($beneficiaryUserType);
             //create the user's beneficiary details.
             $beneficiaryInfo = $this->store($request->merge(['type_infos_id' => $type_info->id]), $adminRequest);
+            if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) return $beneficiaryInfo;
 
             #the inserted beneficiary type according to who added him/her.
             \DB::table('beneficiary_types')
@@ -367,23 +369,19 @@ class BeneficiaryInfoController extends Controller
 
     //1- create new beneficiary fast but his account won't be enabled yet
     public function createNewBeneficiaryNormal(Request $request) {
-    //TODO:  assign beneficiary type mechanisem to normal insertion of new beneficiary
-        $validator = \Validator::make($request->all(), [
-            'activity_id' => 'required'
-        ]);
 
-        if($validator->fails()){
+        $addNewBeneficiaryActivity = Activity::where('name', 'add_new_beneficiary')->first();
+        if(!$addNewBeneficiaryActivity) {return Message::response(true, 'create the activity \"add_new_beneficiary\" first!!');}                
 
-            return Message::response(false,'Invalid Input' ,$validator->errors());  
-        }
 
-        return \DB::transaction(function () use ($request){
+        return \DB::transaction(function () use ($request, $addNewBeneficiaryActivity){
 
             #1- create new beneficiary
             $beneficiaryInfo = $this->createNewBeneficiaryFast($request, false);            
-            
+            if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) return $beneficiaryInfo;
+
             #2- link a new normal insertion between a beneficiary and his activity of becoming beneficiary
-            $activity = Activity::findOrFail($request->activity_id);
+            $activity = Activity::findOrFail($addNewBeneficiaryActivity->id);
 
             $activitable = new Activitable();
             $activitable->fill([
@@ -394,7 +392,38 @@ class BeneficiaryInfoController extends Controller
 
             $activitable = $activity->activitables()->save($activitable);
 
-            return Message::response(true, 'beneficiary created and is waiting for processing..', $activitable);
+            //add the steps related to adding new benefciary request automatically
+            #1- assign the step a needs custodian approval activity step            
+            $newStep = app('App\Http\Controllers\Api\ActivityWorkflowStepController')->store($request->merge([
+                'activitable_id' => $activitable->id,
+                'step_id' => 6,
+                'step_supervisor_id' => 3,
+                'order_num' => 1,
+                'finishing_percentage' => 50,
+                'required' => 1,
+                'status_id' => 1,
+                'description' => 'needs custodian approval',
+            ]), true);
+
+            if($newStep instanceof \Illuminate\Http\JsonResponse) return $newStep;
+
+
+            #2- assign the step a needs manager approval activity step
+            $newStep = app('App\Http\Controllers\Api\ActivityWorkflowStepController')->store($request->merge([
+                'activitable_id' => $activitable->id,
+                'step_id' => 7,
+                'step_supervisor_id' => 2,
+                'order_num' => 2,
+                'finishing_percentage' => 50,
+                'required' => 1,
+                'status_id' => 1,
+                'description' => 'needs manager approval',
+            ]), true);
+
+            if($newStep instanceof \Illuminate\Http\JsonResponse) return $newStep;
+
+
+            return Message::response(true, 'beneficiary request created and is waiting for processing..');
         });
     }
 

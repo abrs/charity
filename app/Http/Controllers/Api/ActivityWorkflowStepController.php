@@ -15,8 +15,9 @@ use Illuminate\Http\Request;
 class ActivityWorkflowStepController extends Controller
 {
 
+    //TODO: this method will be auto-injected due to who have to do it in adding new beneficiary normally scenario
     #store new activity workflow step..
-    public function store(Request $request) {
+    public function store(Request $request, bool $indirecRequest = false) {
 
         $validator = \Validator::make($request->all(), [
             #activity
@@ -39,7 +40,7 @@ class ActivityWorkflowStepController extends Controller
         }
 
         #there might be notifications here => use transactions
-        return \DB::transaction(function () use ($request){
+        return \DB::transaction(function () use ($request, $indirecRequest){
             
             $activityWorkflowStep = ActivityWorkflowSteps::firstOrCreate(
                 [
@@ -62,7 +63,8 @@ class ActivityWorkflowStepController extends Controller
             //TODO: you may send notification to the beneficiary tells him about the new step here.
 
 
-            return Message::response(true, 'activity assigned step successfully.', $activityWorkflowStep);
+            return !$indirecRequest ? Message::response(true, 'activity assigned step successfully.', $activityWorkflowStep) :
+                Null;
         });
     }    
 
