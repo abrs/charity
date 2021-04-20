@@ -106,6 +106,12 @@ class ActivityWorkflowStepController extends Controller
         $queryBelongsToMyRolesQuery = \DB::table('activity_workflow_steps')
             ->whereIn('step_supervisor_id', \Auth::user()->roles->pluck('id')->all());
 
+        #if there were waiting steps and you are asking for pending ones then show the next waiting one instead of showing the next pended
+        $waitingStatusId = Status::where('name', 'waiting')->first()->value('id');
+        $pendingStatusId = Status::where('name', 'pending')->first()->value('id');
+        $waitingRequest = ActivityWorkflowSteps::where('status_id', $waitingStatusId)->first();
+        if($request->status_id == $pendingStatusId && $waitingRequest) {$request->status_id = $waitingRequest->id;}
+
         //get all the ActivityWorkflowSteps that have the status_id I choose
         $queryBelongsToMyRolesQuery->where('status_id', $request->status_id);
         //filter them to the ones have the minimum order_num
