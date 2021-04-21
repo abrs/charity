@@ -35,9 +35,9 @@ class AddNewRequirementsToBeneficiaryInfosTable extends Migration
 
             $table->boolean('is_alive')->default(1);
 
-            $table->unsignedBigInteger('special_needs_type_id')->nullable();
+            // $table->unsignedBigInteger('special_needs_type_id')->nullable();
 
-            $table->foreign('special_needs_type_id')->references('id')->on('special_need_types')->onDelete('cascade');
+            // $table->foreign('special_needs_type_id')->references('id')->on('special_need_types')->onDelete('cascade');
         });
     }
 
@@ -68,7 +68,7 @@ class AddNewRequirementsToBeneficiaryInfosTable extends Migration
                 'email',
                 'is_alive',
                 'type_infos_id',
-                'special_needs_type_id',
+                // 'special_needs_type_id',
             ]);
         });
     }

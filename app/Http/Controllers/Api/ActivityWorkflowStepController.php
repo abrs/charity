@@ -110,6 +110,7 @@ class ActivityWorkflowStepController extends Controller
         $waitingStatusId = Status::where('name', 'waiting')->first()->value('id');
         $pendingStatusId = Status::where('name', 'pending')->first()->value('id');
         $waitingRequest = ActivityWorkflowSteps::where('status_id', $waitingStatusId)->first();
+        //TODO: when asking for waiting requests get the pended -but not the related to the waited -too.
         if($request->status_id == $pendingStatusId && $waitingRequest) {$request->status_id = $waitingRequest->id;}
 
         //get all the ActivityWorkflowSteps that have the status_id I choose

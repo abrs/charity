@@ -42,13 +42,15 @@ class BeneficiaryInfoController extends Controller
      */
     public function store(Request $request, bool $adminRequest = false, bool $beneficiaryRelatedToRelation = false)
     {
+        // die(var_dump($request->phone));
         $validator = \Validator::make($request->all(), [
 
-            #phone required unique for certain beneficiaryinfo
-            'phone' => ['required_if:gender,1', 'min:7', 'max:10', 'numeric', 'unique:beneficiary_infos,phone'],
-
+            
             //no restrictions
             'first_name' => ['required'],
+            
+            #phone required unique for certain beneficiaryinfo
+            'phone' => ['required_if:gender,1', 'digits:10', 'unique:beneficiary_infos,phone'],
             
             'second_name' => ['required'],
             
@@ -84,11 +86,14 @@ class BeneficiaryInfoController extends Controller
             //boolean restriction
             'is_alive' => ['required', 'boolean'],
             //special needs restriction
-            'special_needs_type_id' => ['required_if:is_special_needs,1'],
+            // 'special_needs_type_id' => ['required_if:is_special_needs,1'],
 
             //this type_infos_id is important whenever you need to link between user, type and beneficiary
             'type_infos_id'=>['nullable', new ValidModel('App\Models\Type_Info')],
             'is_enabled' => 'nullable|boolean',
+
+            'special_need_types' => ['required_if:is_special_needs,1', 'array'],
+            'special_need_types.*' => ['numeric', new ValidModel('App\Models\SpecialNeedType')],
         ]);
 
         if($validator->fails()){
@@ -150,13 +155,22 @@ class BeneficiaryInfoController extends Controller
                         'national_number' => $request->national_number,
                         'age' => $request->age,
                         'is_alive' => $request->is_alive,
-                        'special_needs_type_id' => $request->special_needs_type_id,
+                        // 'special_needs_type_id' => $request->special_needs_type_id,
 
                         "created_by" => auth()->user()->user_name,
                         // "is_enabled" => $adminRequest,
                         'is_enabled' => 1,
                     ]
                 );
+
+                //required_if:is_special_needs,1 => attach his/her special needs types
+                if($request->has('special_need_types')) {
+                    //add special needs type if it a special needs case
+                    $beneficiaryInfo->special_needs()->attach($request->special_need_types, [
+
+                        "created_by" => auth()->user()->user_name
+                    ]);
+                }
 
                 // die('beneficiaryRelatedToRelation: ' . $beneficiaryRelatedToRelation);
                 
@@ -201,7 +215,7 @@ class BeneficiaryInfoController extends Controller
     {
         $validator = \Validator::make($request->all(), [
 
-            'phone' => ['required', 'min:7', 'max:10', 'unique:beneficiary_infos,phone,' . $beneficiary_info->id],
+            'phone' => ['required', 'digits:10', 'unique:beneficiary_infos,phone,' . $beneficiary_info->id],
 
             'first_name' => ['required'],
             // 'first_name_en' => ['required'],
@@ -238,11 +252,12 @@ class BeneficiaryInfoController extends Controller
             //number unsigned max(3) min(1) restriction
             'age' => ['required', 'numeric', 'min:1', 'max:200'],
             //email restriction and unique
-            'email' => ['required', 'email'],
+            // 'email' => ['required', 'email'],
             //boolean restriction
             'is_alive' => ['required', 'boolean'],
             //special needs restriction
-            'special_needs_type_id' => ['required_if:is_special_needs,1'],
+            'special_need_types' => ['required_if:is_special_needs,1', 'array'],
+            'special_need_types.*' => ['numeric', new ValidModel('App\Models\SpecialNeedType')],
 
             // 'type_infos_id'=>['required', 'unique:beneficiary_infos,type_infos_id,' . $beneficiary_info->id, new ValidModel('App\Models\Type_Info')],
             'is_enabled' => 'nullable|boolean',
@@ -255,45 +270,64 @@ class BeneficiaryInfoController extends Controller
 
         return Tenant::wrapTenant(function() use ($request, $beneficiary_info){
 
-            $beneficiary_info->update(
-
-                [
-                    // 'type_infos_id' => $request->type_infos_id,
-                    // 'location_id' => $request->location_id,
-                    'first_name' => $request->first_name,
+            return \DB::transaction(function ($request, $beneficiary_info) {
+                
+                $beneficiary_info->update(
+                    
+                    [
+                        // 'type_infos_id' => $request->type_infos_id,
+                        // 'location_id' => $request->location_id,
+                        'first_name' => $request->first_name,
                         // 'en' => $request->first_name_en,
-                    // ],
-                    'second_name' => $request->second_name,
-                        // 'en' => $request->second_name_en,
-                    // ],
-                    'third_name' => $request->third_name,
+                        // ],
+                        'second_name' => $request->second_name,
+                            // 'en' => $request->second_name_en,
+                            // ],
+                        'third_name' => $request->third_name,
                         // 'en' => $request->third_name_en,
-                    // ],
-                    'fourth_name' => $request->fourth_name,
+                        // ],
+                        'fourth_name' => $request->fourth_name,
                         // 'en' => $request->fourth_name_en,
-                    // ],
-                    'last_name' => $request->last_name,
+                        // ],
+                        'last_name' => $request->last_name,
                         // 'en' => $request->last_name_en,
-                    // ],
-                    'known_as' => $request->known_as,
+                        // ],
+                        'known_as' => $request->known_as,
                         // 'en' => $request->known_as_en,
-                    // ],
-                    'career' => $request->career,
+                        // ],
+                        'career' => $request->career,
                         // 'en' => $request->career_en,
-                    // ],
-                    'polling_station_id' => $request->polling_station_id,
-                        // 'en' => $request->polling_station_name_en,
-                    // ],
-                    'standing' => $request->standing,
+                        // ],
+                        'polling_station_id' => $request->polling_station_id,
+                            // 'en' => $request->polling_station_name_en,
+                            // ],
+                        'standing' => $request->standing,
                         // 'en' => $request->standing_en,
-                    // ],
+                        // ],
+                        'date_of_death' => $request->date_of_death,
+                        'is_special_needs' => $request->is_special_needs,
+                        'birth' => $request->birth,
+                        'gender' => $request->gender,
+                        'national_number' => $request->national_number,
+                        'age' => $request->age,
+                        'is_alive' => $request->is_alive,
+                        
+                        "modified_by" => auth()->user()->user_name,
+                        "is_enabled" => $request->has('is_enabled') ? $request->is_enabled : $beneficiary_info->is_enabled,
+                    ]
+                );
+                
+                //required_if:is_special_needs,1 => attach his/her special needs types
+                if($request->has('special_need_types')) {
+                    //add special needs type if it a special needs case
+                    $beneficiary_info->special_needs()->sync($request->special_need_types, [
 
-                    "updated_by" => auth()->user()->user_name,
-                    "is_enabled" => $request->has('is_enabled') ? $request->is_enabled : $beneficiary_info->is_enabled,
-                ]
-            );
-
-           return Message::response(true, 'updated', Beneficiary_Info::findOrFail($beneficiary_info->id));
+                        "modified_by" => auth()->user()->user_name
+                    ]);
+                }
+            
+                return Message::response(true, 'updated', Beneficiary_Info::findOrFail($beneficiary_info->id));
+            });
         });
     }
 

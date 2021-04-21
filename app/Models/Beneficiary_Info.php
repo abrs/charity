@@ -27,8 +27,8 @@ class Beneficiary_Info extends Model
     
     protected $table = 'beneficiary_infos';
     // protected $with = ['locations'];
-    protected $hidden = ['type_infos_id', 'special_needs_type_id'];
-    protected $appends = ['special_needs_type'];
+    protected $hidden = ['type_infos_id'];
+    // protected $appends = ['special_needs_type'];
     // protected $casts = ['is_special_needs' => 'boolean',];
 
 
@@ -51,18 +51,24 @@ class Beneficiary_Info extends Model
         'date_of_death',
         'is_special_needs',
         'birth',
-        'phone',
         'gender',
         'national_number',
         'age',
         'is_alive',
-        'special_needs_type_id',
         'beneficiary_type_id',
+        'phone',
     ];
 
     /** Relations ----------- */
     public function type_info() {
         return $this->belongsTo(Type_Info::class, 'type_infos_id');
+    }
+
+    public function special_needs() {
+
+        return $this->belongsToMany(SpecialNeedType::class, 'beneficiary_special_needs_types', 
+            'beneficiary_id', 'special_needs_type_id')
+                ->withTimestamps();
     }
 
     //relations
@@ -94,10 +100,10 @@ class Beneficiary_Info extends Model
     }
 
 
-    public function getSpecialNeedsTypeAttribute()
-    {
-        return SpecialNeedType::find($this->special_needs_type_id)->name;
-    }
+    // public function getSpecialNeedsTypeAttribute()
+    // {
+    //     return SpecialNeedType::find($this->special_needs_type_id)->name;
+    // }
 
     public static function getModelAttributes($model) {
 
@@ -120,7 +126,6 @@ class Beneficiary_Info extends Model
             'national_number',
             'age',
             'is_alive',
-            'special_needs_type_id',
         ];
 
         $result = '';

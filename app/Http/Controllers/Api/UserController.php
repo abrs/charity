@@ -255,7 +255,7 @@ class UserController extends Controller
 
             'user_id'    => ['required', new ValidModel('App\User')],
             'phone_type_id'  => ['required', new ValidModel('App\Models\PhoneType')],
-            'number'       => ['required', 'unique:phones,number'],
+            'number'       => ['required', 'digits:10', 'unique:phones,number'],
         ]);
 
         if($validator->fails()){
