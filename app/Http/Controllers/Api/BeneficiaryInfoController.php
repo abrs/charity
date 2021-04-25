@@ -180,11 +180,10 @@ class BeneficiaryInfoController extends Controller
                     $beneficiaryInfo->save();
 
                     // die('you are assigning relation to a beneficiary');
-                    return $beneficiaryInfo;
+                    // return $beneficiaryInfo;
                 }
 
-                return $adminRequest ? Message::response(true, 'beneficiary fast assigned successfully', $beneficiaryInfo) :
-                $beneficiaryInfo;
+                return $beneficiaryInfo;
                 
             });
         });

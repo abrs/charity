@@ -373,35 +373,31 @@ class UserController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
 
-            return \DB::transaction(function () use ($request){
+        return \DB::transaction(function () use ($request){
 
-                #if provided with user_id then take it else an auth user who is assigning the relation
-                $request->user_id = $request->user_id ?? \Auth::user()->id;
+            #if provided with user_id then take it else an auth user who is assigning the relation
+            $request->user_id = $request->user_id ?? \Auth::user()->id;
 
-                #1- add the beneficiary related to the user
-                $beneficiaryInfo = app('App\Http\Controllers\Api\BeneficiaryInfoController')->store($request->merge([
+            #1- add the beneficiary related to the user
+            $beneficiaryInfo = app('App\Http\Controllers\Api\BeneficiaryInfoController')->store($request->merge([
 
-                    #it doesn't belong to type it's just a reference to a beneficiary
-                    'type_infos_id' => Null,
+                #it doesn't belong to type it's just a reference to a beneficiary
+                'type_infos_id' => Null,
 
-                ]), true, true);
+            ]), true, true);
 
-                #if there were wrong return it
-                if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($beneficiaryInfo);
+            if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($beneficiaryInfo);
 
+            $beneficiaryInfo->relations()->attach($request->user_id, [
 
-                $beneficiaryInfo->relations()->attach($request->user_id, [
+                'relation_id' => $request->relation_id,
+                'family_budget' => $request->has('family_budget') ? $request->family_budget : NULL,
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                'created_by' => auth()->user()->user_name,
+            ]);
 
-                    'relation_id' => $request->relation_id,
-                    'family_budget' => $request->has('family_budget') ? $request->family_budget : NULL,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'created_by' => auth()->user()->user_name,
-                ]);
-
-                return Message::response(true, 'attached successfully');
-            });
+            return Message::response(true, 'attached successfully');
         });
     }
 
