@@ -26,9 +26,9 @@ class Beneficiary_Info extends Model
     // ];
     
     protected $table = 'beneficiary_infos';
-    // protected $with = ['locations'];
+    protected $with = ['special_needs', 'beneficiary_type'];
     protected $hidden = ['type_infos_id'];
-    // protected $appends = ['special_needs_type'];
+    protected $appends = ['user_id']; //TODO: work on this later
     // protected $casts = ['is_special_needs' => 'boolean',];
 
 
@@ -45,7 +45,7 @@ class Beneficiary_Info extends Model
         'fourth_name',
         'last_name',
         'known_as',
-        'career',
+        'career_id',
         'polling_station_id',
         'standing',
         'date_of_death',
@@ -96,7 +96,11 @@ class Beneficiary_Info extends Model
     |    extra functionality...         |
     =======   =========   ============*/
     public function getUser() {
-        return $this->type_info->user;
+        return User::find($this->type_info()->select('user_id')->value('user_id'));
+    }
+
+    public function getUserIdAttribute() {
+        return \DB::table('type_infos')->where('id', $this->type_infos_id)->value('user_id');
     }
 
 
@@ -115,7 +119,7 @@ class Beneficiary_Info extends Model
             'fourth_name',
             'last_name',
             'known_as',
-            'career',
+            'career_id',
             'polling_station_id',
             'standing',
             'date_of_death',

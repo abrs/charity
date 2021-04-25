@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Helpers\{Tenant, Message};
+use App\Exceptions\JsonExceptionHandler;
 use App\Models\Relation;
 use App\Rules\ValidModel;
 use App\User;
@@ -120,7 +121,7 @@ class UserController extends Controller
             
             return Message::response(true, 'Authorization Granted', [
 
-                'user' => $user,
+                'user' => $user->load('roles.permissions'),
                 
                 'Auth-details' => [
                     'access_token' => $tokenResult->accessToken,
@@ -137,11 +138,22 @@ class UserController extends Controller
 
     #----------------------------------------------------
     //get the user profile
-    public function getProfile() {
+    public function getProfile(Request $request) {
 
+        $validator = \Validator::make($request->all(), [
+            'user_id'    => ['nullable', new ValidModel('App\User')],
+        ]);
 
-        return Message::response(true, 'done' ,User::find(\Auth::user()->id)
-            ->load(['types', 'roles.permissions', 'phones', 'locations', 
+        if($validator->fails()){
+
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        #if provided with user_id then take it else get me the profile of the authenticated user
+        $request->user_id = $request->user_id ?? \Auth::user()->id;
+
+        return Message::response(true, 'done' ,User::find($request->user_id)
+            ->load(['types', 'roles.permissions', 'phones', 'locations',
                 
                 'type_infos' => function ($query) {
                     $query->has('beneficiary_info');
@@ -255,7 +267,7 @@ class UserController extends Controller
 
             'user_id'    => ['required', new ValidModel('App\User')],
             'phone_type_id'  => ['required', new ValidModel('App\Models\PhoneType')],
-            'number'       => ['required', 'digits:10', 'unique:phones,number'],
+            'number'       => ['required', 'digits:11', 'unique:phones,number'],
         ]);
 
         if($validator->fails()){
@@ -377,7 +389,7 @@ class UserController extends Controller
                 ]), true, true);
 
                 #if there were wrong return it
-                if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) return $beneficiaryInfo;
+                if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($beneficiaryInfo);
 
 
                 $beneficiaryInfo->relations()->attach($request->user_id, [

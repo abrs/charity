@@ -53,7 +53,7 @@ Route::group([
             #getAllTheBeneficiariesUsers
             Route::get('getAllTheBeneficiariesUsers', 'Api\UserController@getAllTheBeneficiariesUsers');
             #getUserProfile
-            Route::get('getProfile', 'Api\UserController@getProfile');
+            Route::post('getProfile', 'Api\UserController@getProfile');
             
         });
 
@@ -138,6 +138,10 @@ Route::group([
         Route::post('step_approvals/processingRequest', 'Api\StepApprovalController@processingRequest');
         Route::apiResource('step_approvals', 'Api\StepApprovalController')->except('update');
         Route::post('step_approvals/{step_approval}', 'Api\StepApprovalController@update');
+
+        //careers routes
+        Route::apiResource('careers', 'Api\CareerController')->except('update');
+        Route::post('careers/{career}', 'Api\CareerController@update');
 
         //polling stations routes
         Route::apiResource('polling_stations', 'Api\PollingStationController')->except('update');

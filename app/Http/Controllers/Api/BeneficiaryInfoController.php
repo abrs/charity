@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
+use App\Exceptions\JsonExceptionHandler;
 use App\Models\Activitable;
 use App\Models\Activity;
 use App\Models\Beneficiary_Info;
@@ -23,13 +24,12 @@ class BeneficiaryInfoController extends Controller
      */
     public function index()
     {
-        
         return Tenant::wrapTenant(function() {
                         
             return Message::response(
                 true,
                 'done',
-                Beneficiary_Info::paginate(25)
+                Beneficiary_Info::where('is_enabled', 1)->paginate(25)
             );
         });
     }
@@ -50,7 +50,7 @@ class BeneficiaryInfoController extends Controller
             'first_name' => ['required'],
             
             #phone required unique for certain beneficiaryinfo
-            'phone' => ['required_if:gender,1', 'digits:10', 'unique:beneficiary_infos,phone'],
+            'phone' => ['required_if:gender,1', 'digits:11', 'unique:beneficiary_infos,phone'],
             
             'second_name' => ['required'],
             
@@ -62,7 +62,7 @@ class BeneficiaryInfoController extends Controller
             
             'known_as' => ['required'],
             
-            'career' => ['required'],
+            'career_id' => ['required', new ValidModel('App\Models\Career')],
             
 
             //age restriction
@@ -72,11 +72,11 @@ class BeneficiaryInfoController extends Controller
             'standing' => ['required_if:is_alive,0'],
             // 'standing_en' => ['required_if:is_alive,0'],
                 //date restriction
-            'date_of_death' => ['date_format:YYYY-MM-DD', 'required_if:is_alive,0'],
+            'date_of_death' => ['date', 'required_if:is_alive,0'],
             //boolean restriction
             'is_special_needs' => ['required', 'boolean'],
             //date restriction
-            'birth' => ['date_format:YYYY-MM-DD'],
+            'birth' => ['date'],
             //boolean restriction
             'gender' => ['required'],
             //number restriction
@@ -138,7 +138,7 @@ class BeneficiaryInfoController extends Controller
                         'known_as'  => $request->known_as,
                             // 'en' => $request->known_as_en,
                             // ],
-                        'career'  => $request->career,
+                        'career_id'  => $request->career_id,
                             // 'en' => $request->career_en,
                         // ],
                         'polling_station_id'  => $request->polling_station_id,
@@ -215,7 +215,7 @@ class BeneficiaryInfoController extends Controller
     {
         $validator = \Validator::make($request->all(), [
 
-            'phone' => ['required', 'digits:10', 'unique:beneficiary_infos,phone,' . $beneficiary_info->id],
+            'phone' => ['required', 'digits:11', 'unique:beneficiary_infos,phone,' . $beneficiary_info->id],
 
             'first_name' => ['required'],
             // 'first_name_en' => ['required'],
@@ -229,22 +229,23 @@ class BeneficiaryInfoController extends Controller
             // 'last_name_en' => ['required'],
             'known_as' => ['required'],
             // 'known_as_en' => ['required'],
-            'career' => ['required'],
+            'career_id' => ['required', new ValidModel('App\Models\Career')],
+
             // 'career_en' => ['required'],
 
             //age restriction
-            'polling_station_id' => [Rule::requiredIf($request->age >= 18), new ValidModel('App/Models/pollingStation')],
+            'polling_station_id' => [Rule::requiredIf($request->age >= 18), new ValidModel('App\Models\PollingStation')],
 
             // 'polling_station_name_en' => [Rule::requiredIf($request->age >= 18)],
             //death restriction
             'standing' => ['required_if:is_alive,0'],
             // 'standing_en' => ['required_if:is_alive,0'],
                 //date restriction
-            'date_of_death' => ['date_format:YYYY-MM-DD', 'required_if:is_alive,0'],
+            'date_of_death' => ['date', 'required_if:is_alive,0'],
             //boolean restriction
             'is_special_needs' => ['required', 'boolean'],
             //date restriction
-            'birth' => ['date_format:YYYY-MM-DD'],
+            'birth' => ['date'],
             //boolean restriction
             'gender' => ['required'],
             //number restriction
@@ -295,7 +296,7 @@ class BeneficiaryInfoController extends Controller
                         'known_as' => $request->known_as,
                         // 'en' => $request->known_as_en,
                         // ],
-                        'career' => $request->career,
+                        'career_id' => $request->career_id,
                         // 'en' => $request->career_en,
                         // ],
                         'polling_station_id' => $request->polling_station_id,
@@ -362,7 +363,7 @@ class BeneficiaryInfoController extends Controller
             if($adminRequest) {
                 //create new user using admin privilige
                 $user = app('App\Http\Controllers\Api\UserController')->signup($request, true);
-                if($user instanceof \Illuminate\Http\JsonResponse) return $user;
+                if($user instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($user);
 
                 /*TODO: send notification to the newely created beneficiary tells him
                     to add locations relations and phones.
@@ -375,7 +376,7 @@ class BeneficiaryInfoController extends Controller
             $type_info = $user->assignType($beneficiaryUserType);
             //create the user's beneficiary details.
             $beneficiaryInfo = $this->store($request->merge(['type_infos_id' => $type_info->id]), $adminRequest);
-            if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) return $beneficiaryInfo;
+            if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($beneficiaryInfo);
 
             #the inserted beneficiary type according to who added him/her.
             \DB::table('beneficiary_types')
@@ -412,7 +413,7 @@ class BeneficiaryInfoController extends Controller
 
             #1- create new beneficiary
             $beneficiaryInfo = $this->createNewBeneficiaryFast($request, false);            
-            if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) return $beneficiaryInfo;
+            if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($beneficiaryInfo);
 
             #2- link a new normal insertion between a beneficiary and his activity of becoming beneficiary
             $activity = Activity::findOrFail($addNewBeneficiaryActivity->id);
@@ -439,7 +440,7 @@ class BeneficiaryInfoController extends Controller
                 'description' => 'needs custodian approval',
             ]), true);
 
-            if($newStep instanceof \Illuminate\Http\JsonResponse) return $newStep;
+            if($newStep instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($newStep);
 
 
             #2- assign the step a needs manager approval activity step
@@ -454,7 +455,7 @@ class BeneficiaryInfoController extends Controller
                 'description' => 'needs manager approval',
             ]), true);
 
-            if($newStep instanceof \Illuminate\Http\JsonResponse) return $newStep;
+            if($newStep instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($newStep);
 
 
             return Message::response(true, 'beneficiary request created and is waiting for processing..');

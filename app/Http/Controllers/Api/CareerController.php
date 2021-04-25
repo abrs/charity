@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Helpers\{Tenant, Message};
 use Illuminate\Http\Request;
-use App\Models\PollingStation;
+use App\Models\Career;
 use App\Rules\ValidModel;
 
-class PollingStationController extends Controller
+class CareerController extends Controller
 {
+    
     /**
      * Display a listing of the resource.
      *
@@ -22,7 +23,7 @@ class PollingStationController extends Controller
             return Message::response(
                 true,
                 'done',
-                PollingStation::all()
+                Career::all()
             );
         });
     }
@@ -51,8 +52,8 @@ class PollingStationController extends Controller
 
         return Tenant::wrapTenant(function() use ($request){
 
-            $pollingStation = PollingStation::firstOrCreate(
-                [                    
+            $career = Career::firstOrCreate(
+                [
                     'location_id' => $request->location_id,
                     'name' => $request->name,
                 ],
@@ -66,21 +67,21 @@ class PollingStationController extends Controller
                 ]
             );
 
-           return Message::response(true, 'created', $pollingStation);
+           return Message::response(true, 'created', $career);
         });
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\PollingStation  $pollingStation
+     * @param  \App\Models\Career  $career
      * @return \Illuminate\Http\Response
      */
-    public function show(PollingStation $pollingStation)
+    public function show(Career $career)
     {
-        return Tenant::wrapTenant(function() use ($pollingStation){
+        return Tenant::wrapTenant(function() use ($career){
 
-            return Message::response('true', 'done', $pollingStation);
+            return Message::response('true', 'done', $career);
         });
     }
 
@@ -88,16 +89,15 @@ class PollingStationController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\PollingStation  $pollingStation
+     * @param  \App\Models\Career  $career
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, PollingStation $pollingStation)
+    public function update(Request $request, Career $career)
     {
         $validator = \Validator::make($request->all(), [
             'location_id'=>['required', new ValidModel('App\Models\Location')],
 
             'name'=>['required'],
-            // 'name_ar'=>['required', 'unique:locations,name->ar,' . $location->id],
 
             'is_enabled' => 'nullable|boolean',
         ]);
@@ -107,45 +107,35 @@ class PollingStationController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $pollingStation){
+        return Tenant::wrapTenant(function() use ($request, $career){
 
-            $pollingStation->where([
-
+            $carrer1 = $career->firstOrUpdate(
+            [
                 'name' => $request->name,
                 'location_id' => $request->location_id,
+            ],
 
-            ])->firstOr(function() use ($pollingStation, $request){
+            [
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                'modified_by' => auth()->user()->user_name,
+            ]);                        
+            
 
-                $pollingStation->update(
-    
-                    [
-                        'name' => $request->name,
-                        'location_id' => $request->location_id,
-                        //     'ar' => $request->name_ar,
-                        // ],
-                        // 'name' => $request->name,
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                        'modified_by' => auth()->user()->user_name,
-                    ]
-                );
-            });
-
-
-           return Message::response(true, 'updated', pollingStation::findOrFail($pollingStation->id));
+           return Message::response(true, 'updated', $career);
         });
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\PollingStation  $pollingStation
+     * @param  \App\Models\Career $career
      * @return \Illuminate\Http\Response
      */
-    public function destroy(PollingStation $pollingStation)
+    public function destroy(Career $career)
     {
-        return Tenant::wrapTenant(function() use ($pollingStation){
+        return Tenant::wrapTenant(function() use ($career){
 
-            $pollingStation->delete();
+            $career->delete();
             return Message::response(true, 'deleted');
         });
     }

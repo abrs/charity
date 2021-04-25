@@ -21,8 +21,8 @@ class AddNewRequirementsToBeneficiaryInfosTable extends Migration
             $table->string('fourth_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('known_as')->nullable();
-            $table->string('career')->nullable();
-            $table->string('polling_station_name')->nullable();
+            $table->string('career_id')->nullable();
+            $table->string('polling_station_id')->nullable();
             $table->string('standing')->nullable();
             
             $table->date('date_of_death')->nullable();
@@ -38,6 +38,8 @@ class AddNewRequirementsToBeneficiaryInfosTable extends Migration
             // $table->unsignedBigInteger('special_needs_type_id')->nullable();
 
             // $table->foreign('special_needs_type_id')->references('id')->on('special_need_types')->onDelete('cascade');
+            $table->foreign('career_id')->references('id')->on('careers')->onDelete('cascade');
+            $table->foreign('polling_station_id')->references('id')->on('polling_stations')->onDelete('cascade');
         });
     }
 

@@ -47,6 +47,10 @@ class ActivityWorkflowSteps extends Model
         return $this->belongsTo(Step::class, 'step_id');
     }
 
+    public function status() {
+        return $this->belongsTo(Status::class, 'status_id');
+    }
+
         /*=======   =========   ============
     |    extra functionality...         |
     =======   =========   ============*/
