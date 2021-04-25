@@ -178,27 +178,40 @@ class ActivityWorkflowStepController extends Controller
             $manager = Role::where(['name' => 'manager', 'id' => $activityWorkflowStep->step_supervisor_id])->first();
 
             if($custodian) {
-                #rejection scenario
+                #1- acceptance scenario
+                //no special changes
+
+                #2- rejection scenario
                 if($request->status_id == Status::where('name', 'cancelled')->first()->id) {
-                    //TODO: I reached here.
+                    
+                    #change the beneficiary type to rejected
+                    $this->changeBeneficiaryType($activityWorkflowStep, 'rejected');                    
+
+                    #next there were no need for manager approval so change its status and description
+                    ActivityWorkflowSteps::where('activitable_id', $activityWorkflowStep->activitable_id)
+                        ->where('step_id', 7)->first()->update([
+
+                            'description' => 'beneficiary rejected by custodian',
+                            'status_id' => Status::where('name', 'rejected')->value('id'),
+
+                            'modified_by' => auth()->user()->user_name,
+                        ]);
                 }
             }
 
             if($manager) {
-                #acceptance scenario
+                #1- acceptance scenario
                 if($request->status_id == Status::where('name', 'approved')->first()->id) {
-                    #change the beneficiary type to accepted.
-                    $activitable = Activitable::find($activityWorkflowStep->activitable_id);
-                    #only works if it related to beneficiary processing
-                    $beneficiaryId = $activitable->activitable_id;
-                    $beneficiary = Beneficiary_Info::find($beneficiaryId);
+                    
+                    #change the beneficiary type to approved
+                    $this->changeBeneficiaryType($activityWorkflowStep, 'approved');
+                }
 
-                    $acceptedBeneficiaryType = BeneficiaryType::where('name', 'accepted')->first();
-                    if(!$acceptedBeneficiaryType) {return Message::response(true, 'create the beneficiary type \"accepted\" first!!');}
+                #2- rejection scenario
+                if($request->status_id == Status::where('name', 'approved')->first()->id) {
 
-                    #change the type of the beneficiry to accepted if the manager gave him his approval.
-                    $beneficiary->beneficiary_type()->associate($acceptedBeneficiaryType->id);
-                    $beneficiary->save();
+                    #change the beneficiary type to rejected
+                    $this->changeBeneficiaryType($activityWorkflowStep, 'rejected');
                 }
             }
 
@@ -206,5 +219,23 @@ class ActivityWorkflowStepController extends Controller
 
             return Message::response(true, 'activity step updated successfully..');
         });
+    }
+
+    /* ======== =========   ==========  =======
+        d-r-y methods
+    ======= ======*/
+    private function changeBeneficiaryType(ActivityWorkflowSteps $activityWorkflowStep, string $beneficiaryType) {
+        #change the beneficiary type to specified.
+        $activitable = Activitable::find($activityWorkflowStep->activitable_id);
+        #only works if it related to beneficiary processing
+        $beneficiaryId = $activitable->activitable_id;
+        $beneficiary = Beneficiary_Info::find($beneficiaryId);
+
+        $specifiedBeneficiaryType = BeneficiaryType::where('name', $beneficiaryType)->first();
+        if(!$specifiedBeneficiaryType) {return Message::response(true, 'create the beneficiary type [' . $beneficiaryType . '] first!!');}
+
+        #change the type of the beneficiry
+        $beneficiary->beneficiary_type()->associate($specifiedBeneficiaryType->id);
+        $beneficiary->save();
     }
 }

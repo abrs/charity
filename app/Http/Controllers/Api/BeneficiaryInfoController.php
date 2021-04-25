@@ -108,23 +108,28 @@ class BeneficiaryInfoController extends Controller
             // if(!$beneficiaryInfo) {
 
             return \DB::transaction(function () use ($request, $adminRequest, $beneficiaryRelatedToRelation){
+
+                $oldBeneficiaryInfo = Beneficiary_Info::where([
+
+                    'first_name'  => $request->first_name,
+                    'second_name'  => $request->second_name,
+                    'third_name'  => $request->third_name,
+                    'fourth_name'  => $request->fourth_name,
+
+                ])->first();
+
+                if($oldBeneficiaryInfo) {
+
+                    return Message::response(false, 'already exists');
+                }
                     
-                $beneficiaryInfo = Beneficiary_Info::firstorcreate(
+                $beneficiaryInfo = Beneficiary_Info::create(
                     
                     [
                         'first_name'  => $request->first_name,
-                        // 'en' => $request->first_name_en,
-                        // ],
                         'second_name'  => $request->second_name,
-                        // 'en' => $request->second_name_en,
-                        // ],
                         'third_name'  => $request->third_name,
-                        // 'en' => $request->third_name_en,
-                        // ],
                         'fourth_name'  => $request->fourth_name,
-                    ],
-
-                    [
 
                         'phone' => $request->phone,
 
@@ -272,41 +277,30 @@ class BeneficiaryInfoController extends Controller
 
             return \DB::transaction(function ($request, $beneficiary_info) {
                 
-                $beneficiary_info->update(
+                $beneficiary_info->firstOrUpdate(
                     
                     [
-                        // 'type_infos_id' => $request->type_infos_id,
-                        // 'location_id' => $request->location_id,
                         'first_name' => $request->first_name,
-                        // 'en' => $request->first_name_en,
-                        // ],
+
                         'second_name' => $request->second_name,
-                            // 'en' => $request->second_name_en,
-                            // ],
+
                         'third_name' => $request->third_name,
-                        // 'en' => $request->third_name_en,
-                        // ],
+
                         'fourth_name' => $request->fourth_name,
-                        // 'en' => $request->fourth_name_en,
-                        // ],
+                    ],
+                    
+                    [
                         'last_name' => $request->last_name,
-                        // 'en' => $request->last_name_en,
-                        // ],
                         'known_as' => $request->known_as,
-                        // 'en' => $request->known_as_en,
-                        // ],
-                        'career_id' => $request->career_id,
-                        // 'en' => $request->career_en,
-                        // ],
-                        'polling_station_id' => $request->polling_station_id,
-                            // 'en' => $request->polling_station_name_en,
-                            // ],
-                        'standing' => $request->standing,
-                        // 'en' => $request->standing_en,
-                        // ],
-                        'date_of_death' => $request->date_of_death,
-                        'is_special_needs' => $request->is_special_needs,
                         'birth' => $request->birth,
+
+                        'career_id' => $request->career_id,
+                        'polling_station_id' => $request->polling_station_id,                        
+
+                        'standing' => $request->standing,
+                        'date_of_death' => $request->date_of_death,
+
+                        'is_special_needs' => $request->is_special_needs,
                         'gender' => $request->gender,
                         'national_number' => $request->national_number,
                         'age' => $request->age,
