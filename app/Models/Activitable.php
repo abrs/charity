@@ -8,7 +8,7 @@ class Activitable extends Model
 {
     protected $table = 'activitable';
 
-    protected $with = ['activity'];
+    protected $with = ['activity', 'beneficiary'];
 
     protected $fillable = ['activitable_id', 'activitable_type'];
 
@@ -22,6 +22,10 @@ class Activitable extends Model
 
     public function activity() {
         return $this->belongsTo(Activity::class);
+    }
+
+    public function beneficiary() {
+        return $this->belongsTo(Beneficiary_Info::class, 'activitable_id');
     }
 
     // public function steps() {

@@ -94,7 +94,8 @@ Route::group([
         Route::post('beneficiary_infos/changeAcceptanceType', 'Api\BeneficiaryInfoController@changeAcceptanceType');
         Route::post('beneficiary_infos/createNewBeneficiaryNormal', 'Api\BeneficiaryInfoController@createNewBeneficiaryNormal');
         Route::post('beneficiary_infos/createNewBeneficiaryFast', 'Api\BeneficiaryInfoController@createNewBeneficiaryFast');
-        Route::apiResource('beneficiary_infos', 'Api\BeneficiaryInfoController')->except('update');
+        Route::apiResource('beneficiary_infos', 'Api\BeneficiaryInfoController')->except(['update', 'index']);
+        Route::post('beneficiary_infos', 'Api\BeneficiaryInfoController@index');
         Route::post('beneficiary_infos/{beneficiary_info}', 'Api\BeneficiaryInfoController@update');
 
         //sentences routes

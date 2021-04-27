@@ -28,7 +28,7 @@ class Beneficiary_Info extends CustomModel
     protected $table = 'beneficiary_infos';
     protected $with = ['special_needs', 'beneficiary_type'];
     protected $hidden = ['type_infos_id'];
-    protected $appends = ['user_id']; //TODO: work on this later
+    protected $appends = ['user_id'];
     // protected $casts = ['is_special_needs' => 'boolean',];
 
 

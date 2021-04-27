@@ -72,17 +72,7 @@ class ActivityWorkflowStepController extends Controller
     #----------  ---------   ---------   ----------    ----------  ---------   ---------   ----------
 
     #process beneficiary request
-    public function processingRequest(Request $request) {
-
-        $validator = \Validator::make($request->all(), [
-
-            'status_id'=>['required', new ValidModel('App\Models\Status')],
-        ]);
-
-        if($validator->fails()){
-
-            return Message::response(false,'Invalid Input' ,$validator->errors());  
-        }
+    public function processingRequest() {
 
         //1- get the beneficiary locations
         $beneficiaryId = \DB::table('activity_workflow_steps')
@@ -107,15 +97,30 @@ class ActivityWorkflowStepController extends Controller
         $queryBelongsToMyRolesQuery = \DB::table('activity_workflow_steps')
             ->whereIn('step_supervisor_id', \Auth::user()->roles->pluck('id')->all());
 
-        #if there were waiting steps and you are asking for pending ones then show the next waiting one instead of showing the next pended
+        /*if there were waiting steps 
+            then get me the waited activitable_id if there were any and the pended ones that are related to other activitable
+        */
         $waitingStatusId = Status::where('name', 'waiting')->first()->id;
         $pendingStatusId = Status::where('name', 'pending')->first()->id;
-        $waitingRequest = ActivityWorkflowSteps::where('status_id', $waitingStatusId)->first();
-        //TODO: when asking for waiting requests get the pended -but not the related to the waited -too.
-        if($request->status_id == $pendingStatusId && $waitingRequest) {$request->status_id = $waitingRequest->id;}
 
-        //get all the ActivityWorkflowSteps that have the status_id I choose
-        $queryBelongsToMyRolesQuery->where('status_id', $request->status_id);
+        $waitingRequests = ActivityWorkflowSteps::where('status_id', $waitingStatusId)->get();
+
+        if($waitingRequests->isNotEmpty()) {
+
+            $waitingRequestActivitableId = $waitingRequests->pluck('activitable_id')->all();
+    
+            $pendingRequestId = ActivityWorkflowSteps::where('status_id', $pendingStatusId)
+                ->whereNotIn('activitable_id', $waitingRequestActivitableId)->get('id');
+
+            //get me the waited activitable_id if there were any and the pended ones that are related to other activitable
+            $queryBelongsToMyRolesQuery->whereIn('id', $waitingRequests->pluck('id')->merge($pendingRequestId)->all());
+
+        }else {
+
+            //get all the ActivityWorkflowSteps that have the status_id pended
+            $queryBelongsToMyRolesQuery->where('status_id', $pendingStatusId);
+        }
+
         //filter them to the ones have the minimum order_num
         $activityWorkflowStep = $queryBelongsToMyRolesQuery
             ->where('order_num', $queryBelongsToMyRolesQuery->min('order_num'))->get();

@@ -14,6 +14,8 @@ class LocationType extends Model
 
     protected $table = "location_types";
 
+    protected $hidden = ['pivot'];
+
     // public $translatable  = [
     //     'name'
     // ];

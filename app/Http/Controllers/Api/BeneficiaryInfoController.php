@@ -22,14 +22,29 @@ class BeneficiaryInfoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Tenant::wrapTenant(function() {
-                        
+        $validator = \Validator::make($request->all(), [
+
+            'beneficiary_type_id' => ['nullable', new ValidModel('App\Models\BeneficiaryType')],
+        ]);
+    
+        if($validator->fails()){
+    
+            return Message::response(false,'Invalid Input' ,$validator->errors());  
+        }
+
+        return Tenant::wrapTenant(function() use ($request){
+
             return Message::response(
                 true,
                 'done',
-                Beneficiary_Info::where('is_enabled', 1)->paginate(25)
+                $request->beneficiary_type_id == NULL
+                    ? Beneficiary_Info::where(['is_enabled' => 1])->paginate(25)
+                    : Beneficiary_Info::where([
+                        'is_enabled' => 1 , 
+                        'beneficiary_type_id' => $request->beneficiary_type_id
+                    ])->paginate(25)
             );
         });
     }

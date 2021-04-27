@@ -21,7 +21,7 @@ class StatusController extends Controller
             return Message::response(
                 true,
                 'done',
-                Status::paginate(25)
+                Status::all()
             );
         });
     }

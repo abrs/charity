@@ -60,7 +60,6 @@ class StepApprovalController extends Controller
                     'activity_workflow_steps_id' => $request->activity_workflow_steps_id,
                     // 'user_id' => $request->user_id,
                     // 'owner_id' => $request->owner_id,
-                    //TODO:
                 ],
                 
                 [
@@ -163,7 +162,6 @@ class StepApprovalController extends Controller
             ->join('activity_workflow_steps', function ($join) use ($request){
 
                 $join->on('step_approvals.activity_workflow_steps_id', '=', 'activity_workflow_steps.id')
-                //TODO: test this method again.
                 //and they must has the minimum order num
                 ->where('activity_workflow_steps.order_num', ActivityWorkflowSteps::min('order_num'))
                 //and status id I specify

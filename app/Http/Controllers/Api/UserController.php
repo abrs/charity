@@ -153,11 +153,15 @@ class UserController extends Controller
         $request->user_id = $request->user_id ?? \Auth::user()->id;
 
         return Message::response(true, 'done' ,User::find($request->user_id)
-            ->load(['types', 'roles.permissions', 'phones', 'locations',
+            ->load(['types', 'roles.permissions', 'phones',
+                
+                'locations.locationType' => function ($query) use ($request) {
+                    $query->where('user_id', $request->user_id);
+                },
                 
                 'type_infos' => function ($query) {
                     $query->has('beneficiary_info');
-                }, 
+                },
                 
                 'beneficiary_relations' => function ($query) {
                     $query->where('relation_id', Relation::where('name', 'Breadwinner')->first()->id);

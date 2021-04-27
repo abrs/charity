@@ -11,6 +11,8 @@ class Location extends Model
 {
     use SoftDeletes, EventsTrait;//, HasTranslations;
 
+    // protected $with = ['locationType'];
+
     // public $translatable  = [
     //     'name'
     // ];
@@ -30,6 +32,11 @@ class Location extends Model
     /** Relations ----------- */
     public function point() {
         return $this->belongsTo(Point::class);
+    }
+
+    public function locationType() {
+        return $this->belongsToMany(LocationType::class, 'user_location', 'location_id', 'location_type_id')            
+            ->withTimestamps();
     }
 
     public function beneficiaries() {

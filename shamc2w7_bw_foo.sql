@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 18, 2021 at 02:12 PM
+-- Generation Time: Apr 25, 2021 at 12:31 PM
 -- Server version: 8.0.18
 -- PHP Version: 7.4.2
 
@@ -41,7 +41,9 @@ CREATE TABLE `activitable` (
 --
 
 INSERT INTO `activitable` (`id`, `activity_id`, `activitable_type`, `activitable_id`, `created_at`, `updated_at`) VALUES
-(7, 1, 'App\\Models\\Beneficiary_Info', 23, '2021-04-08 07:50:38', '2021-04-08 07:50:38');
+(7, 1, 'App\\Models\\Beneficiary_Info', 23, '2021-04-08 07:50:38', '2021-04-08 07:50:38'),
+(8, 1, 'App\\Models\\Beneficiary_Info', 43, '2021-04-19 08:54:52', '2021-04-19 08:54:52'),
+(9, 1, 'App\\Models\\Beneficiary_Info', 46, '2021-04-21 08:03:36', '2021-04-21 08:03:36');
 
 -- --------------------------------------------------------
 
@@ -97,8 +99,10 @@ CREATE TABLE `activity_workflow_steps` (
 --
 
 INSERT INTO `activity_workflow_steps` (`id`, `is_enabled`, `created_by`, `modified_by`, `deleted_at`, `activitable_id`, `step_id`, `step_supervisor_id`, `step_supervisor_type`, `order_num`, `finishing_percentage`, `required`, `created_at`, `updated_at`, `status_id`, `description`) VALUES
-(3, 1, 'khald2002', NULL, NULL, 7, 6, 3, NULL, 1, '50', 1, '2021-04-08 08:32:37', '2021-04-14 04:12:48', 1, 'The description field is required.'),
-(4, 1, 'khald2002', NULL, NULL, 7, 7, 3, NULL, 2, '50', 1, '2021-04-12 07:19:02', '2021-04-12 07:19:02', 1, 'needs manager approval');
+(5, 1, 'khald2002', NULL, NULL, 8, 6, 3, NULL, 1, '50', 1, '2021-04-19 08:54:52', '2021-04-19 08:54:52', 1, 'needs custodian approval'),
+(6, 1, 'khald2002', NULL, NULL, 8, 7, 2, NULL, 2, '50', 1, '2021-04-19 08:54:52', '2021-04-19 08:54:52', 1, 'needs manager approval'),
+(7, 1, 'khald2002', NULL, NULL, 9, 6, 3, NULL, 1, '50', 1, '2021-04-21 08:03:36', '2021-04-21 08:03:36', 1, 'needs custodian approval'),
+(8, 1, 'khald2002', NULL, NULL, 9, 7, 2, NULL, 2, '50', 1, '2021-04-21 08:03:36', '2021-04-21 08:03:36', 1, 'needs manager approval');
 
 -- --------------------------------------------------------
 
@@ -121,7 +125,7 @@ CREATE TABLE `beneficiary_infos` (
   `fourth_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `last_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `known_as` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `career` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `career_id` bigint(20) UNSIGNED DEFAULT NULL,
   `standing` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date_of_death` date DEFAULT NULL,
   `is_special_needs` tinyint(1) NOT NULL DEFAULT '0',
@@ -130,7 +134,6 @@ CREATE TABLE `beneficiary_infos` (
   `national_number` bigint(20) UNSIGNED DEFAULT NULL,
   `age` int(10) UNSIGNED DEFAULT NULL,
   `is_alive` tinyint(1) NOT NULL DEFAULT '1',
-  `special_needs_type_id` bigint(20) UNSIGNED DEFAULT NULL,
   `beneficiary_type_id` bigint(20) UNSIGNED DEFAULT NULL,
   `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `polling_station_id` bigint(20) UNSIGNED DEFAULT NULL
@@ -140,11 +143,42 @@ CREATE TABLE `beneficiary_infos` (
 -- Dumping data for table `beneficiary_infos`
 --
 
-INSERT INTO `beneficiary_infos` (`id`, `type_infos_id`, `is_enabled`, `created_by`, `modified_by`, `deleted_at`, `created_at`, `updated_at`, `first_name`, `second_name`, `third_name`, `fourth_name`, `last_name`, `known_as`, `career`, `standing`, `date_of_death`, `is_special_needs`, `birth`, `gender`, `national_number`, `age`, `is_alive`, `special_needs_type_id`, `beneficiary_type_id`, `phone`, `polling_station_id`) VALUES
-(23, 33, 1, 'khald2002', NULL, NULL, '2021-04-08 07:50:37', '2021-04-18 11:05:37', 'khald', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 'engineer', NULL, NULL, 1, NULL, 1, 34562365, 20, 1, 1, 1, NULL, NULL),
-(36, 48, 1, 'khald2002', NULL, NULL, '2021-04-17 08:56:09', '2021-04-17 08:56:09', 'khald', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 'engineer', NULL, NULL, 1, NULL, 1, 34562365, 20, 1, 1, 1, NULL, NULL),
-(39, NULL, 0, 'khald2002', NULL, NULL, '2021-04-18 08:04:08', '2021-04-18 08:04:08', 'khald', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 'engineer', NULL, NULL, 1, NULL, 1, 34562365, 20, 1, 1, NULL, NULL, NULL),
-(40, NULL, 0, 'khald2002', NULL, NULL, '2021-04-18 08:11:52', '2021-04-18 08:11:52', 'khald', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 'engineer', NULL, NULL, 1, NULL, 1, 34562365, 20, 1, 1, NULL, NULL, 1);
+INSERT INTO `beneficiary_infos` (`id`, `type_infos_id`, `is_enabled`, `created_by`, `modified_by`, `deleted_at`, `created_at`, `updated_at`, `first_name`, `second_name`, `third_name`, `fourth_name`, `last_name`, `known_as`, `career_id`, `standing`, `date_of_death`, `is_special_needs`, `birth`, `gender`, `national_number`, `age`, `is_alive`, `beneficiary_type_id`, `phone`, `polling_station_id`) VALUES
+(23, 33, 1, 'khald2002', NULL, NULL, '2021-04-08 07:50:37', '2021-04-18 11:05:37', 'khald', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 2, NULL, NULL, 1, NULL, 1, 34562365, 20, 1, 1, NULL, NULL),
+(36, 48, 1, 'khald2002', NULL, NULL, '2021-04-17 08:56:09', '2021-04-17 08:56:09', 'khald', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 2, NULL, NULL, 1, NULL, 1, 34562365, 20, 1, 1, NULL, NULL),
+(39, NULL, 0, 'khald2002', NULL, NULL, '2021-04-18 08:04:08', '2021-04-18 08:04:08', 'khald', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 2, NULL, NULL, 1, NULL, 1, 34562365, 20, 1, NULL, NULL, NULL),
+(40, NULL, 0, 'khald2002', NULL, NULL, '2021-04-18 08:11:52', '2021-04-18 08:11:52', 'khald', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 2, NULL, NULL, 1, NULL, 1, 34562365, 20, 1, NULL, NULL, 1),
+(43, 33, 1, 'khald2002', NULL, NULL, '2021-04-19 08:54:52', '2021-04-19 08:54:52', 'hamdiiiiiiiiiiiiiiii', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 2, NULL, NULL, 1, NULL, 0, 34562365, 20, 1, 2, NULL, 1),
+(45, 5, 1, 'khald2002', NULL, NULL, '2021-04-20 07:28:38', '2021-04-20 07:28:38', 'sami', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 2, NULL, NULL, 1, NULL, 1, 34562365, 20, 1, NULL, '3746285765', 1),
+(46, 33, 1, 'khald2002', NULL, NULL, '2021-04-21 08:03:35', '2021-04-21 08:03:36', 'sosokkk', 'ghali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 1, NULL, NULL, 1, NULL, 0, 34562365, 20, 1, 2, NULL, 1),
+(47, 90, 1, 'khald2002', NULL, NULL, '2021-04-25 08:00:21', '2021-04-25 08:00:21', 'Yousif', 'sali', 'sami', 'Gorge', 'hadi', 'Abo Abdo', 1, NULL, NULL, 0, NULL, 1, 3456, 20, 1, 1, '35246234532', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `beneficiary_special_needs_types`
+--
+
+CREATE TABLE `beneficiary_special_needs_types` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `beneficiary_id` bigint(20) UNSIGNED NOT NULL,
+  `special_needs_type_id` bigint(20) UNSIGNED NOT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `created_by` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `modified_by` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `beneficiary_special_needs_types`
+--
+
+INSERT INTO `beneficiary_special_needs_types` (`id`, `beneficiary_id`, `special_needs_type_id`, `is_enabled`, `created_by`, `modified_by`, `deleted_at`, `created_at`, `updated_at`) VALUES
+(1, 23, 1, 1, 'khald2002', NULL, NULL, '2021-04-20 06:51:45', '2021-04-20 06:51:45'),
+(3, 45, 1, 1, 'khald2002', NULL, NULL, '2021-04-20 07:28:38', '2021-04-20 07:28:38'),
+(4, 46, 1, 1, 'khald2002', NULL, NULL, '2021-04-21 08:03:35', '2021-04-21 08:03:35');
 
 -- --------------------------------------------------------
 
@@ -171,6 +205,33 @@ INSERT INTO `beneficiary_types` (`id`, `name`, `is_enabled`, `created_by`, `modi
 (1, 'accepted', 1, 'khald2002', NULL, NULL, '2021-04-17 05:53:21', '2021-04-17 05:53:21'),
 (2, 'pending registered', 1, 'khald2002', NULL, NULL, '2021-04-17 05:55:54', '2021-04-17 05:55:54'),
 (3, 'rejected', 1, 'khald2002', NULL, NULL, '2021-04-17 05:56:49', '2021-04-17 05:56:49');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `careers`
+--
+
+CREATE TABLE `careers` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `location_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `created_by` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `modified_by` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `careers`
+--
+
+INSERT INTO `careers` (`id`, `location_id`, `name`, `is_enabled`, `created_by`, `modified_by`, `deleted_at`, `created_at`, `updated_at`) VALUES
+(1, 4, 'سائق قطار', 1, 'khald2002', 'khald2002', NULL, '2021-04-21 05:20:00', '2021-04-21 06:32:15'),
+(2, 4, 'دكتور جامعي', 1, 'khald2002', NULL, NULL, '2021-04-21 05:20:11', '2021-04-21 05:20:11'),
+(3, 4, 'عسكري', 1, 'khald2002', NULL, NULL, '2021-04-21 05:20:32', '2021-04-21 05:20:32');
 
 -- --------------------------------------------------------
 
@@ -229,7 +290,19 @@ INSERT INTO `events` (`id`, `action_name`, `eventable_type`, `eventable_id`, `to
 (36, 'Create', 'App\\User', 39, NULL, NULL, NULL, 'khald2002 Created User user_name: hamiiiiiiiiiiieeed, ', 3, '2021-04-17 08:17:08', '2021-04-17 08:17:08'),
 (40, 'Create', 'App\\User', 43, NULL, NULL, NULL, 'khald2002 Created User user_name: hamiiiiiiiiiiieeed, ', 3, '2021-04-17 08:56:09', '2021-04-17 08:56:09'),
 (41, 'Create', 'App\\Models\\PollingStation', 1, NULL, NULL, NULL, 'khald2002 Created PollingStation name: زمردة, location_id: 4, ', 3, '2021-04-18 10:18:28', '2021-04-18 10:18:28'),
-(42, 'Update', 'App\\Models\\PollingStation', 1, NULL, NULL, NULL, 'khald2002 Updated PollingStation name: بون بون, location_id: 4, ', 3, '2021-04-18 10:24:51', '2021-04-18 10:24:51');
+(42, 'Update', 'App\\Models\\PollingStation', 1, NULL, NULL, NULL, 'khald2002 Updated PollingStation name: بون بون, location_id: 4, ', 3, '2021-04-18 10:24:51', '2021-04-18 10:24:51'),
+(43, 'Create', 'App\\Models\\ActivityWorkflowSteps', 5, NULL, NULL, NULL, 'khald2002 Created ActivityWorkflowSteps status_id: 1, description: needs custodian approval, ', 3, '2021-04-19 08:54:52', '2021-04-19 08:54:52'),
+(44, 'Create', 'App\\Models\\ActivityWorkflowSteps', 6, NULL, NULL, NULL, 'khald2002 Created ActivityWorkflowSteps status_id: 1, description: needs manager approval, ', 3, '2021-04-19 08:54:52', '2021-04-19 08:54:52'),
+(45, 'Create', 'App\\Models\\Career', 1, NULL, NULL, NULL, 'khald2002 Created Career name: مدرس, location_id: 4, ', 3, '2021-04-21 05:20:00', '2021-04-21 05:20:00'),
+(46, 'Create', 'App\\Models\\Career', 2, NULL, NULL, NULL, 'khald2002 Created Career name: دكتور جامعي, location_id: 4, ', 3, '2021-04-21 05:20:11', '2021-04-21 05:20:11'),
+(47, 'Create', 'App\\Models\\Career', 3, NULL, NULL, NULL, 'khald2002 Created Career name: عسكري, location_id: 4, ', 3, '2021-04-21 05:20:32', '2021-04-21 05:20:32'),
+(48, 'Update', 'App\\Models\\Career', 1, NULL, NULL, NULL, 'khald2002 Updated Career name: رائد فضاء, location_id: 4, ', 3, '2021-04-21 05:23:22', '2021-04-21 05:23:22'),
+(49, 'Update', 'App\\Models\\Career', 1, NULL, NULL, NULL, 'khald2002 Updated Career name: سائق قطار, location_id: 4, ', 3, '2021-04-21 06:32:15', '2021-04-21 06:32:15'),
+(50, 'Create', 'App\\Models\\ActivityWorkflowSteps', 7, NULL, NULL, NULL, 'khald2002 Created ActivityWorkflowSteps status_id: 1, description: needs custodian approval, ', 3, '2021-04-21 08:03:36', '2021-04-21 08:03:36'),
+(51, 'Create', 'App\\Models\\ActivityWorkflowSteps', 8, NULL, NULL, NULL, 'khald2002 Created ActivityWorkflowSteps status_id: 1, description: needs manager approval, ', 3, '2021-04-21 08:03:36', '2021-04-21 08:03:36'),
+(77, 'Create', 'App\\User', 69, NULL, NULL, NULL, 'khald2002 Created User user_name: hamiiiiieeeee, ', 3, '2021-04-21 15:28:13', '2021-04-21 15:28:13'),
+(92, 'Create', 'App\\User', 84, NULL, NULL, NULL, 'khald2002 Created User user_name: hamiiiiieeeee, ', 3, '2021-04-25 07:58:43', '2021-04-25 07:58:43'),
+(93, 'Create', 'App\\User', 85, NULL, NULL, NULL, 'khald2002 Created User user_name: hadddd, ', 3, '2021-04-25 08:00:21', '2021-04-25 08:00:21');
 
 -- --------------------------------------------------------
 
@@ -588,7 +661,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (64, '2021_04_1_124643_create_user_relations_table', 45),
 (65, '2021_04_18_113528_add_phone_to_beneficiary_infos_table', 46),
 (66, '2021_04_18_121954_create_polling_stations_table', 47),
-(67, '2021_04_18_130724_change_polling_station_name_in_beneficiary_infos_table', 48);
+(67, '2021_04_18_130724_change_polling_station_name_in_beneficiary_infos_table', 48),
+(69, '2021_04_20_082245_create_beneficiary_special_needs_types_table', 49),
+(70, '2021_04_21_073606_create_careers_table', 50);
 
 -- --------------------------------------------------------
 
@@ -632,7 +707,10 @@ INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES
 (1, 'App\\User', 34),
 (1, 'App\\User', 35),
 (1, 'App\\User', 39),
-(1, 'App\\User', 43);
+(1, 'App\\User', 43),
+(1, 'App\\User', 69),
+(1, 'App\\User', 84),
+(1, 'App\\User', 85);
 
 -- --------------------------------------------------------
 
@@ -659,13 +737,17 @@ CREATE TABLE `oauth_access_tokens` (
 INSERT INTO `oauth_access_tokens` (`id`, `user_id`, `client_id`, `name`, `scopes`, `revoked`, `created_at`, `updated_at`, `expires_at`) VALUES
 ('087efc77e3ed4a5ef5bf40d40d37af11b2746ca8882365376ce4df1c2f4d287498071f1ec2d05402', 3, 2, 'Personal Access Token', '[]', 0, '2021-04-05 09:41:23', '2021-04-05 09:41:23', '2021-04-12 12:41:24'),
 ('0a300ba4a15b347b4b64c8ff05bd807bc32f6a925f4d51949851d75acbff1cf6361c5bf2192adb2d', 3, 2, 'Personal Access Token', '[]', 0, '2021-02-04 08:45:57', '2021-02-04 08:45:57', '2021-01-04 10:45:57'),
+('0a508e5eda972e67240323da366691e1f6db9a8f41fc4838e4a65ee5ff04130cee000af291c3a904', 3, 2, 'Personal Access Token', '[]', 0, '2021-04-21 07:27:50', '2021-04-21 07:27:50', '2021-04-28 10:27:51'),
+('0e40f520bb1e8879a8c87f9d46838eb409e6a08375f556895d4d62d665ca1bc450d75f7c37342cdb', 3, 2, 'Personal Access Token', '[]', 0, '2021-04-19 06:05:53', '2021-04-19 06:05:53', '2021-04-26 09:05:54'),
 ('19008ddb3fa7c66220debb2e4acc5075eba2c053ea6f50b18952f84ccdf246d7109c056d6767c2e0', 2, 2, 'Personal Access Token', '[]', 0, '2021-01-06 11:04:02', '2021-01-06 11:04:02', '2021-01-13 13:04:02'),
 ('1a5964fa6868539a1fb23c440b83d7a562743b338daffffd83237d1749dd112ac26dfc27cb5694b1', 4, 2, 'Personal Access Token', '[]', 0, '2021-01-20 10:34:55', '2021-01-20 10:34:55', '2021-01-27 12:34:55'),
 ('1f3c450fe4b0a3a58ca24006ed7c8ad438a099cff7ed32688a4eb7a822fb8d45022f28e7d41bbb06', 3, 2, 'Personal Access Token', '[]', 0, '2021-03-14 07:31:13', '2021-03-14 07:31:13', '2021-03-21 09:31:14'),
 ('2c1089836c5821d54b115f2cc823d26c62f64b766a9881913a96a48c0d7f3eb5c80c8754d5b85cbf', 1, 2, 'Personal Access Token', '[]', 1, '2021-01-06 12:17:44', '2021-01-06 12:17:44', '2021-01-13 14:17:44'),
+('318ebdff6f83a00da68701a7f1b9020f0980fd907ee96d9437b89eb1bd1b3bfa1bfb17a740527408', 3, 2, 'Personal Access Token', '[]', 0, '2021-04-21 05:16:36', '2021-04-21 05:16:36', '2021-04-28 08:16:37'),
 ('4bd2627e01dfe430fc0bc1e2d2f370b3b5b049862ab9c9db4b68b3849f3f68d8c14708219b4d5801', 3, 2, 'Personal Access Token', '[]', 0, '2021-04-12 05:28:11', '2021-04-12 05:28:11', '2021-04-19 08:28:12'),
 ('61ba8f581fb79e045b3eaabb493511b524b8866c4af4a7110da6d086980405dcd208171893706233', 3, 2, 'Personal Access Token', '[]', 1, '2021-04-13 09:36:10', '2021-04-13 09:36:10', '2021-04-20 12:36:11'),
 ('6a678e2ed114cdff969b60295ade3049f0e43a8ac74dfaa9010a1a00e77b63b6e8eebf49fbaa0087', 3, 2, 'Personal Access Token', '[]', 0, '2021-02-18 15:31:44', '2021-02-18 15:31:44', '2021-02-25 17:31:45'),
+('6ec09b60f5a25e2e712bf71db3a679d7a32139f2d9f6c5ca55ec6e59d366248ad38b32ebb23ef12b', 3, 2, 'Personal Access Token', '[]', 0, '2021-04-20 06:27:07', '2021-04-20 06:27:07', '2021-04-27 09:27:07'),
 ('7fea5ace6c22f42a6f089f0f6a611fed387c31256210592609bc486bfce0aa93696ddfb9a7228794', 3, 2, 'Personal Access Token', '[]', 0, '2021-02-28 05:38:29', '2021-02-28 05:38:29', '2021-03-07 07:38:30'),
 ('8e9ba96e9b17b00f9f8bbe64a8d5133382102ed054ca8594231f885487a244200ca3eff6b73bf80a', 3, 2, 'Personal Access Token', '[]', 0, '2021-02-03 16:27:47', '2021-02-03 16:27:47', '2021-02-10 18:27:48'),
 ('97698c9747cc9a703e9cb3b43bf1d1d5a1dffc980641a63177d3b91d938806af07343ab911f63216', 1, 2, 'Personal Access Token', '[]', 0, '2021-01-06 10:55:21', '2021-01-06 10:55:21', '2021-01-13 12:55:22'),
@@ -1145,10 +1227,7 @@ INSERT INTO `statuses` (`id`, `name`, `is_enabled`, `created_by`, `modified_by`,
 (1, 'pending', 1, 'tester1', NULL, NULL),
 (2, 'waiting', 1, 'tester1', NULL, NULL),
 (3, 'approved', 1, 'tester1', NULL, NULL),
-(4, 'cancelled', 1, 'tester1', NULL, NULL),
-(5, 'not started', 1, 'tester1', NULL, NULL),
-(6, 'in progress', 1, 'tester1', NULL, NULL),
-(7, 'completed', 1, 'tester1', NULL, NULL);
+(4, 'cancelled', 1, 'tester1', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1194,14 +1273,6 @@ CREATE TABLE `step_approvals` (
   `modified_by` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `step_approvals`
---
-
-INSERT INTO `step_approvals` (`id`, `created_at`, `updated_at`, `activity_workflow_steps_id`, `status_id`, `description`, `is_enabled`, `created_by`, `modified_by`, `deleted_at`) VALUES
-(4, '2021-04-08 08:32:37', '2021-04-08 08:32:37', 3, 1, 'your request has been sent and waiting server approval', 1, 'khald2002', NULL, NULL),
-(6, '2021-04-12 07:19:02', '2021-04-12 07:19:02', 4, 1, 'your request has been sent and waiting manager approval', 1, 'khald2002', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1263,7 +1334,9 @@ INSERT INTO `type_infos` (`id`, `user_id`, `type_id`, `deleted_at`, `is_enabled`
 (28, 2, 33, NULL, 1, 'khald2002', 'khald2002', '2021-02-04 13:53:06', '2021-03-29 05:17:40'),
 (32, 28, 9, NULL, 1, 'khald2002', NULL, '2021-04-04 09:17:50', '2021-04-04 09:17:50'),
 (33, 3, 9, NULL, 1, 'khald2002', NULL, '2021-04-05 08:56:23', '2021-04-05 08:56:23'),
-(48, 43, 9, NULL, 1, 'khald2002', NULL, '2021-04-17 08:56:09', '2021-04-17 08:56:09');
+(48, 43, 9, NULL, 1, 'khald2002', NULL, '2021-04-17 08:56:09', '2021-04-17 08:56:09'),
+(89, 84, 9, NULL, 1, 'khald2002', NULL, '2021-04-25 07:58:43', '2021-04-25 07:58:43'),
+(90, 85, 9, NULL, 1, 'khald2002', NULL, '2021-04-25 08:00:21', '2021-04-25 08:00:21');
 
 -- --------------------------------------------------------
 
@@ -1296,7 +1369,9 @@ INSERT INTO `users` (`id`, `password`, `user_name`, `email`, `deleted_at`, `is_e
 (5, '$2y$10$CLAykW0yza8GiJx4Ec94NeWACFT6xKZotwzMslV/ikUgCpq/SjGfW', 'koko34', NULL, NULL, 1, NULL, NULL, '2021-01-27 09:39:51', '2021-01-27 09:39:51'),
 (24, '$2y$10$bZw0u7A5SBSt6DLL8TkHduxt1RfLuDlZyQuVliXrkk1j0O9LGqRYm', 'oioi34', NULL, NULL, 1, NULL, NULL, '2021-02-17 10:53:07', '2021-02-17 10:53:07'),
 (28, '$2y$10$CTBbvnt.mqxXwa6/bbsGBen5xE7Gn5a/rSwsyOKYp/jrkOSgSMjpK', 'golden roger', NULL, NULL, 1, NULL, NULL, '2021-04-04 09:17:50', '2021-04-04 09:17:50'),
-(43, '$2y$10$P360UtwDybQrmK7UWALqj.6B3ne1h86Vg9R9Yo23D3uriX3AwjAci', 'hamiiiiiiiiiiieeed', NULL, NULL, 1, NULL, NULL, '2021-04-17 08:56:09', '2021-04-17 08:56:09');
+(43, '$2y$10$P360UtwDybQrmK7UWALqj.6B3ne1h86Vg9R9Yo23D3uriX3AwjAci', 'hamiiiiiiiiiiieeed', NULL, NULL, 1, NULL, NULL, '2021-04-17 08:56:09', '2021-04-17 08:56:09'),
+(84, '$2y$10$ypG2OjqRY1iLOqU/H9Au7eurC0EfnV34clnP6pNuJItkqwQfXBVpy', 'hamiiiiieeeee', NULL, NULL, 1, NULL, NULL, '2021-04-25 07:58:43', '2021-04-25 07:58:43'),
+(85, '$2y$10$iXqH8XoT0ahXu1dsRDMh8.fB9Z4d6H85JrBuWK3xi74AhYBQJPIg2', 'hadddd', NULL, NULL, 1, NULL, NULL, '2021-04-25 08:00:21', '2021-04-25 08:00:21');
 
 -- --------------------------------------------------------
 
@@ -1384,15 +1459,30 @@ ALTER TABLE `activity_workflow_steps`
 ALTER TABLE `beneficiary_infos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `beneficiary_infos_type_infos_id_foreign` (`type_infos_id`),
-  ADD KEY `beneficiary_infos_special_needs_type_id_foreign` (`special_needs_type_id`),
   ADD KEY `beneficiary_infos_beneficiary_type_id_foreign` (`beneficiary_type_id`),
-  ADD KEY `beneficiary_infos_polling_station_id_foreign` (`polling_station_id`);
+  ADD KEY `beneficiary_infos_polling_station_id_foreign` (`polling_station_id`),
+  ADD KEY `beneficiary_career_id_foreign` (`career_id`);
+
+--
+-- Indexes for table `beneficiary_special_needs_types`
+--
+ALTER TABLE `beneficiary_special_needs_types`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_ben_spc_need` (`beneficiary_id`,`special_needs_type_id`),
+  ADD KEY `beneficiary_special_needs_types_special_needs_type_id_foreign` (`special_needs_type_id`);
 
 --
 -- Indexes for table `beneficiary_types`
 --
 ALTER TABLE `beneficiary_types`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `careers`
+--
+ALTER TABLE `careers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `careers_location_id_foreign` (`location_id`);
 
 --
 -- Indexes for table `events`
@@ -1686,7 +1776,7 @@ ALTER TABLE `user_relations`
 -- AUTO_INCREMENT for table `activitable`
 --
 ALTER TABLE `activitable`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `activities`
@@ -1698,13 +1788,19 @@ ALTER TABLE `activities`
 -- AUTO_INCREMENT for table `activity_workflow_steps`
 --
 ALTER TABLE `activity_workflow_steps`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `beneficiary_infos`
 --
 ALTER TABLE `beneficiary_infos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+
+--
+-- AUTO_INCREMENT for table `beneficiary_special_needs_types`
+--
+ALTER TABLE `beneficiary_special_needs_types`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `beneficiary_types`
@@ -1713,10 +1809,16 @@ ALTER TABLE `beneficiary_types`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `careers`
+--
+ALTER TABLE `careers`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=94;
 
 --
 -- AUTO_INCREMENT for table `forms`
@@ -1770,7 +1872,7 @@ ALTER TABLE `location_types`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
 
 --
 -- AUTO_INCREMENT for table `oauth_clients`
@@ -1884,13 +1986,13 @@ ALTER TABLE `types`
 -- AUTO_INCREMENT for table `type_infos`
 --
 ALTER TABLE `type_infos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT for table `user_location`
@@ -1926,10 +2028,23 @@ ALTER TABLE `activity_workflow_steps`
 -- Constraints for table `beneficiary_infos`
 --
 ALTER TABLE `beneficiary_infos`
+  ADD CONSTRAINT `beneficiary_career_id_foreign` FOREIGN KEY (`career_id`) REFERENCES `careers` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   ADD CONSTRAINT `beneficiary_infos_beneficiary_type_id_foreign` FOREIGN KEY (`beneficiary_type_id`) REFERENCES `beneficiary_types` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `beneficiary_infos_polling_station_id_foreign` FOREIGN KEY (`polling_station_id`) REFERENCES `polling_stations` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `beneficiary_infos_special_needs_type_id_foreign` FOREIGN KEY (`special_needs_type_id`) REFERENCES `special_need_types` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `beneficiary_infos_type_infos_id_foreign` FOREIGN KEY (`type_infos_id`) REFERENCES `type_infos` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `beneficiary_special_needs_types`
+--
+ALTER TABLE `beneficiary_special_needs_types`
+  ADD CONSTRAINT `beneficiary_special_needs_types_beneficiary_id_foreign` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary_infos` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `beneficiary_special_needs_types_special_needs_type_id_foreign` FOREIGN KEY (`special_needs_type_id`) REFERENCES `special_need_types` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `careers`
+--
+ALTER TABLE `careers`
+  ADD CONSTRAINT `careers_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `events`
