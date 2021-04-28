@@ -49,27 +49,26 @@ class RelationController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $relation = Relation::checkOrCreate(
+            [
+                'name' => $request->name,
+            ],
 
-            $relation = Relation::firstOrCreate(
+            [
+                //     'en' => $request->name_en,
+                // ],
 
-                [
-                    'name' => $request->name,
-                    //     'en' => $request->name_en,
-                    // ],
-
-                    'description' => $request->has('description') ? $request->description : Null,
-                    //     'en' => $request->has('description_en') ? $request->description_en : Null,
-                    // ],
-                    'code' => $this->getCode(5, now()),
-                    // 's_beneficiary_id' => $request->has('s_beneficiary_id') ? $request->s_beneficiary_id : Null,
-                    
-                    'created_by' => auth()->user()->user_name,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                ]
-            );
-            return Message::response(true, 'created', $relation);
-        });
+                'description' => $request->has('description') ? $request->description : Null,
+                //     'en' => $request->has('description_en') ? $request->description_en : Null,
+                // ],
+                'code' => $this->getCode(5, now()),
+                // 's_beneficiary_id' => $request->has('s_beneficiary_id') ? $request->s_beneficiary_id : Null,
+                
+                'created_by' => auth()->user()->user_name,
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+            ]
+        );
+        return Message::response(true, 'created', $relation);
     }
 
     /**

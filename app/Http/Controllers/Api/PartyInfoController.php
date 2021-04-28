@@ -49,21 +49,18 @@ class PartyInfoController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $partyInfo = Party_Info::checkOrCreate(
 
-            $partyInfo = Party_Info::firstOrCreate(
+            ['type_infos_id' => $request->type_infos_id],
 
-                ['type_infos_id' => $request->type_infos_id],
+            [
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                'created_by' => auth()->user()->user_name,
+                'code' => $this->getCode(5, now()),
+            ]
+        );
 
-                [
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
-                    'created_by' => auth()->user()->user_name,
-                    'code' => $this->getCode(5, now()),
-                ]
-            );
-
-           return Message::response(true, 'created', $partyInfo);
-        });
+        return Message::response(true, 'created', $partyInfo);
     }
 
     /**
@@ -182,48 +179,45 @@ class PartyInfoController extends Controller
         #create a password for the user
         $password = bcrypt($request->password);
 
-        return Tenant::wrapTenant(function() use ($request, $password){
+        return \DB::transaction(function () use ($request, $password){
 
-            return \DB::transaction(function () use ($request, $password){
+            #1- create user
+            $created_user = User::checkOrCreate(
+                #a user with the same name is an old user.
+                ['user_name' => $request->user_name],
 
-                #1- create user
-                $created_user = User::firstOrCreate(
-                    #a user with the same name is an old user.
-                    ['user_name' => $request->user_name],
+                [
+                    // 'name' => $request->name,
+                    // 'email' => $request->email,
+                    'password' => $password,
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'created_by' => auth()->user()->user_name,
+                ],
+            );
 
-                    [
-                        // 'name' => $request->name,
-                        // 'email' => $request->email,
-                        'password' => $password,
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
-                        'created_by' => auth()->user()->user_name,
-                    ],
-                );
+            #2- create a type info between a user and a created type.
+            $typeInfo = Type_Info::checkOrcreate(
+                ['user_id' => $created_user->id, 'type_id' => $request->type_id],
+                [
+                    #if is_enabled is null then it's false
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'created_by' => auth()->user()->user_name,
+                ]
+            );
+            
+            #create a party details
+            $partyInfo = Party_Info::checkOrCreate(
 
-                #2- create a type info between a user and a created type.
-                $typeInfo = Type_Info::firstOrcreate(
-                    ['user_id' => $created_user->id, 'type_id' => $request->type_id],
-                    [
-                        #if is_enabled is null then it's false
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
-                        'created_by' => auth()->user()->user_name,
-                    ]
-                );
-                
-                #create a party details
-                $partyInfo = Party_Info::firstOrCreate(
+                ['type_infos_id' => $typeInfo->id,],
 
-                    ['type_infos_id' => $typeInfo->id,],
+                [
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
+                    'created_by' => auth()->user()->user_name,
+                    'code' => $this->getCode(5, now()),
+                ]
+            );
 
-                    [
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 0,
-                        'created_by' => auth()->user()->user_name,
-                        'code' => $this->getCode(5, now()),
-                    ]
-                );
-
-                return Message::response(true, 'created', $partyInfo);
-            });
+            return Message::response(true, 'created', $partyInfo);
         });
     }
 }

@@ -57,24 +57,21 @@ class UserController extends Controller
 
         $password = bcrypt($request->password);
 
-        return Tenant::wrapTenant(function() use ($request, $password, $fastSignup){
+        $created_user = User::checkOrCreate(
+            #a user with the same name is an old user.
+            ['user_name' => $request->user_name],
 
-            $created_user = User::firstOrCreate(
-                #a user with the same name is an old user.
-                ['user_name' => $request->user_name],
+            [
+                'password' => $password,
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+            ],
+        );
 
-                [
-                    'password' => $password,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                ],
-            );
+        #after creating a user by default he is a normal user
+        // $created_user->assignRole('normal');
 
-            #after creating a user by default he is a normal user
-            $created_user->assignRole('normal');
-
-            return $fastSignup ? $created_user : 
-                Message::response(true, 'user created successfully', $created_user);
-        });
+        return $fastSignup ? $created_user : 
+            Message::response(true, 'user created successfully', $created_user);
     }
 
     #--------- ---------- -------------- ------------ ---------------

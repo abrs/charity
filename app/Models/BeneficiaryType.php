@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\CustomModel;
 use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BeneficiaryType extends Model
 {
-    use SoftDeletes, EventsTrait;
+    use SoftDeletes, EventsTrait, CustomModel;
     
     /**
      * The attributes that are mass assignable.

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\CustomModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,7 +11,7 @@ use App\Traits\EventsTrait;
 
 class SpecialNeedType extends Model
 {
-    use SoftDeletes, EventsTrait;//, HasTranslations;
+    use SoftDeletes, EventsTrait, CustomModel;//, HasTranslations;
 
     // public $translatable  = [
     //     'name'

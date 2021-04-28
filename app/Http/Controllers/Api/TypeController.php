@@ -47,21 +47,20 @@ class TypeController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $type = Type::checkOrcreate(
+            [
+                'name' => $request->name,
+            ],
+            [
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                //     'en' => $request->name_en,
+                // ],
+                'created_by' => auth()->user()->user_name,
+            ]
+        );
 
-            $type = Type::firstOrcreate(
-                [
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => $request->name,
-                    //     'en' => $request->name_en,
-                    // ],
-                    'created_by' => auth()->user()->user_name,
-                ]
-            );
-
-            return Message::response(true, 'created', $type);          
-        });
+        return Message::response(true, 'created', $type);          
     }
 
     /**

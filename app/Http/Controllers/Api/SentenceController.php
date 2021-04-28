@@ -46,27 +46,24 @@ class SentenceController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        return \DB::transaction(function () use ($request){
 
-            return \DB::transaction(function () use ($request){
+            $sentence = Sentence::checkOrcreate(
+                [
+                    'body' => $request->body,
+                ],
+                [
+                    #if is_enabled is null then it's false
+                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    'created_by' => auth()->user()->user_name,                     
+                ]
+            );
 
-                $sentence = Sentence::firstOrcreate(
-                    [
-                        'body' => $request->body,
-                    ],
-                    [
-                        #if is_enabled is null then it's false
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                        'created_by' => auth()->user()->user_name,                     
-                    ]
-                );
+            $sentence->languages()->attach($request->language_id, [
+                'translation' => $request->translation
+            ]);
 
-                $sentence->languages()->attach($request->language_id, [
-                    'translation' => $request->translation
-                ]);
-
-                return Message::response(true, 'created', $sentence);
-            });
+            return Message::response(true, 'created', $sentence);
         });
     }
 

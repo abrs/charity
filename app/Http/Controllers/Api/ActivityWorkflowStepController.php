@@ -43,7 +43,7 @@ class ActivityWorkflowStepController extends Controller
         #there might be notifications here => use transactions
         return \DB::transaction(function () use ($request, $indirecRequest){
             
-            $activityWorkflowStep = ActivityWorkflowSteps::firstOrCreate(
+            $activityWorkflowStep = ActivityWorkflowSteps::checkOrCreate(
                 [
                     'activitable_id' => $request->activitable_id,
                     'step_id' => $request->step_id,
@@ -169,10 +169,13 @@ class ActivityWorkflowStepController extends Controller
         return \DB::transaction(function () use ($request, $activityWorkflowStep){
             
             #1- update the workflow step status and add a useful description
-            $activityWorkflowStep->update(
+            $activityWorkflowStep->firstOrUpdate(
+                [
+                    'status_id' => $request->status_id,
+                ],
+
                 [
                     'description' => $request->description,
-                    'status_id' => $request->status_id,
 
                     'modified_by' => auth()->user()->user_name,
                 ]
@@ -202,6 +205,11 @@ class ActivityWorkflowStepController extends Controller
                             'modified_by' => auth()->user()->user_name,
                         ]);
                 }
+
+                #3- waiting for correction scenario
+                /*no special changes => a custodian changes the status to waiting with useful description and 
+                    makes call to the beneficiary tells him what to change.
+                */
             }
 
             if($manager) {

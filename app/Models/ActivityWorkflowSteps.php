@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\CustomModel;
 use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ActivityWorkflowSteps extends Model
 {
-    use SoftDeletes, EventsTrait;
+    use SoftDeletes, EventsTrait, CustomModel;
 
     protected $table = 'activity_workflow_steps';
 

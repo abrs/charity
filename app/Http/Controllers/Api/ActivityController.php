@@ -48,13 +48,14 @@ class ActivityController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+            $activity = Activity::checkOrCreate(
+                [
 
-            $activity = Activity::firstOrcreate(
-                [                
+                    'name' => $request->name,
+                ],
+                [
                     #if is_enabled is null then it's false
                     'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => $request->name,
                         // 'en' => $request->name_en,
                     // ],
                     'created_by' => auth()->user()->user_name,
@@ -62,7 +63,6 @@ class ActivityController extends Controller
             );
 
             return Message::response(true, 'created', $activity);          
-        });
     }
 
     /**
@@ -160,7 +160,7 @@ class ActivityController extends Controller
 
             return \DB::transaction(function () use ($request){
 
-                $step = Step::firstOrcreate(
+                $step = Step::create(
                     [                        
                         'name' => $request->name,
                             // 'en' => $request->name_en,

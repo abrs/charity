@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\CustomModel;
 use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Location extends Model
 {
-    use SoftDeletes, EventsTrait;//, HasTranslations;
+    use SoftDeletes, EventsTrait, CustomModel;//, HasTranslations;
 
     // protected $with = ['locationType'];
 
@@ -26,8 +27,8 @@ class Location extends Model
         'modified_by', 
     ];
 
-    // protected $with = ['point'];
-    protected $hidden = ['point', 'pivot'];
+    protected $with = ['point'];
+    protected $hidden = ['pivot'];
 
     /** Relations ----------- */
     public function point() {

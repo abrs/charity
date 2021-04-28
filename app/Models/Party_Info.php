@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\CustomModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Party_Info extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, CustomModel;
     
     protected $table = 'party_infos';
     protected $with = ['type_info.user'];

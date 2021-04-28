@@ -50,25 +50,22 @@ class CareerController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $career = Career::checkOrCreate(
+            [
+                'location_id' => $request->location_id,
+                'name' => $request->name,
+            ],
 
-            $career = Career::firstOrCreate(
-                [
-                    'location_id' => $request->location_id,
-                    'name' => $request->name,
-                ],
+            [
+                // 'name' => $request->name,
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                //     'en' => $request->name_en,
+                // ],
+                'created_by' => auth()->user()->user_name,
+            ]
+        );
 
-                [
-                    // 'name' => $request->name,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    //     'en' => $request->name_en,
-                    // ],
-                    'created_by' => auth()->user()->user_name,
-                ]
-            );
-
-           return Message::response(true, 'created', $career);
-        });
+        return Message::response(true, 'created', $career);
     }
 
     /**
@@ -107,22 +104,20 @@ class CareerController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $career){
 
-            $carrer1 = $career->firstOrUpdate(
-            [
-                'name' => $request->name,
-                'location_id' => $request->location_id,
-            ],
+        $carrer1 = $career->firstOrUpdate(
+        [
+            'name' => $request->name,
+            'location_id' => $request->location_id,
+        ],
 
-            [
-                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                'modified_by' => auth()->user()->user_name,
-            ]);                        
-            
+        [
+            'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+            'modified_by' => auth()->user()->user_name,
+        ]);                        
+        
 
-           return Message::response(true, 'updated', $career);
-        });
+        return Message::response(true, 'updated', $carrer1);
     }
 
     /**

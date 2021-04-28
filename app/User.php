@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Traits\CustomModel;
 use App\Models\Beneficiary_Info;
 use App\Models\Location;
 use App\Models\PhoneType;
@@ -19,7 +20,7 @@ use App\Traits\EventsTrait;
 
 class User extends Authenticatable
 {
-    use Notifiable, HasRoles, HasApiTokens, EventsTrait;//, HasTranslations;
+    use Notifiable, HasRoles, HasApiTokens, EventsTrait, CustomModel;//, HasTranslations;
 
     // public $translatable  = [
     //     'first_name', 'last_name'

@@ -52,25 +52,22 @@ class StepApprovalController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $stepApproval = StepApproval::checkOrCreate(
 
-            $stepApproval = StepApproval::firstOrCreate(
+            [
+                'activity_workflow_steps_id' => $request->activity_workflow_steps_id,
+                // 'user_id' => $request->user_id,
+                // 'owner_id' => $request->owner_id,
+            ],
+            
+            [
+                'status_id' => $request->status_id,
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                'created_by' => auth()->user()->user_name,
+            ]
+        );
 
-                [
-                    'activity_workflow_steps_id' => $request->activity_workflow_steps_id,
-                    // 'user_id' => $request->user_id,
-                    // 'owner_id' => $request->owner_id,
-                ],
-                
-                [
-                    'status_id' => $request->status_id,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'created_by' => auth()->user()->user_name,
-                ]
-            );
-
-           return Message::response(true, 'created', $stepApproval);
-        });
+        return Message::response(true, 'created', $stepApproval);
     }
 
     /**

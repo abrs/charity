@@ -116,96 +116,84 @@ class BeneficiaryInfoController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $adminRequest, $beneficiaryRelatedToRelation){
 
-            // $beneficiaryInfo = Beneficiary_Info::where('type_infos_id', $request->type_infos_id)->first();
+        // $beneficiaryInfo = Beneficiary_Info::where('type_infos_id', $request->type_infos_id)->first();
 
-            // if(!$beneficiaryInfo) {
+        // if(!$beneficiaryInfo) {
 
-            return \DB::transaction(function () use ($request, $adminRequest, $beneficiaryRelatedToRelation){
+        return \DB::transaction(function () use ($request, $adminRequest, $beneficiaryRelatedToRelation){
 
-                $oldBeneficiaryInfo = Beneficiary_Info::where([
-
+            $beneficiaryInfo = Beneficiary_Info::checkOrCreate(
+                [
                     'first_name'  => $request->first_name,
+
                     'second_name'  => $request->second_name,
+
                     'third_name'  => $request->third_name,
+
                     'fourth_name'  => $request->fourth_name,
+                ],
 
-                ])->first();
+                [
+                    'phone' => $request->phone,
 
-                if($oldBeneficiaryInfo) {
-
-                    return Message::response(false, 'already exists');
-                }
+                    'type_infos_id' => $request->type_infos_id,
                     
-                $beneficiaryInfo = Beneficiary_Info::create(
-                    
-                    [
-                        'first_name'  => $request->first_name,
-                        'second_name'  => $request->second_name,
-                        'third_name'  => $request->third_name,
-                        'fourth_name'  => $request->fourth_name,
-
-                        'phone' => $request->phone,
-
-                        'type_infos_id' => $request->type_infos_id,
-                        
-                        // 'en' => $request->fourth_name_en,
+                    // 'en' => $request->fourth_name_en,
+                    // ],
+                    'last_name'  => $request->last_name,
+                    // 'en' => $request->last_name_en,
+                    // ],
+                    'known_as'  => $request->known_as,
+                        // 'en' => $request->known_as_en,
                         // ],
-                        'last_name'  => $request->last_name,
-                        // 'en' => $request->last_name_en,
-                        // ],
-                        'known_as'  => $request->known_as,
-                            // 'en' => $request->known_as_en,
-                            // ],
-                        'career_id'  => $request->career_id,
-                            // 'en' => $request->career_en,
-                        // ],
-                        'polling_station_id'  => $request->polling_station_id,
-                            // 'en' => $request->polling_station_name_en,
-                        // ],
-                        'standing'  => $request->standing,
-                        // 'en' => $request->standing_en,
-                        // ],
+                    'career_id'  => $request->career_id,
+                        // 'en' => $request->career_en,
+                    // ],
+                    'polling_station_id'  => $request->polling_station_id,
+                        // 'en' => $request->polling_station_name_en,
+                    // ],
+                    'standing'  => $request->standing,
+                    // 'en' => $request->standing_en,
+                    // ],
 
-                        'date_of_death' => $request->date_of_death,
-                        'is_special_needs' => $request->is_special_needs,
-                        'birth' => $request->birth,
-                        'gender' => $request->gender,
-                        'national_number' => $request->national_number,
-                        'age' => $request->age,
-                        'is_alive' => $request->is_alive,
-                        // 'special_needs_type_id' => $request->special_needs_type_id,
+                    'date_of_death' => $request->date_of_death,
+                    'is_special_needs' => $request->is_special_needs,
+                    'birth' => $request->birth,
+                    'gender' => $request->gender,
+                    'national_number' => $request->national_number,
+                    'age' => $request->age,
+                    'is_alive' => $request->is_alive,
+                    // 'special_needs_type_id' => $request->special_needs_type_id,
 
-                        "created_by" => auth()->user()->user_name,
-                        // "is_enabled" => $adminRequest,
-                        'is_enabled' => 1,
-                    ]
-                );
+                    "created_by" => auth()->user()->user_name,
+                    // "is_enabled" => $adminRequest,
+                    'is_enabled' => 1,
+                ]
+            );
 
-                //required_if:is_special_needs,1 => attach his/her special needs types
-                if($request->has('special_need_types')) {
-                    //add special needs type if it a special needs case
-                    $beneficiaryInfo->special_needs()->attach($request->special_need_types, [
+            //required_if:is_special_needs,1 => attach his/her special needs types
+            if($request->has('special_need_types')) {
+                //add special needs type if it a special needs case
+                $beneficiaryInfo->special_needs()->attach($request->special_need_types, [
 
-                        "created_by" => auth()->user()->user_name
-                    ]);
-                }
+                    "created_by" => auth()->user()->user_name
+                ]);
+            }
 
-                // die('beneficiaryRelatedToRelation: ' . $beneficiaryRelatedToRelation);
-                
-                if($beneficiaryRelatedToRelation) {
-                    #if for relation then it is disabled
-                    $beneficiaryInfo->is_enabled = 0;
-                    $beneficiaryInfo->save();
+            // die('beneficiaryRelatedToRelation: ' . $beneficiaryRelatedToRelation);
+            
+            if($beneficiaryRelatedToRelation) {
+                #if for relation then it is disabled
+                $beneficiaryInfo->is_enabled = 0;
+                $beneficiaryInfo->save();
 
-                    // die('you are assigning relation to a beneficiary');
-                    // return $beneficiaryInfo;
-                }
+                // die('you are assigning relation to a beneficiary');
+                // return $beneficiaryInfo;
+            }
 
-                return $beneficiaryInfo;
-                
-            });
+            return $beneficiaryInfo;
+            
         });
     }
 
@@ -288,55 +276,53 @@ class BeneficiaryInfoController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $beneficiary_info){
 
-            return \DB::transaction(function ($request, $beneficiary_info) {
-                
-                $beneficiary_info->firstOrUpdate(
-                    
-                    [
-                        'first_name' => $request->first_name,
-
-                        'second_name' => $request->second_name,
-
-                        'third_name' => $request->third_name,
-
-                        'fourth_name' => $request->fourth_name,
-                    ],
-                    
-                    [
-                        'last_name' => $request->last_name,
-                        'known_as' => $request->known_as,
-                        'birth' => $request->birth,
-
-                        'career_id' => $request->career_id,
-                        'polling_station_id' => $request->polling_station_id,                        
-
-                        'standing' => $request->standing,
-                        'date_of_death' => $request->date_of_death,
-
-                        'is_special_needs' => $request->is_special_needs,
-                        'gender' => $request->gender,
-                        'national_number' => $request->national_number,
-                        'age' => $request->age,
-                        'is_alive' => $request->is_alive,
-                        
-                        "modified_by" => auth()->user()->user_name,
-                        "is_enabled" => $request->has('is_enabled') ? $request->is_enabled : $beneficiary_info->is_enabled,
-                    ]
-                );
-                
-                //required_if:is_special_needs,1 => attach his/her special needs types
-                if($request->has('special_need_types')) {
-                    //add special needs type if it a special needs case
-                    $beneficiary_info->special_needs()->sync($request->special_need_types, [
-
-                        "modified_by" => auth()->user()->user_name
-                    ]);
-                }
+        return \DB::transaction(function ($request, $beneficiary_info) {
             
-                return Message::response(true, 'updated', Beneficiary_Info::findOrFail($beneficiary_info->id));
-            });
+            $beneficiary_info->firstOrUpdate(
+                
+                [
+                    'first_name' => $request->first_name,
+
+                    'second_name' => $request->second_name,
+
+                    'third_name' => $request->third_name,
+
+                    'fourth_name' => $request->fourth_name,
+                ],
+                
+                [
+                    'last_name' => $request->last_name,
+                    'known_as' => $request->known_as,
+                    'birth' => $request->birth,
+
+                    'career_id' => $request->career_id,
+                    'polling_station_id' => $request->polling_station_id,                        
+
+                    'standing' => $request->standing,
+                    'date_of_death' => $request->date_of_death,
+
+                    'is_special_needs' => $request->is_special_needs,
+                    'gender' => $request->gender,
+                    'national_number' => $request->national_number,
+                    'age' => $request->age,
+                    'is_alive' => $request->is_alive,
+                    
+                    "modified_by" => auth()->user()->user_name,
+                    "is_enabled" => $request->has('is_enabled') ? $request->is_enabled : $beneficiary_info->is_enabled,
+                ]
+            );
+            
+            //required_if:is_special_needs,1 => attach his/her special needs types
+            if($request->has('special_need_types')) {
+                //add special needs type if it a special needs case
+                $beneficiary_info->special_needs()->sync($request->special_need_types, [
+
+                    "modified_by" => auth()->user()->user_name
+                ]);
+            }
+        
+            return Message::response(true, 'updated', Beneficiary_Info::findOrFail($beneficiary_info->id));
         });
     }
 
@@ -385,9 +371,8 @@ class BeneficiaryInfoController extends Controller
             //create the user's beneficiary details.
             $beneficiaryInfo = $this->store($request->merge(['type_infos_id' => $type_info->id]), $adminRequest);
             if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($beneficiaryInfo);
-
             #the inserted beneficiary type according to who added him/her.
-            \DB::table('beneficiary_types')
+            return \DB::table('beneficiary_types')
                 ->when($adminRequest, function ($query) use ($beneficiaryInfo){
                     //assign the new fast created beneficiary type of "accepted" if an admin who added it
                     $acceptedBeneficiaryType = $query->where('name', 'accepted')->first();
@@ -396,6 +381,8 @@ class BeneficiaryInfoController extends Controller
                     $beneficiaryInfo->beneficiary_type()->associate($acceptedBeneficiaryType->id);                    
                     $beneficiaryInfo->save();
 
+                    return Message::response(true, 'beneficiary fast created successfully');
+
                 }, function ($query) use ($beneficiaryInfo){
                     #else assign the beneficiary type "pending registered" if it's him who inserting the data.
                     $PendedBeneficiaryType = $query->where('name', 'pending registered')->first();
@@ -403,10 +390,10 @@ class BeneficiaryInfoController extends Controller
 
                     $beneficiaryInfo->beneficiary_type()->associate($PendedBeneficiaryType->id);
                     $beneficiaryInfo->save();
+
+
+                    return $beneficiaryInfo;
                 });
-
-
-            return $beneficiaryInfo;
         });
     }
 
@@ -421,6 +408,7 @@ class BeneficiaryInfoController extends Controller
 
             #1- create new beneficiary
             $beneficiaryInfo = $this->createNewBeneficiaryFast($request, false);            
+            
             if($beneficiaryInfo instanceof \Illuminate\Http\JsonResponse) throw new JsonExceptionHandler($beneficiaryInfo);
 
             #2- link a new normal insertion between a beneficiary and his activity of becoming beneficiary

@@ -45,22 +45,19 @@ class LanguageController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $language = Language::checkOrcreate(
+            [
+                'title' => $request->title,
+                'abbrivation' => $request->abbrivation,
+            ],
+            [
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,                    
+                'created_by' => auth()->user()->user_name,                     
+            ]
+        );
 
-            $language = Language::firstOrcreate(
-                [
-                    'title' => $request->title,
-                    'abbrivation' => $request->abbrivation,
-                ],
-                [
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,                    
-                    'created_by' => auth()->user()->user_name,                     
-                ]
-            );
-
-            return Message::response(true, 'created', $language);          
-        });
+        return Message::response(true, 'created', $language);          
     }
 
     /**

@@ -43,19 +43,18 @@ class BeneficiaryTypeController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $beneficiaryType = BeneficiaryType::checkOrcreate(
+            [
+                'name' => $request->name,
+            ],
+            [
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                'created_by' => auth()->user()->user_name,                     
+            ]
+        );
 
-            $beneficiaryType = BeneficiaryType::firstOrcreate(
-                [
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => $request->name,
-                    'created_by' => auth()->user()->user_name,                     
-                ]
-            );
-
-            return Message::response(true, 'created', $beneficiaryType);          
-        });
+        return Message::response(true, 'created', $beneficiaryType);          
     }
 
     /**

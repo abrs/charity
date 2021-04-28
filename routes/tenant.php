@@ -136,9 +136,9 @@ Route::group([
         Route::post('steps/{step}', 'Api\StepController@update');
 
         //step approval routes
-        Route::post('step_approvals/processingRequest', 'Api\StepApprovalController@processingRequest');
-        Route::apiResource('step_approvals', 'Api\StepApprovalController')->except('update');
-        Route::post('step_approvals/{step_approval}', 'Api\StepApprovalController@update');
+        // Route::post('step_approvals/processingRequest', 'Api\StepApprovalController@processingRequest');
+        // Route::apiResource('step_approvals', 'Api\StepApprovalController')->except('update');
+        // Route::post('step_approvals/{step_approval}', 'Api\StepApprovalController@update');
 
         //careers routes
         Route::apiResource('careers', 'Api\CareerController')->except('update');

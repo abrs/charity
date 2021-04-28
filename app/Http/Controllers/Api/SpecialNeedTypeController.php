@@ -44,22 +44,21 @@ class SpecialNeedTypeController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $specialNeedType = SpecialNeedType::checkOrcreate(
+            [
+                'name' => $request->name,
+            ],
+            [
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    // 'en' => $request->name_en,
+                // ],
+                // 'name' => $request->name,
+                'created_by' => auth()->user()->user_name,                     
+            ]
+        );
 
-            $specialNeedType = SpecialNeedType::firstOrcreate(
-                [
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => $request->name,
-                        // 'en' => $request->name_en,
-                    // ],
-                    // 'name' => $request->name,
-                    'created_by' => auth()->user()->user_name,                     
-                ]
-            );
-
-            return Message::response(true, 'created', $specialNeedType);          
-        });
+        return Message::response(true, 'created', $specialNeedType);          
     }
 
     /**

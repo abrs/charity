@@ -44,21 +44,20 @@ class StatusController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $status = Status::checkOrcreate(    
+            [
+                'name' => $request->name,
+            ],            
+            [
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                //     'en' => $request->name_en,
+                // ],
+                'created_by' => auth()->user()->user_name,
+            ]
+        );
 
-            $status = Status::firstOrcreate(                
-                [
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => $request->name,
-                    //     'en' => $request->name_en,
-                    // ],
-                    'created_by' => auth()->user()->user_name,
-                ]
-            );
-
-            return Message::response(true, 'created', $status);          
-        });
+        return Message::response(true, 'created', $status);          
     }
 
     /**

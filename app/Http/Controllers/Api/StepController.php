@@ -46,26 +46,25 @@ class StepController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
 
-            $step = Step::firstOrcreate(
-                [
-                    'name' => $request->name,
-                        // 'en' => $request->name_en,
-                    // ],
+        $step = Step::checkOrcreate(
+            [
+                'name' => $request->name,
+            ],
+            
+            [
 
-                    'description' => $request->has('description') ? $request->description : Null,
-                    //     'en' => $request->has('description_en') ? $request->description_en : Null,
-                    // ],
-                    
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'created_by' => auth()->user()->user_name,
-                ]
-            );
+                'description' => $request->has('description') ? $request->description : Null,
+                //     'en' => $request->has('description_en') ? $request->description_en : Null,
+                // ],
+                
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                'created_by' => auth()->user()->user_name,
+            ]
+        );
 
-            return Message::response(true, 'created', $step);          
-        });
+        return Message::response(true, 'created', $step);          
     }
 
     /**

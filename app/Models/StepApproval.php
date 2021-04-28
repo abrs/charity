@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\CustomModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use App\Models\ActivityWorkflowSteps;
 
 class StepApproval extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, CustomModel;
 
     protected $table = 'step_approvals';
 

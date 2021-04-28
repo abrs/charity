@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-use App\Helpers\CustomModel;
+use App\Traits\CustomModel;
+use Illuminate\Database\Eloquent\Model;
 use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\User;
 // use Spatie\Translatable\HasTranslations;
 
-class Beneficiary_Info extends CustomModel
+class Beneficiary_Info extends Model
 {
-    use SoftDeletes, EventsTrait;//, HasTranslations;
+    use SoftDeletes, EventsTrait, CustomModel;//, HasTranslations;
 
     // public $translatable  = [
     //     'first_name',

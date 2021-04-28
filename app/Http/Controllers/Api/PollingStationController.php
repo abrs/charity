@@ -49,25 +49,22 @@ class PollingStationController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $pollingStation = PollingStation::checkOrCreate(
+            [                    
+                'location_id' => $request->location_id,
+                'name' => $request->name,
+            ],
 
-            $pollingStation = PollingStation::firstOrCreate(
-                [                    
-                    'location_id' => $request->location_id,
-                    'name' => $request->name,
-                ],
+            [
+                // 'name' => $request->name,
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                //     'en' => $request->name_en,
+                // ],
+                'created_by' => auth()->user()->user_name,
+            ]
+        );
 
-                [
-                    // 'name' => $request->name,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    //     'en' => $request->name_en,
-                    // ],
-                    'created_by' => auth()->user()->user_name,
-                ]
-            );
-
-           return Message::response(true, 'created', $pollingStation);
-        });
+        return Message::response(true, 'created', $pollingStation);
     }
 
     /**
@@ -107,32 +104,22 @@ class PollingStationController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $pollingStation){
 
-            $pollingStation->where([
-
+        $pollingStation = $pollingStation->firstOrUpdate(
+            [
                 'name' => $request->name,
+
                 'location_id' => $request->location_id,
+            ],
 
-            ])->firstOr(function() use ($pollingStation, $request){
+            [
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
 
-                $pollingStation->update(
-    
-                    [
-                        'name' => $request->name,
-                        'location_id' => $request->location_id,
-                        //     'ar' => $request->name_ar,
-                        // ],
-                        // 'name' => $request->name,
-                        'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                        'modified_by' => auth()->user()->user_name,
-                    ]
-                );
-            });
+                'modified_by' => auth()->user()->user_name,
+            ]
+        );
 
-
-           return Message::response(true, 'updated', pollingStation::findOrFail($pollingStation->id));
-        });
+        return Message::response(true, 'updated', $pollingStation);
     }
 
     /**

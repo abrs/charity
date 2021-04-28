@@ -49,22 +49,21 @@ class LocationController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $location = Location::checkOrCreate(
+            [                
+                'name' => $request->name,
+            ],
+            [
+                'point_id' => $request->point_id,
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                // 'name' => $request->name,
+                //     'en' => $request->name_en,
+                // ],
+                'created_by' => auth()->user()->user_name,
+            ]
+        );
 
-            $location = Location::firstOrCreate(
-                [
-                    'point_id' => $request->point_id,
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    // 'name' => $request->name,
-                    'name' => $request->name,
-                    //     'en' => $request->name_en,
-                    // ],
-                    'created_by' => auth()->user()->user_name,
-                ]
-            );
-
-           return Message::response(true, 'created', $location);
-        });
+        return Message::response(true, 'created', $location);
     }
 
     /**

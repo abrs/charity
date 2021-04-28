@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Traits\EventsTrait;
-use App\Helpers\CustomModel;
+use App\Traits\CustomModel;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Career extends CustomModel
+class Career extends Model
 {
-    use SoftDeletes, EventsTrait;//, HasTranslations;
+    use SoftDeletes, EventsTrait, CustomModel;//, HasTranslations;
 
     // public $translatable  = [
     //     'name'

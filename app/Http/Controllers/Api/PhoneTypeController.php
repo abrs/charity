@@ -47,22 +47,22 @@ class PhoneTypeController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
 
-            $phoneType = PhoneType::firstOrcreate(
-                [
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => $request->name,
-                        // 'en' => $request->name_en,
-                    // ],
-                    // 'name' => $request->name,
-                    'created_by' => auth()->user()->user_name,                     
-                ]
-            );
+        $phoneType = PhoneType::checkOrcreate(
+            [
+                'name' => $request->name,
+            ],
+            [
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                    // 'en' => $request->name_en,
+                // ],
+                // 'name' => $request->name,
+                'created_by' => auth()->user()->user_name,                     
+            ]
+        );
 
-            return Message::response(true, 'created', $phoneType);          
-        });
+        return Message::response(true, 'created', $phoneType);          
     }
 
     /**

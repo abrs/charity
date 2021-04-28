@@ -35,7 +35,7 @@ class PointController extends Controller
     public function store(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'name'=>['required', 'unique:points,name'],
+            'name'=>['required'],
             'is_enabled' => 'nullable|boolean',
         ]);
 
@@ -43,19 +43,19 @@ class PointController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $point = Point::checkOrCreate(
+            [
+                'name' => $request->name,
+            ],
+            
+            [
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                'created_by' => auth()->user()->user_name,                     
+            ]
+        );
 
-            $point = Point::firstOrcreate(
-                [
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'name' => $request->name,
-                    'created_by' => auth()->user()->user_name,                     
-                ]
-            );
-
-            return Message::response(true, 'created', $point);          
-        });
+        return Message::response(true, 'created', $point);          
     }
 
     /**

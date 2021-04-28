@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\CustomModel;
 use App\Traits\EventsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PollingStation extends Model
 {
-    use SoftDeletes, EventsTrait;//, HasTranslations;
+    use SoftDeletes, EventsTrait, CustomModel;//, HasTranslations;
 
     // public $translatable  = [
     //     'name'

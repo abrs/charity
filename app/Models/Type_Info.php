@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\CustomModel;
 use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use App\Traits\EventsTrait;
 
 class Type_Info extends Model
 {
-    use SoftDeletes, EventsTrait;
+    use SoftDeletes, EventsTrait, CustomModel;
 
     // public $fieldName = 'name';
     

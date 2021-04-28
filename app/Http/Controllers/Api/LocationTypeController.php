@@ -46,21 +46,21 @@ class LocationTypeController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request){
+        $locationType = LocationType::checkOrCreate(
+            [
+                'name' => $request->name,
+            ],
 
-            $locationType = LocationType::firstOrCreate(
-                [
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    // 'name' => $request->name,
-                    'name' => $request->name,
-                        // 'en' => $request->name_en,
-                    // ],
-                    'created_by' => auth()->user()->user_name,
-                ]
-            );
+            [
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                // 'name' => $request->name,
+                    // 'en' => $request->name_en,
+                // ],
+                'created_by' => auth()->user()->user_name,
+            ]
+        );
 
-           return Message::response(true, 'created', $locationType);
-        });
+        return Message::response(true, 'created', $locationType);
     }
 
     /**

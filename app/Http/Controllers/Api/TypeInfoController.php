@@ -46,20 +46,17 @@ class TypeInfoController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $fastSignup){
+        $typeInfo = Type_Info::checkOrcreate(
+            ['user_id' => $request->user_id, 'type_id' => $request->type_id],
+            [
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                'created_by' => auth()->user()->user_name,
+            ]
+        );
 
-            $typeInfo = Type_Info::firstOrcreate(
-                ['user_id' => $request->user_id, 'type_id' => $request->type_id],
-                [
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'created_by' => auth()->user()->user_name,
-                ]
-            );
-
-            return $fastSignup ? $typeInfo :
-                Message::response(true, 'created', $typeInfo);          
-        });
+        return $fastSignup ? $typeInfo :
+            Message::response(true, 'created', $typeInfo);          
     }
 
     /**
@@ -96,21 +93,21 @@ class TypeInfoController extends Controller
             return Message::response(false,'Invalid Input' ,$validator->errors());  
         }
 
-        return Tenant::wrapTenant(function() use ($request, $type_info){
 
-            $type_info->update(
-                [
-                    'user_id' => $request->user_id, 
-                    'type_id' => $request->type_id,
-                
-                    #if is_enabled is null then it's false
-                    'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
-                    'modified_by' => auth()->user()->user_name,
-                ]
-            );
+        $type_info = $type_info->firstOrUpdate(
+            [
+                'user_id' => $request->user_id, 
+                'type_id' => $request->type_id,
+            ],
 
-            return Message::response(true, 'updated', Type_Info::findOrFail($type_info->id));
-        });
+            [
+                #if is_enabled is null then it's false
+                'is_enabled' => $request->has('is_enabled') ? $request->is_enabled : 1,
+                'modified_by' => auth()->user()->user_name,
+            ]
+        );
+
+        return Message::response(true, 'updated', $type_info);
     }
 
     /**
