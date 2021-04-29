@@ -10,6 +10,7 @@ use App\Models\Activity;
 use App\Models\Beneficiary_Info;
 use App\Models\BeneficiaryType;
 use App\Models\Type;
+use App\Models\Type_Info;
 use App\Rules\ValidModel;
 use BadMethodCallException;
 use Illuminate\Http\Request;
@@ -122,6 +123,12 @@ class BeneficiaryInfoController extends Controller
         // if(!$beneficiaryInfo) {
 
         return \DB::transaction(function () use ($request, $adminRequest, $beneficiaryRelatedToRelation){
+
+            if($request->type_infos_id != Null) {
+
+                $typeInfo = Type_Info::find($request->type_infos_id);
+                if($typeInfo != Null) {return Message::response(false,'You already requested beneficiary account');}
+            }
 
             $beneficiaryInfo = Beneficiary_Info::checkOrCreate(
                 [
