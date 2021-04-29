@@ -126,8 +126,8 @@ class BeneficiaryInfoController extends Controller
 
             if($request->type_infos_id != Null) {
 
-                $typeInfo = Type_Info::find($request->type_infos_id);
-                if($typeInfo != Null) {return Message::response(false,'You already requested beneficiary account');}
+                $oldBeneficiary = Beneficiary_info::where('type_infos_id', $request->type_infos_id)->first();
+                if($oldBeneficiary != Null) {return Message::response(false,'this user already requested beneficiary account');}
             }
 
             $beneficiaryInfo = Beneficiary_Info::checkOrCreate(
